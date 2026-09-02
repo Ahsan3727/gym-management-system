@@ -30,6 +30,10 @@ app.use('/api/auth/login', loginLimiter);
 const superAdminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
 app.use('/api/superadmin', superAdminLimiter);
 
+// Friendly response for anyone (or any uptime monitor) hitting the bare
+// domain directly — the real app only ever calls routes under /api/...
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'Ironline API is running. See /api/health.' }));
+
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
 app.use('/api/auth', authRoutes);
