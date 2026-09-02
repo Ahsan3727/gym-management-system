@@ -6,8 +6,10 @@ const emptyForm = { username: '', password: '', name: '', phone: '', planId: '' 
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
+  // BUG #13 FIX: Fetch only active plans for dropdowns via /plans/active
   const [plans, setPlans] = useState([]);
   const [search, setSearch] = useState('');
+  // BUG #8 FIX: Use 'inactive' (not 'expired') to match the backend and the UI label
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
@@ -22,6 +24,7 @@ export default function Customers() {
 
   const [progressFor, setProgressFor] = useState(null); // customer object
   const [progress, setProgress] = useState(null);
+  const [progressError, setProgressError] = useState('');
 
   async function load() {
     const params = {};
@@ -29,7 +32,8 @@ export default function Customers() {
     if (search) params.search = search;
     const [customersRes, plansRes] = await Promise.all([
       api.get('/admin/customers', { params }),
-      api.get('/admin/plans'),
+      // BUG #13 FIX: Use /plans/active so only active plans appear in dropdowns
+      api.get('/admin/plans/active'),
     ]);
     setCustomers(customersRes.data);
     setPlans(plansRes.data);
@@ -81,17 +85,30 @@ export default function Customers() {
     }
   }
 
+  // BUG #10 FIX: handleDelete now has proper error handling — previously
+  // silently swallowed API errors and showed no feedback to the user.
   async function handleDelete(customer) {
     if (!window.confirm(`Remove ${customer.name}? This deletes their login and all logged data.`)) return;
-    await api.delete(`/admin/customers/${customer._id}`);
-    await load();
+    try {
+      await api.delete(`/admin/customers/${customer._id}`);
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || `Could not remove ${customer.name}.`);
+    }
   }
 
+  // BUG #11 FIX: openProgress now has error handling — previously the modal
+  // would show "Loading…" forever on any API error with no feedback.
   async function openProgress(customer) {
     setProgressFor(customer);
     setProgress(null);
-    const { data } = await api.get(`/admin/customers/${customer._id}/progress`);
-    setProgress(data);
+    setProgressError('');
+    try {
+      const { data } = await api.get(`/admin/customers/${customer._id}/progress`);
+      setProgress(data);
+    } catch {
+      setProgressError('Could not load progress data.');
+    }
   }
 
   return (
@@ -111,10 +128,11 @@ export default function Customers() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {/* BUG #8 FIX: 'expired' → 'inactive' to match the backend filter and the label */}
         <select className="field-input max-w-[10rem]" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">All statuses</option>
           <option value="active">Active</option>
-          <option value="expired">Inactive</option>
+          <option value="inactive">Inactive</option>
           <option value="overdue">Overdue fees</option>
         </select>
         <button type="submit" className="btn-secondary">Search</button>
@@ -179,6 +197,7 @@ export default function Customers() {
             </div>
             <div className="mb-4">
               <label className="field-label">Plan</label>
+              {/* BUG #13 FIX: Uses active-only plans */}
               <select className="field-input" value={createForm.planId} onChange={(e) => setCreateForm({ ...createForm, planId: e.target.value })}>
                 <option value="">No plan</option>
                 {plans.map((p) => (
@@ -207,6 +226,7 @@ export default function Customers() {
             </div>
             <div className="mb-4">
               <label className="field-label">Plan</label>
+              {/* BUG #13 FIX: Uses active-only plans */}
               <select className="field-input" value={editing.plan?._id || editing.plan || ''} onChange={(e) => setEditing({ ...editing, plan: e.target.value })}>
                 <option value="">No plan</option>
                 {plans.map((p) => (
@@ -230,7 +250,10 @@ export default function Customers() {
 
       {progressFor && (
         <Modal title={`${progressFor.name} — progress`} onClose={() => setProgressFor(null)} width="max-w-2xl">
-          {!progress ? (
+          {/* BUG #11 FIX: Show an error message instead of infinite "Loading…" */}
+          {progressError ? (
+            <div className="py-8 text-center text-sm text-ember-dark">{progressError}</div>
+          ) : !progress ? (
             <div className="py-8 text-center text-sm text-steel">Loading…</div>
           ) : (
             <div className="space-y-6">

@@ -99,12 +99,17 @@ router.put(
   asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
     if (!admin) return res.status(404).json({ message: 'Admin not found.' });
-    await User.findByIdAndUpdate(admin.user, { isActive: req.body.enable === true ? true : false });
-    await logAction(req, 'admin.disable_login', 'Admin', admin._id);
+    const isActive = req.body.enable === true;
+    await User.findByIdAndUpdate(admin.user, { isActive });
+    await logAction(req, isActive ? 'admin.enable_login' : 'admin.disable_login', 'Admin', admin._id);
     res.json({ message: 'Admin login access updated.' });
   })
 );
 
+// BUG #2 FIX: The temp password is no longer returned in the HTTP response body.
+// In a production system this MUST be delivered via email (add a mailer service).
+// For now it is logged server-side ONLY so it never appears in browser network
+// history, response bodies, or frontend UI.
 router.put(
   '/admins/:id/reset-password',
   asyncHandler(async (req, res) => {
@@ -116,8 +121,14 @@ router.put(
     await User.findByIdAndUpdate(admin.user, { passwordHash });
 
     await logAction(req, 'admin.reset_password', 'Admin', admin._id);
-    // In production this would be emailed, not returned in the response.
-    res.json({ message: 'Password reset.', tempPassword });
+
+    // TODO: Send tempPassword via email to the gym owner instead of logging here.
+    // This is a placeholder — integrate a mailer (e.g. Nodemailer + SendGrid).
+    console.log(`[reset-password] Temp password for gym "${admin.gymName}": ${tempPassword}`);
+
+    res.json({
+      message: `Password has been reset for ${admin.gymName}. The temporary password has been logged to the server console. Please configure a mailer to email it to the gym owner directly.`,
+    });
   })
 );
 

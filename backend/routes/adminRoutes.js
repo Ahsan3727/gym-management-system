@@ -53,6 +53,17 @@ router.get(
   })
 );
 
+// BUG #13 FIX: Returns only active plans so inactive plans don't appear in
+// customer-facing dropdowns. A separate /plans/all endpoint is available for
+// the admin's own Plans management page.
+router.get(
+  '/plans/active',
+  asyncHandler(async (req, res) => {
+    const plans = await MembershipPlan.find({ admin: req.adminId, isActive: true }).sort({ price: 1 });
+    res.json(plans);
+  })
+);
+
 router.post(
   '/plans',
   asyncHandler(async (req, res) => {
@@ -91,14 +102,15 @@ router.delete(
 
 /* -------------------------------- Customers -------------------------------- */
 
-// GET /api/admin/customers?status=active|expired|overdue&search=jane
+// GET /api/admin/customers?status=active|inactive|overdue&search=jane
 router.get(
   '/customers',
   asyncHandler(async (req, res) => {
     const { status, search } = req.query;
     const query = { admin: req.adminId };
+    // BUG #8 FIX: Use 'inactive' (not 'expired') to be consistent with the UI label
     if (status === 'active') query.isActive = true;
-    if (status === 'expired') query.isActive = false;
+    if (status === 'inactive') query.isActive = false;
     if (search) query.name = { $regex: search, $options: 'i' };
 
     let customers = await Customer.find(query).populate('plan').sort({ created_at: -1 });
@@ -174,7 +186,8 @@ router.delete(
     const customer = await Customer.findOne({ _id: req.params.id, admin: req.adminId });
     if (!customer) return res.status(404).json({ message: 'Customer not found.' });
 
-    // Remove the customer and everything scoped to them.
+    // BUG #6 FIX: Remove the customer and ALL data scoped to them, including
+    // Notifications (previously omitted, leaving orphaned records in the DB).
     await Promise.all([
       Customer.deleteOne({ _id: customer._id }),
       User.deleteOne({ _id: customer.user }),
@@ -183,6 +196,7 @@ router.delete(
       DietLog.deleteMany({ customer: customer._id }),
       WeightLog.deleteMany({ customer: customer._id }),
       Streak.deleteMany({ customer: customer._id }),
+      Notification.deleteMany({ user: customer.user }), // was missing before
     ]);
     res.json({ message: 'Customer removed.' });
   })
@@ -263,11 +277,13 @@ router.put(
     if (dueDate !== undefined) fee.dueDate = dueDate;
     if (status !== undefined) {
       fee.status = status;
+      // BUG #5 FIX: Use if/else so only one branch executes — the previous
+      // code used two separate if-blocks which was correct by accident but
+      // fragile and confusing to read.
       if (status === 'paid') {
         fee.paidOn = new Date();
         fee.receiptNumber = fee.receiptNumber || `RCPT-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-      }
-      if (status !== 'paid') {
+      } else {
         fee.paidOn = null;
       }
     }

@@ -64,6 +64,11 @@ export default function Account() {
 
   const statusColor = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-ember-dark' };
 
+  // BUG #14 FIX: Format amounts with 2 decimal places and thousands separator
+  function fmtAmount(amount) {
+    return (amount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
   return (
     <div>
       <h1 className="mb-1 text-2xl font-semibold text-ink">Account</h1>
@@ -139,7 +144,7 @@ export default function Account() {
             {fees.map((fee) => (
               <tr key={fee._id} className="border-b border-ink/5 last:border-0">
                 <td className="px-4 py-3 text-ink/70">{new Date(fee.dueDate).toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-ink">${fee.amount}</td>
+                <td className="px-4 py-3 font-medium text-ink">${fmtAmount(fee.amount)}</td>
                 <td className={`px-4 py-3 font-medium capitalize ${statusColor[fee.status]}`}>{fee.status}</td>
                 <td className="px-4 py-3 text-ink/70">{fee.paidOn ? new Date(fee.paidOn).toLocaleDateString() : '—'}</td>
               </tr>

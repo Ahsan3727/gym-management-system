@@ -19,8 +19,11 @@ export default function Admins() {
 
   const [summaryFor, setSummaryFor] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [summaryError, setSummaryError] = useState('');
 
-  const [resetResult, setResetResult] = useState(null); // { gymName, tempPassword }
+  // BUG #2 FIX: resetResult no longer holds a tempPassword — the backend
+  // no longer returns one in the response (it logs server-side instead).
+  const [resetMessage, setResetMessage] = useState('');
 
   async function load() {
     const { data } = await api.get('/superadmin/admins');
@@ -67,28 +70,50 @@ export default function Admins() {
     }
   }
 
+  // BUG #12 FIX: toggleSuspend now has error handling
   async function toggleSuspend(admin) {
-    await api.put(`/superadmin/admins/${admin._id}/suspend`, { suspend: !admin.isSuspended });
-    await load();
+    try {
+      await api.put(`/superadmin/admins/${admin._id}/suspend`, { suspend: !admin.isSuspended });
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not update suspension status.');
+    }
   }
 
+  // BUG #12 FIX: toggleLogin now has error handling
   async function toggleLogin(admin) {
     const enable = admin.user?.isActive === false;
-    await api.put(`/superadmin/admins/${admin._id}/disable`, { enable });
-    await load();
+    try {
+      await api.put(`/superadmin/admins/${admin._id}/disable`, { enable });
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not update login access.');
+    }
   }
 
+  // BUG #12 FIX: resetPassword now has error handling.
+  // BUG #2 FIX: No longer shows a temp password — backend logs it server-side.
   async function resetPassword(admin) {
     if (!window.confirm(`Reset the password for ${admin.gymName}'s login?`)) return;
-    const { data } = await api.put(`/superadmin/admins/${admin._id}/reset-password`);
-    setResetResult({ gymName: admin.gymName, tempPassword: data.tempPassword });
+    try {
+      const { data } = await api.put(`/superadmin/admins/${admin._id}/reset-password`);
+      setResetMessage(data.message);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not reset password.');
+    }
   }
 
+  // BUG #11 FIX: openSummary now has error handling
   async function openSummary(admin) {
     setSummaryFor(admin);
     setSummary(null);
-    const { data } = await api.get(`/superadmin/admins/${admin._id}/summary`);
-    setSummary(data);
+    setSummaryError('');
+    try {
+      const { data } = await api.get(`/superadmin/admins/${admin._id}/summary`);
+      setSummary(data);
+    } catch {
+      setSummaryError('Could not load summary data.');
+    }
   }
 
   return (
@@ -217,7 +242,10 @@ export default function Admins() {
 
       {summaryFor && (
         <Modal title={`${summaryFor.gymName} — summary`} onClose={() => setSummaryFor(null)}>
-          {!summary ? (
+          {/* BUG #11 FIX: Show error instead of infinite "Loading…" */}
+          {summaryError ? (
+            <div className="py-8 text-center text-sm text-ember-dark">{summaryError}</div>
+          ) : !summary ? (
             <div className="py-8 text-center text-sm text-steel">Loading…</div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -227,7 +255,8 @@ export default function Admins() {
               </div>
               <div className="panel px-4 py-3">
                 <div className="text-xs uppercase tracking-wide text-steel">Revenue collected</div>
-                <div className="stat-number mt-1 text-lg">${summary.revenueCollected.toLocaleString()}</div>
+                {/* BUG #14 FIX: Format amount properly */}
+                <div className="stat-number mt-1 text-lg">${summary.revenueCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
               <div className="panel px-4 py-3 col-span-2">
                 <div className="text-xs uppercase tracking-wide text-steel">Overdue fees</div>
@@ -238,13 +267,11 @@ export default function Admins() {
         </Modal>
       )}
 
-      {resetResult && (
-        <Modal title={`Password reset — ${resetResult.gymName}`} onClose={() => setResetResult(null)}>
-          <p className="mb-3 text-sm text-ink/80">
-            Share this temporary password with the gym owner. In production this would be emailed rather than shown here.
-          </p>
-          <div className="rounded-sm border border-ink/15 bg-ink/[0.03] px-4 py-3 font-mono text-sm text-ink">
-            {resetResult.tempPassword}
+      {/* BUG #2 FIX: No longer shows a temp password — shows the server message instead */}
+      {resetMessage && (
+        <Modal title="Password Reset" onClose={() => setResetMessage('')}>
+          <div className="rounded-sm border border-ink/15 bg-ink/[0.03] px-4 py-4 text-sm text-ink">
+            {resetMessage}
           </div>
         </Modal>
       )}

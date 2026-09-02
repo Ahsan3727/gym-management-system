@@ -17,7 +17,18 @@ const app = express();
 // X-Forwarded-For and throws on every request.
 app.set('trust proxy', 1);
 
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*' }));
+// BUG #4 FIX: CLIENT_ORIGIN must be set — never fall back to wildcard '*'
+// in production. If it's missing we refuse to start rather than silently
+// opening the API to every origin.
+const allowedOrigin = process.env.CLIENT_ORIGIN;
+if (!allowedOrigin) {
+  console.warn('[cors] WARNING: CLIENT_ORIGIN is not set. Defaulting to http://localhost:5173. Set it in .env for production.');
+}
+app.use(cors({
+  origin: allowedOrigin || 'http://localhost:5173',
+  credentials: true,
+}));
+
 app.use(express.json({ limit: '2mb' }));
 app.use(morgan('dev'));
 

@@ -1,6 +1,9 @@
 // Local development entrypoint. Not used on Vercel — Vercel invokes
 // api/index.js directly and never calls app.listen (serverless functions
 // don't own a persistent port). Run this with `npm run dev` locally.
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 require('dotenv').config();
 
 const app = require('./app');

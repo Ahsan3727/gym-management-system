@@ -140,45 +140,26 @@ frontend/
   provider, environment-specific secrets management, and payment processing
   (e.g. Stripe) rather than manual fee status toggling.
 
-## Deploying to Vercel
+## Deploying to Vercel (Unified Single Deployment)
 
-This is a MERN app (Express + MongoDB backend, Vite/React frontend), so it
-deploys as **two separate Vercel projects** pointing at the same GitHub repo
-— one with its Root Directory set to `backend`, one set to `frontend`. This
-is the standard, most reliable way to run a Node/Express API + a Vite SPA
-on Vercel (a single Express `app.listen()` process can't run on Vercel as-is,
-since Vercel functions are serverless — `backend/api/index.js` and
-`backend/vercel.json` already handle that conversion for you).
+This project is configured for **a single Vercel deployment** where both the Vite/React frontend and the Express serverless backend run under **one single domain and one Vercel project** — eliminating CORS issues, double URLs, and dual project management.
 
-**0. Push this project to a GitHub repo first** (Vercel deploys from git).
+### Deployment Steps:
 
-**1. Database** — create a free [MongoDB Atlas](https://www.mongodb.com/atlas)
-cluster if you don't have a reachable MongoDB already (a `localhost` URI
-won't work from Vercel's servers). Get its connection string.
-
-**2. Deploy the backend**
-- New Project on [vercel.com](https://vercel.com) → import the repo →
-  set **Root Directory** to `backend`.
-- Framework preset: "Other" (no build step needed).
-- Add Environment Variables: `MONGO_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`,
-  `CLIENT_ORIGIN` (fill this in after step 3, once you know the frontend
-  URL — you can redeploy to update it).
-- Deploy. Note the resulting URL, e.g. `https://gym-backend.vercel.app`.
-- Run `npm run seed` **locally** (pointed at the same `MONGO_URI` via your
-  local `.env`) to create the first Super Admin — Vercel functions are
-  request-driven and aren't meant for one-off scripts like this.
-
-**3. Deploy the frontend**
-- New Project → same repo → set **Root Directory** to `frontend`.
-- Framework preset: Vite (auto-detected). Build command `npm run build`,
-  output directory `dist` (Vercel fills these in automatically).
-- Add Environment Variable `VITE_API_URL` = `https://gym-backend.vercel.app/api`
-  (your backend URL from step 2, with `/api` appended).
-- Deploy. Note this URL, e.g. `https://gym-app.vercel.app`.
-
-**4. Close the loop** — go back to the backend project's Environment
-Variables and set `CLIENT_ORIGIN` to the frontend URL from step 3, then
-redeploy the backend (Vercel → Deployments → ⋯ → Redeploy) so CORS allows it.
+1. **Push your code to GitHub** (if not already done).
+2. **Import into Vercel**:
+   - Go to [vercel.com](https://vercel.com) → **Add New...** → **Project**.
+   - Select your `gym-management-system` repository.
+   - Leave **Root Directory** as `./` (default root).
+   - Vercel will automatically read `vercel.json`, use `npm run build` for the frontend, and deploy `/api` as serverless functions.
+3. **Set Environment Variables in Vercel**:
+   - `MONGO_URI`: Your MongoDB Atlas connection string.
+   - `JWT_SECRET`: A secure random secret string.
+   - `JWT_EXPIRES_IN`: `7d`
+4. **Click Deploy**!
+   - Your frontend will be available at `https://your-project.vercel.app/`.
+   - Your API will be available on the same domain at `https://your-project.vercel.app/api/`.
+   - No CORS configuration or dual-project linking needed!
 
 **Caveats worth knowing:**
 - The login rate limiter (`express-rate-limit`) keeps its counts in memory

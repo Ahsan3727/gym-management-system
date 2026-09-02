@@ -98,12 +98,22 @@ router.post(
   })
 );
 
+// BUG #3 FIX: Whitelist only the allowed fields — no longer uses Object.assign(log, req.body)
+// which would let a user overwrite protected fields like `customer` or `_id`.
 router.put(
   '/workouts/:id',
   asyncHandler(async (req, res) => {
     const log = await WorkoutLog.findOne({ _id: req.params.id, customer: req.customerId });
     if (!log) return res.status(404).json({ message: 'Log not found.' });
-    Object.assign(log, req.body);
+    const { exercise, sets, reps, weight, durationMinutes, isRestDay, notes, date } = req.body;
+    if (exercise !== undefined) log.exercise = exercise;
+    if (sets !== undefined) log.sets = sets;
+    if (reps !== undefined) log.reps = reps;
+    if (weight !== undefined) log.weight = weight;
+    if (durationMinutes !== undefined) log.durationMinutes = durationMinutes;
+    if (isRestDay !== undefined) log.isRestDay = isRestDay;
+    if (notes !== undefined) log.notes = notes;
+    if (date !== undefined) log.date = date;
     await log.save();
     res.json(log);
   })
@@ -138,12 +148,18 @@ router.post(
   })
 );
 
+// BUG #3 FIX: Whitelist only the allowed fields — same mass assignment fix as workouts.
 router.put(
   '/diet/:id',
   asyncHandler(async (req, res) => {
     const log = await DietLog.findOne({ _id: req.params.id, customer: req.customerId });
     if (!log) return res.status(404).json({ message: 'Log not found.' });
-    Object.assign(log, req.body);
+    const { meal, calories, macros, waterMl, date } = req.body;
+    if (meal !== undefined) log.meal = meal;
+    if (calories !== undefined) log.calories = calories;
+    if (macros !== undefined) log.macros = macros;
+    if (waterMl !== undefined) log.waterMl = waterMl;
+    if (date !== undefined) log.date = date;
     await log.save();
     res.json(log);
   })
@@ -212,12 +228,15 @@ router.post(
     let streak = await Streak.findOne({ customer: req.customerId });
     if (!streak) streak = new Streak({ customer: req.customerId });
 
+    // BUG #16 FIX: Use UTC methods so "today" is consistent regardless of the
+    // server's local timezone. Previously setHours(0,0,0,0) used local time
+    // which could cause double check-ins or missed streaks near midnight UTC.
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     if (streak.lastCheckin) {
       const last = new Date(streak.lastCheckin);
-      last.setHours(0, 0, 0, 0);
+      last.setUTCHours(0, 0, 0, 0);
       const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 0) {

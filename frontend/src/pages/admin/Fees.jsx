@@ -5,6 +5,9 @@ import Modal from '../../components/Modal.jsx';
 export default function Fees() {
   const [fees, setFees] = useState([]);
   const [customers, setCustomers] = useState([]);
+  // BUG #7 FIX: Maintain a separate all-fees totals object that is never
+  // affected by the status filter, so the summary cards always show real totals.
+  const [allTotals, setAllTotals] = useState({});
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
 
@@ -16,12 +19,21 @@ export default function Fees() {
   async function load() {
     const params = {};
     if (status) params.status = status;
-    const [feesRes, customersRes] = await Promise.all([
+    // BUG #7 FIX: Also fetch all fees (no status filter) to compute correct totals
+    const [feesRes, customersRes, allFeesRes] = await Promise.all([
       api.get('/admin/fees', { params }),
       api.get('/admin/customers'),
+      api.get('/admin/fees'), // unfiltered — for totals cards
     ]);
     setFees(feesRes.data);
     setCustomers(customersRes.data);
+
+    // Compute totals from the unfiltered list
+    const totals = allFeesRes.data.reduce((acc, f) => {
+      acc[f.status] = (acc[f.status] || 0) + f.amount;
+      return acc;
+    }, {});
+    setAllTotals(totals);
   }
 
   useEffect(() => {
@@ -46,19 +58,20 @@ export default function Fees() {
   }
 
   async function setFeeStatus(fee, newStatus) {
-    await api.put(`/admin/fees/${fee._id}`, { status: newStatus });
-    await load();
+    try {
+      await api.put(`/admin/fees/${fee._id}`, { status: newStatus });
+      await load();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not update fee status.');
+    }
   }
 
-  const totals = fees.reduce(
-    (acc, f) => {
-      acc[f.status] = (acc[f.status] || 0) + f.amount;
-      return acc;
-    },
-    {}
-  );
-
   const statusColor = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-ember-dark' };
+
+  // BUG #14 FIX: Format amounts with 2 decimal places and thousands separator
+  function fmtAmount(amount) {
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   return (
     <div>
@@ -70,18 +83,19 @@ export default function Fees() {
         <button onClick={() => setShowCreate(true)} className="btn-primary">Add fee</button>
       </div>
 
+      {/* BUG #7 FIX: Summary cards use allTotals (unfiltered), not the filtered list */}
       <div className="mb-8 grid grid-cols-3 gap-4">
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Paid</div>
-          <div className="stat-number mt-1 text-chalk-dark">${(totals.paid || 0).toLocaleString()}</div>
+          <div className="stat-number mt-1 text-chalk-dark">${fmtAmount(allTotals.paid || 0)}</div>
         </div>
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Unpaid</div>
-          <div className="stat-number mt-1">${(totals.unpaid || 0).toLocaleString()}</div>
+          <div className="stat-number mt-1">${fmtAmount(allTotals.unpaid || 0)}</div>
         </div>
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Overdue</div>
-          <div className="stat-number mt-1 text-ember-dark">${(totals.overdue || 0).toLocaleString()}</div>
+          <div className="stat-number mt-1 text-ember-dark">${fmtAmount(allTotals.overdue || 0)}</div>
         </div>
       </div>
 
@@ -111,7 +125,8 @@ export default function Fees() {
             {fees.map((fee) => (
               <tr key={fee._id} className="border-b border-ink/5 last:border-0">
                 <td className="px-4 py-3 font-medium text-ink">{fee.customer?.name || '—'}</td>
-                <td className="px-4 py-3 text-ink/70">${fee.amount}</td>
+                {/* BUG #14 FIX: Format amount properly */}
+                <td className="px-4 py-3 text-ink/70">${fmtAmount(fee.amount)}</td>
                 <td className="px-4 py-3 text-ink/70">{new Date(fee.dueDate).toLocaleDateString()}</td>
                 <td className={`px-4 py-3 font-medium capitalize ${statusColor[fee.status]}`}>{fee.status}</td>
                 <td className="px-4 py-3 text-right space-x-3">
@@ -156,7 +171,7 @@ export default function Fees() {
             </div>
             <div className="mb-4">
               <label className="field-label">Amount</label>
-              <input type="number" className="field-input" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
+              <input type="number" step="0.01" min="0" className="field-input" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
             </div>
             <div className="mb-4">
               <label className="field-label">Due date</label>

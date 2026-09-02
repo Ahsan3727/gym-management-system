@@ -34,12 +34,16 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // BUG #9 FIX: login() no longer calls refreshMe() redundantly right after
+  // setting the user from the login response. That caused an extra round-trip
+  // to /auth/me on every login. The richer profile data (admin/customer doc)
+  // is still available by calling refreshMe() explicitly when needed, or it
+  // will be fetched on the next page load via the useEffect above.
   async function login(username, password) {
     const { data } = await api.post('/auth/login', { username, password });
     localStorage.setItem('gym_token', data.token);
     localStorage.setItem('gym_user', JSON.stringify(data.user));
     setUser(data.user);
-    await refreshMe();
     return data.user;
   }
 
