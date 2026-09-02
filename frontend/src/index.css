@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-bone text-ink font-body;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+  :focus-visible {
+    outline: 2px solid #E1553A;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-ember px-4 py-2.5 text-sm font-semibold text-bone transition-colors hover:bg-ember-dark disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-ink/15 bg-transparent px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-ember/40 bg-transparent px-4 py-2.5 text-sm font-semibold text-ember-dark transition-colors hover:bg-ember/10;
+  }
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-steel;
+  }
+  .field-input {
+    @apply w-full rounded-sm border border-ink/15 bg-white px-3 py-2 text-sm text-ink placeholder:text-steel-light focus:border-ember focus:outline-none;
+  }
+  .panel {
+    @apply rounded-sm border border-ink/10 bg-white;
+  }
+  .stat-number {
+    @apply font-display text-4xl font-semibold leading-none;
+  }
+}

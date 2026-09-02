@@ -1,0 +1,266 @@
+const express = require('express');
+
+const Fee = require('../models/Fee');
+const WorkoutLog = require('../models/WorkoutLog');
+const DietLog = require('../models/DietLog');
+const WeightLog = require('../models/WeightLog');
+const Streak = require('../models/Streak');
+const Notification = require('../models/Notification');
+
+const asyncHandler = require('../utils/asyncHandler');
+const { protect, authorize } = require('../middleware/auth');
+const { attachCustomerTenant } = require('../middleware/tenant');
+
+const router = express.Router();
+
+// Every route below belongs to the logged-in customer only (req.customerId).
+router.use(protect, authorize('customer'), attachCustomerTenant);
+
+/* --------------------------------- Profile --------------------------------- */
+
+router.get(
+  '/profile',
+  asyncHandler(async (req, res) => {
+    await req.customerDoc.populate('plan');
+    res.json(req.customerDoc);
+  })
+);
+
+router.put(
+  '/profile',
+  asyncHandler(async (req, res) => {
+    const { phone, goals, notificationPrefs } = req.body;
+    if (phone !== undefined) req.customerDoc.phone = phone;
+    if (goals !== undefined) req.customerDoc.goals = goals;
+    if (notificationPrefs !== undefined) {
+      req.customerDoc.notificationPrefs = { ...req.customerDoc.notificationPrefs, ...notificationPrefs };
+    }
+    await req.customerDoc.save();
+    res.json(req.customerDoc);
+  })
+);
+
+// Read-only fee status + membership/renewal info.
+router.get(
+  '/fees',
+  asyncHandler(async (req, res) => {
+    const fees = await Fee.find({ customer: req.customerId }).sort({ dueDate: -1 });
+    res.json(fees);
+  })
+);
+
+router.get(
+  '/membership',
+  asyncHandler(async (req, res) => {
+    await req.customerDoc.populate('plan');
+    const nextDue = await Fee.findOne({ customer: req.customerId, status: { $ne: 'paid' } }).sort({ dueDate: 1 });
+    res.json({ plan: req.customerDoc.plan, joinDate: req.customerDoc.joinDate, nextDue });
+  })
+);
+
+router.get(
+  '/notifications',
+  asyncHandler(async (req, res) => {
+    const notifications = await Notification.find({ user: req.user._id }).sort({ sentAt: -1 }).limit(50);
+    res.json(notifications);
+  })
+);
+
+/* --------------------------------- Workouts -------------------------------- */
+
+router.get(
+  '/workouts',
+  asyncHandler(async (req, res) => {
+    const logs = await WorkoutLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    res.json(logs);
+  })
+);
+
+router.post(
+  '/workouts',
+  asyncHandler(async (req, res) => {
+    const { exercise, sets, reps, weight, durationMinutes, isRestDay, notes, date } = req.body;
+    if (!isRestDay && !exercise) {
+      return res.status(400).json({ message: 'exercise is required unless logging a rest day.' });
+    }
+    const log = await WorkoutLog.create({
+      customer: req.customerId,
+      exercise: exercise || 'Rest day',
+      sets,
+      reps,
+      weight,
+      durationMinutes,
+      isRestDay: !!isRestDay,
+      notes,
+      date: date || Date.now(),
+    });
+    res.status(201).json(log);
+  })
+);
+
+router.put(
+  '/workouts/:id',
+  asyncHandler(async (req, res) => {
+    const log = await WorkoutLog.findOne({ _id: req.params.id, customer: req.customerId });
+    if (!log) return res.status(404).json({ message: 'Log not found.' });
+    Object.assign(log, req.body);
+    await log.save();
+    res.json(log);
+  })
+);
+
+router.delete(
+  '/workouts/:id',
+  asyncHandler(async (req, res) => {
+    const result = await WorkoutLog.findOneAndDelete({ _id: req.params.id, customer: req.customerId });
+    if (!result) return res.status(404).json({ message: 'Log not found.' });
+    res.json({ message: 'Deleted.' });
+  })
+);
+
+/* ---------------------------------- Diet ----------------------------------- */
+
+router.get(
+  '/diet',
+  asyncHandler(async (req, res) => {
+    const logs = await DietLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    res.json(logs);
+  })
+);
+
+router.post(
+  '/diet',
+  asyncHandler(async (req, res) => {
+    const { meal, calories, macros, waterMl, date } = req.body;
+    if (!meal) return res.status(400).json({ message: 'meal is required.' });
+    const log = await DietLog.create({ customer: req.customerId, meal, calories, macros, waterMl, date: date || Date.now() });
+    res.status(201).json(log);
+  })
+);
+
+router.put(
+  '/diet/:id',
+  asyncHandler(async (req, res) => {
+    const log = await DietLog.findOne({ _id: req.params.id, customer: req.customerId });
+    if (!log) return res.status(404).json({ message: 'Log not found.' });
+    Object.assign(log, req.body);
+    await log.save();
+    res.json(log);
+  })
+);
+
+router.delete(
+  '/diet/:id',
+  asyncHandler(async (req, res) => {
+    const result = await DietLog.findOneAndDelete({ _id: req.params.id, customer: req.customerId });
+    if (!result) return res.status(404).json({ message: 'Log not found.' });
+    res.json({ message: 'Deleted.' });
+  })
+);
+
+/* ------------------------------ Weight & body ------------------------------ */
+
+router.get(
+  '/weight',
+  asyncHandler(async (req, res) => {
+    const logs = await WeightLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    res.json(logs);
+  })
+);
+
+router.post(
+  '/weight',
+  asyncHandler(async (req, res) => {
+    const { weightKg, heightCm, measurements, progressPhotoUrl, date } = req.body;
+    if (!weightKg) return res.status(400).json({ message: 'weightKg is required.' });
+    const log = await WeightLog.create({
+      customer: req.customerId,
+      weightKg,
+      heightCm,
+      measurements,
+      progressPhotoUrl,
+      date: date || Date.now(),
+    });
+    res.status(201).json(log);
+  })
+);
+
+router.delete(
+  '/weight/:id',
+  asyncHandler(async (req, res) => {
+    const result = await WeightLog.findOneAndDelete({ _id: req.params.id, customer: req.customerId });
+    if (!result) return res.status(404).json({ message: 'Log not found.' });
+    res.json({ message: 'Deleted.' });
+  })
+);
+
+/* ---------------------------------- Streak ---------------------------------- */
+
+router.get(
+  '/streak',
+  asyncHandler(async (req, res) => {
+    const streak = await Streak.findOne({ customer: req.customerId });
+    res.json(streak);
+  })
+);
+
+// One check-in per day. Extends the streak if yesterday's check-in exists,
+// resets to 1 if there was a gap, no-ops if already checked in today.
+router.post(
+  '/streak/checkin',
+  asyncHandler(async (req, res) => {
+    let streak = await Streak.findOne({ customer: req.customerId });
+    if (!streak) streak = new Streak({ customer: req.customerId });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (streak.lastCheckin) {
+      const last = new Date(streak.lastCheckin);
+      last.setHours(0, 0, 0, 0);
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) {
+        return res.json(streak); // already checked in today
+      }
+      streak.currentStreak = diffDays === 1 ? streak.currentStreak + 1 : 1;
+    } else {
+      streak.currentStreak = 1;
+    }
+
+    streak.lastCheckin = today;
+    streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
+
+    const milestones = [7, 30, 100, 365];
+    milestones.forEach((m) => {
+      const badge = `${m}-day-streak`;
+      if (streak.currentStreak >= m && !streak.badges.includes(badge)) {
+        streak.badges.push(badge);
+      }
+    });
+
+    await streak.save();
+    res.json(streak);
+  })
+);
+
+/* -------------------------------- Analytics --------------------------------- */
+
+// Aggregated series for the dashboard charts: weight over time, workout
+// consistency (sessions per day over last 30 days), calorie trend.
+router.get(
+  '/analytics',
+  asyncHandler(async (req, res) => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const [weight, workouts, diet] = await Promise.all([
+      WeightLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo } }).sort({ date: 1 }).select('weightKg date'),
+      WorkoutLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo }, isRestDay: false }).select('date'),
+      DietLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo } }).select('calories date'),
+    ]);
+
+    res.json({ weight, workouts, diet });
+  })
+);
+
+module.exports = router;
