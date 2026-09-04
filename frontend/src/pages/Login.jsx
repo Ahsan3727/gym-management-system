@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const roleHome = { customer: '/customer', admin: '/admin', super_admin: '/superadmin' };
+const roleHome = { customer: '/customer', admin: '/admin', super_admin: '/superadmin', trainer: '/trainer' };
 
 export default function Login() {
   const { login } = useAuth();
@@ -53,7 +53,7 @@ export default function Login() {
 
         <div className="flex gap-8 text-sm text-steel-light">
           <div>
-            <div className="font-display text-2xl text-bone">3</div>
+            <div className="font-display text-2xl text-bone">4</div>
             roles, one login
           </div>
           <div>

@@ -23,6 +23,7 @@ export function AuthProvider({ children }) {
     } catch {
       localStorage.removeItem('gym_token');
       localStorage.removeItem('gym_user');
+      localStorage.removeItem('gym_refresh_token');
       setUser(null);
     } finally {
       setLoading(false);
@@ -34,23 +35,29 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // BUG #9 FIX: login() no longer calls refreshMe() redundantly right after
-  // setting the user from the login response. That caused an extra round-trip
-  // to /auth/me on every login. The richer profile data (admin/customer doc)
-  // is still available by calling refreshMe() explicitly when needed, or it
-  // will be fetched on the next page load via the useEffect above.
   async function login(username, password) {
     const { data } = await api.post('/auth/login', { username, password });
     localStorage.setItem('gym_token', data.token);
+    if (data.refreshToken) {
+      localStorage.setItem('gym_refresh_token', data.refreshToken);
+    }
     localStorage.setItem('gym_user', JSON.stringify(data.user));
     setUser(data.user);
     return data.user;
   }
 
-  function logout() {
-    localStorage.removeItem('gym_token');
-    localStorage.removeItem('gym_user');
-    setUser(null);
+  async function logout() {
+    const refreshToken = localStorage.getItem('gym_refresh_token');
+    try {
+      await api.post('/auth/logout', { refreshToken });
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      localStorage.removeItem('gym_token');
+      localStorage.removeItem('gym_user');
+      localStorage.removeItem('gym_refresh_token');
+      setUser(null);
+    }
   }
 
   return (

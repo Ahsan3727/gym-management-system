@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 // accident). Now any new role just needs an entry in this map.
 const roleHome = {
   customer: '/customer',
+  trainer: '/trainer',
   admin: '/admin',
   super_admin: '/superadmin',
 };

@@ -10,6 +10,8 @@ const Settings = require('../models/Settings');
 
 const asyncHandler = require('../utils/asyncHandler');
 const { protect, authorize } = require('../middleware/auth');
+const { sendEmail } = require('../utils/mailer');
+const { passwordResetEmail } = require('../utils/emailTemplates');
 
 const router = express.Router();
 
@@ -118,16 +120,27 @@ router.put(
 
     const tempPassword = crypto.randomBytes(6).toString('base64url');
     const passwordHash = await User.hashPassword(tempPassword);
-    await User.findByIdAndUpdate(admin.user, { passwordHash });
+    const adminUser = await User.findByIdAndUpdate(admin.user, { passwordHash }, { new: true });
 
     await logAction(req, 'admin.reset_password', 'Admin', admin._id);
 
-    // TODO: Send tempPassword via email to the gym owner instead of logging here.
-    // This is a placeholder — integrate a mailer (e.g. Nodemailer + SendGrid).
-    console.log(`[reset-password] Temp password for gym "${admin.gymName}": ${tempPassword}`);
+    const recipientEmail = admin.contactEmail || adminUser?.email || (adminUser?.username?.includes('@') ? adminUser.username : null);
+    let emailSent = false;
+    if (recipientEmail) {
+      const mailResult = await sendEmail({
+        to: recipientEmail,
+        subject: `Temporary Password Reset — ${admin.gymName}`,
+        html: passwordResetEmail(admin.gymName, tempPassword),
+      });
+      emailSent = !!mailResult.success;
+    }
+
+    console.log(`[reset-password] Temp password for gym "${admin.gymName}": ${tempPassword} (Email sent: ${emailSent})`);
 
     res.json({
-      message: `Password has been reset for ${admin.gymName}. The temporary password has been logged to the server console. Please configure a mailer to email it to the gym owner directly.`,
+      message: emailSent
+        ? `Password has been reset for ${admin.gymName}. A temporary password has been emailed to ${recipientEmail}.`
+        : `Password has been reset for ${admin.gymName}. The temporary password has been logged to the server console.`,
     });
   })
 );

@@ -6,6 +6,8 @@ const DietLog = require('../models/DietLog');
 const WeightLog = require('../models/WeightLog');
 const Streak = require('../models/Streak');
 const Notification = require('../models/Notification');
+const Admin = require('../models/Admin');
+const stripeUtil = require('../utils/stripe');
 
 const asyncHandler = require('../utils/asyncHandler');
 const { protect, authorize } = require('../middleware/auth');
@@ -22,7 +24,11 @@ router.get(
   '/profile',
   asyncHandler(async (req, res) => {
     await req.customerDoc.populate('plan');
-    res.json(req.customerDoc);
+    const admin = await Admin.findById(req.adminId).select('gymName gymLogoUrl checkinTokenRequired');
+    res.json({
+      ...req.customerDoc.toObject(),
+      gym: admin,
+    });
   })
 );
 
@@ -49,6 +55,34 @@ router.get(
   })
 );
 
+router.post(
+  '/fees/:id/pay',
+  asyncHandler(async (req, res) => {
+    const fee = await Fee.findOne({ _id: req.params.id, customer: req.customerId });
+    if (!fee) return res.status(404).json({ message: 'Fee record not found.' });
+
+    if (fee.status === 'paid') {
+      return res.status(400).json({ message: 'This fee is already paid.' });
+    }
+
+    const gym = await Admin.findById(req.adminId);
+    await req.customerDoc.populate('user');
+
+    const session = await stripeUtil.createFeeCheckoutSession({
+      fee,
+      customer: req.customerDoc,
+      gym,
+      originUrl: req.headers.origin,
+    });
+
+    res.json({
+      checkoutUrl: session.url,
+      sessionId: session.id,
+      isSimulated: !!session.isSimulated,
+    });
+  })
+);
+
 router.get(
   '/membership',
   asyncHandler(async (req, res) => {
@@ -63,6 +97,30 @@ router.get(
   asyncHandler(async (req, res) => {
     const notifications = await Notification.find({ user: req.user._id }).sort({ sentAt: -1 }).limit(50);
     res.json(notifications);
+  })
+);
+
+router.patch(
+  '/notifications/read-all',
+  asyncHandler(async (req, res) => {
+    await Notification.updateMany(
+      { user: req.user._id, readAt: null },
+      { readAt: new Date() }
+    );
+    res.json({ message: 'All marked as read' });
+  })
+);
+
+router.patch(
+  '/notifications/:id/read',
+  asyncHandler(async (req, res) => {
+    const notif = await Notification.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { readAt: new Date() },
+      { new: true }
+    );
+    if (!notif) return res.status(404).json({ message: 'Notification not found' });
+    res.json(notif);
   })
 );
 
@@ -225,6 +283,33 @@ router.get(
 router.post(
   '/streak/checkin',
   asyncHandler(async (req, res) => {
+    // If gym requires physical QR token, validate token and expiry
+    const admin = await Admin.findById(req.adminId);
+    if (admin?.checkinTokenRequired) {
+      let token = req.body?.qrToken?.trim();
+      if (token && token.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(token);
+          token = parsed.token;
+        } catch {
+          // ignore json parse error, use raw string
+        }
+      }
+
+      if (!token) {
+        return res.status(400).json({
+          message: 'QR check-in verification is required by your gym. Please scan the QR code at reception.',
+        });
+      }
+
+      const isExpired = !admin.checkinTokenExpiry || new Date() > new Date(admin.checkinTokenExpiry);
+      if (token !== admin.checkinToken || isExpired) {
+        return res.status(400).json({
+          message: 'Invalid or expired QR check-in token. Please scan the latest code at reception.',
+        });
+      }
+    }
+
     let streak = await Streak.findOne({ customer: req.customerId });
     if (!streak) streak = new Streak({ customer: req.customerId });
 

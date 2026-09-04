@@ -6,18 +6,24 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function CustomerOverview() {
   const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
   const [streak, setStreak] = useState(null);
   const [membership, setMembership] = useState(null);
   const [weightLogs, setWeightLogs] = useState([]);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [qrInput, setQrInput] = useState('');
+  const [showQrModal, setShowQrModal] = useState(false);
   const [error, setError] = useState('');
+  const [checkinMessage, setCheckinMessage] = useState('');
 
   async function loadAll() {
-    const [streakRes, membershipRes, weightRes] = await Promise.all([
+    const [profileRes, streakRes, membershipRes, weightRes] = await Promise.all([
+      api.get('/customer/profile'),
       api.get('/customer/streak'),
       api.get('/customer/membership'),
       api.get('/customer/weight'),
     ]);
+    setProfile(profileRes.data);
     setStreak(streakRes.data);
     setMembership(membershipRes.data);
     setWeightLogs(weightRes.data);
@@ -27,15 +33,28 @@ export default function CustomerOverview() {
     loadAll().catch(() => setError('Could not load your dashboard.'));
   }, []);
 
-  async function handleCheckin() {
+  async function performCheckin(qrToken) {
     setCheckingIn(true);
+    setError('');
+    setCheckinMessage('');
     try {
-      const { data } = await api.post('/customer/streak/checkin');
+      const { data } = await api.post('/customer/streak/checkin', { qrToken });
       setStreak(data);
-    } catch {
-      setError('Check-in failed. Try again.');
+      setCheckinMessage('Checked in successfully! Streak updated.');
+      setShowQrModal(false);
+      setQrInput('');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Check-in failed. Verify the reception code.');
     } finally {
       setCheckingIn(false);
+    }
+  }
+
+  function handleCheckinClick() {
+    if (profile?.gym?.checkinTokenRequired) {
+      setShowQrModal(true);
+    } else {
+      performCheckin();
     }
   }
 
@@ -46,12 +65,24 @@ export default function CustomerOverview() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">
-        Welcome back{user?.username ? `, ${user.username}` : ''}
-      </h1>
-      <p className="mb-8 text-sm text-steel">Here's where things stand today.</p>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="mb-1 text-2xl font-semibold text-ink">
+            Welcome back{user?.username ? `, ${user.username}` : ''}
+          </h1>
+          <p className="text-sm text-steel">Here's where things stand today at {profile?.gym?.gymName || 'your gym'}.</p>
+        </div>
+        {profile?.gym?.gymLogoUrl && (
+          <img
+            src={profile.gymLogoUrl || profile.gym.gymLogoUrl}
+            alt="Gym Logo"
+            className="h-12 w-12 rounded-lg object-cover border border-ink/10"
+          />
+        )}
+      </div>
 
       {error && <div className="mb-6 text-sm text-ember-dark">{error}</div>}
+      {checkinMessage && <div className="mb-6 text-sm text-chalk-dark">{checkinMessage}</div>}
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard label="Current streak" value={streak ? `${streak.currentStreak}d` : '—'} accent="text-ember" />
@@ -64,17 +95,66 @@ export default function CustomerOverview() {
         />
       </div>
 
-      <div className="panel mb-8 flex items-center justify-between px-6 py-5">
+      <div className="panel mb-8 flex flex-wrap items-center justify-between gap-4 px-6 py-5">
         <div>
           <div className="text-sm font-medium text-steel">Daily check-in</div>
           <div className="mt-0.5 text-sm text-ink/80">
-            {checkedInToday ? "You're checked in for today. Nice work." : "You haven't checked in today."}
+            {checkedInToday
+              ? "You're checked in for today. Nice work!"
+              : profile?.gym?.checkinTokenRequired
+              ? 'Scan reception QR code or enter token to check in.'
+              : "You haven't checked in today."}
           </div>
         </div>
-        <button onClick={handleCheckin} disabled={checkingIn || checkedInToday} className="btn-primary">
-          {checkedInToday ? 'Checked in' : checkingIn ? 'Checking in…' : 'Check in'}
+        <button
+          onClick={handleCheckinClick}
+          disabled={checkingIn || checkedInToday}
+          className="btn-primary"
+        >
+          {checkedInToday ? 'Checked in' : checkingIn ? 'Checking in…' : profile?.gym?.checkinTokenRequired ? 'QR Check-in' : 'Check in'}
         </button>
       </div>
+
+      {/* QR Check-In Modal for gyms requiring reception code */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-stone-900 border border-ink/10">
+            <h3 className="text-base font-semibold text-ink mb-1">Reception QR Verification</h3>
+            <p className="text-xs text-steel mb-4">
+              Enter the passcode or paste the scanned token displayed at your gym's front desk.
+            </p>
+            <input
+              type="text"
+              placeholder="Paste token or reception passcode…"
+              value={qrInput}
+              onChange={(e) => setQrInput(e.target.value)}
+              className="field-input mb-4 font-mono text-xs"
+              autoFocus
+            />
+            {error && <div className="mb-3 text-xs text-ember-dark">{error}</div>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => performCheckin(qrInput)}
+                disabled={!qrInput.trim() || checkingIn}
+                className="btn-primary flex-1 text-xs"
+              >
+                {checkingIn ? 'Verifying…' : 'Confirm Check-In'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrModal(false);
+                  setQrInput('');
+                }}
+                className="btn-secondary text-xs"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {streak?.badges?.length > 0 && (
         <div className="mb-8">
@@ -89,10 +169,10 @@ export default function CustomerOverview() {
         </div>
       )}
 
-      <div className="flex gap-3 text-sm">
+      <div className="flex flex-wrap gap-3 text-sm">
         <Link to="/customer/workouts" className="btn-secondary">Log a workout</Link>
         <Link to="/customer/diet" className="btn-secondary">Log a meal</Link>
-        <Link to="/customer/weight" className="btn-secondary">Log weight</Link>
+        <Link to="/customer/weight" className="btn-secondary">Log weight & photo</Link>
       </div>
     </div>
   );

@@ -10,6 +10,9 @@ const adminSchema = new mongoose.Schema(
     workingHours: { type: String, default: '' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // the super_admin who created this gym
     isSuspended: { type: Boolean, default: false },
+    checkinToken: { type: String, default: '' },
+    checkinTokenExpiry: { type: Date, default: null },
+    checkinTokenRequired: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );

@@ -1,211 +1,288 @@
-# 🗺️ Ironline SaaS — Master Product & Engineering Roadmap
+# Ironline — Development Roadmap
 
+This document defines the phased delivery plan for the Ironline Gym Management System.
+Each phase builds directly on the previous one. Features are ordered by business impact
+and technical dependency — the things that block production go first.
+
+---
+
+## How to Read This File
+
+- **Status badges**: `[DONE]` `[NEXT]` `[PLANNED]` `[DEFERRED]`
+- **Priority**: P1 (must-have) → P2 (important) → P3 (nice-to-have)
+- **Source**: Where in the code the gap was identified
+
+---
+
+## Phase 1 — Core MVP (Current Baseline)
+
+**Goal**: A working, deployable multi-tenant gym platform that gym owners can actually
+use to manage their members and track their own revenue manually.
+
+| Feature | Status | Notes |
+| :--- | :---: | :--- |
+| JWT authentication + bcrypt hashing | DONE | `backend/routes/authRoutes.js` |
+| Role-based access: customer / trainer / admin / super_admin | DONE | `backend/middleware/auth.js` |
+| Server-side tenant isolation via JWT-derived `req.adminId` | DONE | `backend/middleware/tenant.js` |
+| Super Admin: create / suspend / enable gym accounts | DONE | `backend/routes/superAdminRoutes.js` |
+| Super Admin: password reset (Nodemailer email delivery) | DONE | Nodemailer SMTP pipeline delivers reset credentials |
+| Super Admin: audit log + platform stats | DONE | `backend/routes/superAdminRoutes.js` |
+| Super Admin: platform settings singleton | DONE | `backend/models/Settings.js` |
+| Admin: gym profile CRUD | DONE | `backend/routes/adminRoutes.js` |
+| Admin: membership plan CRUD + deactivation | DONE | `backend/routes/adminRoutes.js` |
+| Admin: member directory (create / edit / flag inactive / delete) | DONE | `backend/routes/adminRoutes.js` |
+| Admin: cascading member deletion (user + all logs) | DONE | BUG #6 fixed — all child docs removed |
+| Admin: fee record creation + manual status toggle | DONE | `backend/routes/adminRoutes.js` |
+| Admin: auto-generated receipt number on payment | DONE | `crypto.randomBytes` in adminRoutes |
+| Admin: revenue report by date range | DONE | `/api/admin/fees-report` |
+| Admin: broadcast announcements → stored notifications | DONE | `backend/routes/adminRoutes.js` |
+| Customer: workout logging (CRUD) | DONE | `backend/routes/customerRoutes.js` |
+| Customer: diet / water logging (CRUD) | DONE | `backend/routes/customerRoutes.js` |
+| Customer: weight / body measurement logging | DONE | `backend/routes/customerRoutes.js` |
+| Customer: daily streak check-in + milestone badges | DONE | BUG #16 fixed — UTC-consistent |
+| Customer: 30-day analytics endpoint | DONE | `/api/customer/analytics` |
+| Customer: fee status view (read-only) | DONE | `backend/routes/customerRoutes.js` |
+| Customer: notification inbox | DONE | `backend/routes/customerRoutes.js` |
+| Unified Vercel deployment (SPA + serverless API, single domain) | DONE | `vercel.json` at root |
+| Login brute-force rate limiting | DONE | express-rate-limit, 20 req/15 min/IP |
+| Field whitelisting to prevent mass-assignment | DONE | BUG #3 fixed across all routes |
+
+---
+
+## Phase 2 — Automation & Production Hardening (Completed)
+
+**Status**: Completed. All 6 features implemented across backend and frontend.
+
+---
+
+### 2.1 — Automated Overdue Fee Detection (P1)
+
+**Why first**: Admins currently have to manually find and flip fees to `overdue`.
+This is the most painful daily admin task and the most common source of lost revenue.
+
+**What to build**:
+- A scheduled job (Vercel Cron, or a standalone worker on Railway/Render) that runs
+  once per day at midnight.
+- Query: `Fee.find({ status: 'unpaid', dueDate: { $lt: new Date() } })`
+- Bulk-update all matching documents to `status: 'overdue'`.
+- Optionally trigger a notification for each affected customer.
+
+**Files to create/modify**:
+- `backend/jobs/markOverdueFees.js` — the job logic
+- `vercel.json` — add a cron function entry (Vercel Cron syntax)
+- `api/cron/overdue.js` — the Vercel cron handler
+
+**Code already in place**:
+- `Fee` model has `status`, `dueDate`, and compound index `{ admin, status, dueDate }`.
+- `Notification` model and `Customer.notificationPrefs` fields are already defined
+  and waiting for this use case (see `backend/models/Notification.js`).
+
+---
+
+### 2.2 — Transactional Email via Resend / SendGrid (P1)
+
+**Why second**: The current password reset flow logs the temp password to `console.log`
+server-side (see `backend/routes/superAdminRoutes.js` line ~127). This is a
+**security and usability gap** — gym owners have no way to receive their reset password
+without server access.
+
+**What to build**:
+- Install an email SDK: `npm install resend` (or `@sendgrid/mail`)
+- Create `backend/utils/mailer.js` — thin wrapper with `sendEmail({ to, subject, html })`
+- Patch `superAdminRoutes.js`: replace `console.log(tempPassword)` with a mailer call
+- Add welcome email on new customer account creation
+- Add overdue fee reminder email (triggered by the Phase 2.1 cron)
+
+**Environment variables to add**:
 ```
-  Current Version: v1.0.0 (Production Ready)  │  Architecture: Monorepo Fullstack (Vercel Unified)
-  Target Release:  v2.0.0 (Q4 2026)           │  Scope: Commercialization, Operations & Scale
-```
-
----
-
-## 📑 Table of Contents
-
-1. [Roadmap Overview & Release Timeline](#1-roadmap-overview--release-timeline)
-2. [Feature Prioritization Matrix (MoSCoW)](#2-feature-prioritization-matrix-moscow)
-3. [Phase 1: Automated Payments & Invoicing (v1.1)](#-phase-1-automated-payments--invoicing-v11)
-4. [Phase 2: Attendance & Front-Desk Operations (v1.2)](#-phase-2-attendance--front-desk-operations-v12)
-5. [Phase 3: Staff Hierarchy & Class Booking (v1.3)](#-phase-3-staff-hierarchy--class-booking-v13)
-6. [Phase 4: Executive BI Analytics & Cloud Media (v1.4)](#-phase-4-executive-bi-analytics--cloud-media-v14)
-7. [Phase 5: Mobile App (PWA) & AI Coaching (v2.0)](#-phase-5-mobile-app-pwa--ai-coaching-v20)
-8. [Technical & Security Architecture Standards](#-technical--security-architecture-standards)
-
----
-
-## 1. Roadmap Overview & Release Timeline
-
-```
-  2026 Q3 (Weeks 1 - 3)        2026 Q4 (Weeks 4 - 7)        2026 Q4 (Weeks 8 - 10)       2027 Q1 (Weeks 11 - 12+)
-  ┌───────────────────────┐    ┌───────────────────────┐    ┌───────────────────────┐    ┌───────────────────────┐
-  │      VERSION 1.1      │    │      VERSION 1.2      │    │      VERSION 1.3      │    │      VERSION 2.0      │
-  │ • Stripe / Razorpay   │───>│ • QR Attendance       │───>│ • Staff/Trainer Tier  │───>│ • Mobile PWA App      │
-  │ • PDF Invoices        │    │ • Auto-Overdue Cron   │    │ • Group Class Booking │    │ • AI Fitness Coach    │
-  │ • Email/SMS Alerts    │    │ • Live Gym Occupancy  │    │ • Executive BI Dash   │    │ • Multi-Branch Chains │
-  └───────────────────────┘    └───────────────────────┘    └───────────────────────┘    └───────────────────────┘
-```
-
----
-
-## 2. Feature Prioritization Matrix (MoSCoW)
-
-| Priority Tier | Feature Module | Target Release | Effort | Business Value |
-| :--- | :--- | :---: | :---: | :---: |
-| **Must Have (P0)** | Online Payment Gateway (Stripe) | v1.1 | 🟢 Medium | 🔴 Critical (Revenue) |
-| **Must Have (P0)** | Downloadable PDF Invoices & Receipts | v1.1 | 🟢 Low | 🔴 Critical (Compliance) |
-| **Must Have (P0)** | Automated Fee Cron (Auto-Overdue) | v1.1 | 🟢 Low | 🟡 High (Automation) |
-| **Should Have (P1)** | QR Code Member Attendance Check-In | v1.2 | 🟡 Medium | 🟡 High (Daily Utility) |
-| **Should Have (P1)** | Email & SMS Notifications (Resend/Twilio) | v1.2 | 🟢 Low | 🟡 High (Retention) |
-| **Should Have (P1)** | Trainer / Staff Role (`trainer`) | v1.3 | 🟡 Medium | 🟡 High (Delegation) |
-| **Could Have (P2)** | Group Class Scheduling & Seat Booking | v1.3 | 🔴 High | 🟢 Medium (Upsell) |
-| **Could Have (P2)** | Executive BI & MRR Financial Dashboard | v1.4 | 🟡 Medium | 🟡 High (Insights) |
-| **Could Have (P2)** | Cloudinary / S3 Progress Photo Gallery | v1.4 | 🟢 Low | 🟢 Medium (Engagement) |
-| **Future (P3)** | Progressive Web App (PWA) Installable | v2.0 | 🟡 Medium | 🟡 High (Mobile UX) |
-| **Future (P3)** | AI Workout & Diet Generation | v2.0 | 🔴 High | 🟢 Medium (Innovation) |
-| **Future (P3)** | Multi-Branch Gym Franchise System | v2.1 | 🔴 High | 🔴 Critical (Enterprise) |
-
----
-
-## 💳 Phase 1: Automated Payments & Invoicing (v1.1)
-> **Goal:** Enable hands-free online membership payments and legal receipt generation.  
-> **Timeline:** Weeks 1 – 3  
-> **Target Release:** `v1.1.0`
-
-### 1.1 Stripe & Razorpay Checkout Integration
-* **User Story:** As a member, I want to pay my gym fees online using my credit card, Apple Pay, or Google Pay so that I don't have to carry cash to the front desk.
-* **Architecture & Deliverables:**
-  * [ ] **New Route:** `POST /api/customer/fees/:id/checkout-session` (Generates a hosted payment link).
-  * [ ] **Webhook Handler:** `POST /api/payments/webhook` (Listens to `checkout.session.completed`).
-  * [ ] **Data Model Updates:** Add `stripeSessionId`, `paymentGateway`, and `paymentMethod` to `Fee.js`.
-  * [ ] **Frontend:** "Pay Now" button on `Customer/Account.jsx` and `Customer/Fees.jsx`.
-* **Dependencies:** `stripe` npm package, Stripe Webhook Secret.
-
-### 1.2 PDF Receipt & Tax Invoice Generator
-* **User Story:** As a member, I want to download an official invoice receipt as a PDF for tax and employer fitness allowance reimbursement.
-* **Architecture & Deliverables:**
-  * [ ] **New Route:** `GET /api/customer/fees/:id/receipt` (Streams a generated PDF).
-  * [ ] **PDF Layout:** Includes Gym Name, Logo, Address, Tax/GST Number, Receipt Number, Customer Name, and "PAID" badge.
-  * [ ] **Frontend:** "Download Receipt" icon button in Fee History tables.
-* **Dependencies:** `pdfkit` or `@react-pdf/renderer`.
-
-### 1.3 Automated Overdue Cron Scheduler
-* **User Story:** As a gym owner, I want unpaid fees to automatically flag as overdue the day after they expire without manual review.
-* **Architecture & Deliverables:**
-  * [ ] **Worker Script:** `backend/jobs/feeCheckCron.js` running daily at 00:00 UTC.
-  * [ ] **Vercel Cron:** Configured in `vercel.json` under `"crons"`.
-  * [ ] **Action:** Queries `Fee.find({ status: 'unpaid', dueDate: { $lt: new Date() } })` and flips status to `overdue`.
-
----
-
-## 📲 Phase 2: Attendance & Front-Desk Operations (v1.2)
-> **Goal:** Streamline the daily check-in process and eliminate front-desk bottlenecks.  
-> **Timeline:** Weeks 4 – 5  
-> **Target Release:** `v1.2.0`
-
-### 2.1 Dynamic Member QR Code
-* **User Story:** As a member, I want a digital membership card on my phone so I can enter the gym quickly.
-* **Architecture & Deliverables:**
-  * [ ] **Member UI:** Dynamic QR card on `CustomerOverview.jsx` embedding a signed token: `{ customerId, gymId, timestamp }`.
-  * [ ] **Security:** QR codes regenerate every 60 seconds to prevent members from sharing screenshots.
-* **Dependencies:** `qrcode.react`.
-
-### 2.2 Front-Desk High-Speed Scanner
-* **User Story:** As a gym receptionist, I want to scan member QR codes via a webcam or USB barcode reader to verify entry in under 1 second.
-* **Architecture & Deliverables:**
-  * [ ] **New Route:** `POST /api/admin/check-in` (Validates member status).
-  * [ ] **Validation Rules:**
-    * 🟢 Active plan + no overdue fees ➔ **Approved** (Logs attendance, bumps daily streak).
-    * 🔴 Overdue fee or inactive plan ➔ **Alert** (Prompts desk to collect payment).
-  * [ ] **Frontend Scanner:** Dedicated page at `/admin/check-in` utilizing HTML5 camera feeds.
-* **Dependencies:** `html5-qrcode`.
-
-### 2.3 Live Gym Occupancy Counter
-* **User Story:** As a member or owner, I want to see how crowded the gym is in real-time.
-* **Architecture & Deliverables:**
-  * [ ] **New Model:** `Attendance.js` (`customer`, `admin`, `checkInTime`, `checkOutTime`).
-  * [ ] **Widget:** Live badge: *"Currently in Gym: 28 Members"* with 2-hour automatic checkout timeout.
-
----
-
-## 👥 Phase 3: Staff Hierarchy & Class Booking (v1.3)
-> **Goal:** Support trainers, staff delegation, and group fitness classes.  
-> **Timeline:** Weeks 6 – 7  
-> **Target Release:** `v1.3.0`
-
-### 3.1 Trainer Role & Delegated Client Management
-* **User Story:** As a gym owner, I want personal trainers to manage their own clients' workout plans without seeing gym financials.
-* **Architecture & Deliverables:**
-  * [ ] **Role Expansion:** Add `'trainer'` to `User.js` role enum.
-  * [ ] **Permissions:** Trainers can read/write workouts and diets for assigned members; zero access to fee reports or platform settings.
-  * [ ] **Owner Controls:** Owner can assign/reassign members to trainers from `Admin/Customers.jsx`.
-
-### 3.2 Group Class Scheduling & Reservation System
-* **User Story:** As a member, I want to reserve a spot in tomorrow's 7:00 PM HIIT class before it fills up.
-* **Architecture & Deliverables:**
-  * [ ] **New Model:** `ClassSession.js` (`title`, `trainer`, `capacity`, `startTime`, `durationMinutes`, `bookedMembers`).
-  * [ ] **Admin UI:** `/admin/classes` to publish weekly class schedules.
-  * [ ] **Member UI:** `/customer/classes` with 1-click "Book Spot" button and instant capacity counter (e.g. *12/15 Spots Left*).
-  * [ ] **Waitlist Logic:** Automatic queue promotion if an attendee cancels.
-
----
-
-## 📊 Phase 4: Executive BI Analytics & Cloud Media (v1.4)
-> **Goal:** Give gym owners enterprise-grade business insights and provide cloud media storage.  
-> **Timeline:** Weeks 8 – 10  
-> **Target Release:** `v1.4.0`
-
-### 4.1 Gym Financial Health & Retention Analytics
-* **User Story:** As a gym owner, I need to know my Monthly Recurring Revenue (MRR) and which members are at risk of quitting.
-* **Architecture & Deliverables:**
-  * [ ] **MRR & Cashflow Projections:** Real-time calculation of active recurring memberships vs. one-time fees.
-  * [ ] **Churn Warning System:** Automatic flag for members with zero attendance in the last 14 days.
-  * [ ] **Export Engine:** Download full member rosters, payment history, and attendance records as `.csv` or `.xlsx`.
-* **Dependencies:** `exceljs` or `json2csv`.
-
-### 4.2 Secure Cloud Storage for Progress Photos
-* **User Story:** As a member, I want to upload private progress photos so I can visually see my fitness transformation over time.
-* **Architecture & Deliverables:**
-  * [ ] **Storage Provider:** Direct signed upload to Cloudinary or AWS S3 (no heavy binaries stored in MongoDB).
-  * [ ] **Security:** Photos are private and scoped strictly to the authenticated user.
-  * [ ] **Comparison Tool:** Interactive slider widget comparing "Before" vs. "After" photos on `Customer/Weight.jsx`.
-
----
-
-## 📱 Phase 5: Mobile App (PWA) & AI Coaching (v2.0)
-> **Goal:** Provide native mobile app convenience and cutting-edge AI workout intelligence.  
-> **Timeline:** Weeks 11 – 12+  
-> **Target Release:** `v2.0.0`
-
-### 5.1 Progressive Web App (PWA) Native Mobile Installation
-* **User Story:** As a member, I want to install Ironline on my iPhone or Android home screen with an app icon.
-* **Architecture & Deliverables:**
-  * [ ] **Web Manifest:** Custom app icons, splash screens, and theme color `#14171A`.
-  * [ ] **Service Worker:** Offline asset caching for instant dashboard load times on poor gym WiFi.
-  * [ ] **Push Notifications:** Web Push API for workout reminders and payment confirmations.
-
-### 5.2 AI-Powered Workout & Nutrition Assistant
-* **User Story:** As a member, I want AI to generate a personalized workout split and meal plan based on my logged weight trends.
-* **Architecture & Deliverables:**
-  * [ ] **AI Integration:** Google Gemini 1.5 Flash API endpoint at `/api/customer/ai/generate-plan`.
-  * [ ] **Context Injection:** Feeds the member's current weight, goals, and recent workout logs into the prompt.
-  * [ ] **Output:** Structured JSON routine directly importable into the member's workout calendar.
-
----
-
-## 🛡️ Technical & Security Architecture Standards
-
-To maintain system integrity as new modules are developed, all pull requests must conform to these architectural standards:
-
-```
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │                           SECURITY MANDATES                             │
-  ├───────────────────────────────────┬─────────────────────────────────────┤
-  │ 1. Zero Cross-Tenant Leakage      │ Every database query touching gym   │
-  │                                   │ data MUST filter by req.adminId.    │
-  ├───────────────────────────────────┼─────────────────────────────────────┤
-  │ 2. PCI DSS Compliance             │ No payment credentials may touch    │
-  │                                   │ our database or server logs.        │
-  ├───────────────────────────────────┼─────────────────────────────────────┤
-  │ 3. Strict Mass-Assignment Guards  │ Never use Object.assign(doc, body). │
-  │                                   │ Always whitelist explicit fields.   │
-  ├───────────────────────────────────┼─────────────────────────────────────┤
-  │ 4. Unified Vercel Footprint       │ Keep frontend and API under one     │
-  │                                   │ Vercel domain to eliminate CORS.    │
-  └───────────────────────────────────┴─────────────────────────────────────┘
+RESEND_API_KEY=re_...
+FROM_EMAIL=noreply@ironlinegym.com
 ```
 
 ---
 
-## 🚀 Getting Started on Phase 1
+### 2.3 — Asset Upload Pipeline (P2)
 
-The recommended immediate development sequence:
-1. **Module 1.1:** Setup Stripe account & build `/api/payments/checkout-session`.
-2. **Module 1.2:** Implement `pdfkit` receipt generator at `/api/customer/fees/:id/receipt`.
-3. **Module 1.3:** Configure Resend email templates for welcome and payment emails.
+**Why**: `Customer.progressPhotoUrl` and `Admin.gymLogoUrl` currently accept any
+raw URL string. There is no upload UI or secure storage.
+
+**What to build**:
+- Backend: `POST /api/upload/signed-url` — generates a pre-signed S3 or Cloudinary
+  upload URL. The client uploads directly to cloud storage; the URL is stored in DB.
+- Frontend: Replace the `gymLogoUrl` text input in `GymProfile.jsx` with a file picker
+  that calls the signed-URL endpoint first, then uploads.
+
+**Options (pick one)**:
+- **Cloudinary** — easiest, generous free tier, Node SDK: `npm install cloudinary`
+- **AWS S3** — most standard, requires IAM, `npm install @aws-sdk/client-s3`
+- **Supabase Storage** — if you later want to consider Supabase as a DB alternative
+
+---
+
+### 2.4 — JWT Refresh Token & Logout Invalidation (P2)
+
+**Why**: Current access tokens live 7 days with no server-side invalidation. If an
+admin's device is stolen, there is no way to log them out remotely.
+
+**What to build**:
+- On login: issue a short-lived access token (15 min) + a long-lived refresh token
+  (30 days) stored in an `httpOnly` cookie.
+- Add `POST /api/auth/refresh` — validates the refresh token cookie, returns a new
+  access token.
+- Add `POST /api/auth/logout` — adds the refresh token to a short-lived Redis blocklist
+  (or just deletes it from a `RefreshToken` collection in MongoDB).
+- Frontend: Axios interceptor retries the original request after refreshing the token
+  on a 401 response.
+
+---
+
+### 2.5 — QR-Code Gym Check-In (P2)
+
+**Why**: The current streak check-in is completely self-reported. A member could
+maintain a streak without ever entering the gym. For gyms that care about physical
+attendance, a physical check-in mechanism is needed.
+
+**What to build**:
+- Admin generates a dynamic QR code (rotates every 24 hours) displayed on a tablet/screen
+  at gym reception. The QR code encodes a time-limited token.
+- Customer scans QR with their phone — the frontend sends the token to
+  `POST /api/customer/streak/checkin` which validates it before incrementing the streak.
+- Add `qrToken` and `qrTokenExpiry` fields to `Admin` model.
+- Add `POST /api/admin/checkin-qr` — rotates and returns the current QR token.
+
+---
+
+### 2.6 — CSV / PDF Export of Reports (P2)
+
+**Why**: Gym owners need to export fee records and member lists for accounting.
+
+**What to build**:
+- `GET /api/admin/fees/export?format=csv&from=...&to=...` — streams a CSV using
+  `csv-writer` or a simple manual string builder.
+- `GET /api/admin/fees/export?format=pdf` — generate PDF using `pdfkit` (lightweight,
+  no headless browser needed).
+- Add export buttons to `frontend/src/pages/admin/Fees.jsx`.
+
+---
+
+## Phase 3 — Commercial Monetization & Scale (Completed)
+
+**Status**: Completed. All 4 features implemented across backend and frontend.
+
+---
+
+### 3.1 — Stripe Payment Integration (P1)
+
+**What**: Replace manual fee toggling with real money movement.
+
+- Member self-service: `POST /api/customer/fees/:id/pay` creates a Stripe Checkout
+  session. Member pays with card. Stripe webhook calls
+  `POST /api/webhooks/stripe` which marks the fee as `paid` automatically.
+- Admin view: Stripe Dashboard for payout and dispute management.
+- Super Admin billing: Stripe Billing for per-gym SaaS subscription (e.g. $29/month
+  per gym). Controlled via `Settings.platformBillingEnabled` already in the model.
+
+**Environment variables to add**:
+```
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+---
+
+### 3.2 — Trainer / Staff Role (P2)
+
+**Why**: Most gyms have personal trainers who need to assign workout plans and
+track client progress — but should not have full admin access to billing or member creation.
+
+**What to build**:
+- New role: `trainer` — sits between `customer` and `admin` in the role hierarchy.
+- `Trainer` model: links to a `User`, belongs to an `Admin` (gym), has an assigned list
+  of customer IDs.
+- New routes: `trainerRoutes.js` — can read/write `WorkoutLog` and `DietLog` for
+  assigned customers only.
+- New frontend pages: `pages/trainer/` — client list, workout plan builder.
+
+---
+
+### 3.3 — Multi-Branch / Franchise Hierarchy (P3)
+
+**Why**: A gym chain with multiple locations needs one owner account that governs
+multiple branch admins.
+
+**What to build**:
+- New model: `GymChain` — one document per franchise owner.
+- `Admin.gymChain` reference field.
+- New role: `chain_owner` — sits above `admin`, sees aggregated stats across all branches.
+- Super Admin still governs all chains at the platform level.
+
+---
+
+### 3.4 — Progressive Web App (PWA) (P3)
+
+**Why**: Members should be able to install Ironline to their phone home screen and
+check in / log workouts offline (syncing when they regain connectivity).
+
+**What to build**:
+- `vite-plugin-pwa` — generates a service worker and `manifest.json`.
+- Cache-first strategy for the dashboard shell and static assets.
+- IndexedDB-backed offline queue for workout log submissions.
+
+---
+
+## Dependency Graph
+
+```
+Phase 1 (DONE)
+    |
+    +---> Phase 2.1 (Overdue Cron)    <-- enables Phase 2.2 email triggers
+    +---> Phase 2.2 (Email)           <-- enables Phase 3.1 Stripe receipts
+    +---> Phase 2.3 (Asset Upload)    <-- independent
+    +---> Phase 2.4 (JWT Refresh)     <-- independent, enables Phase 3.1 security
+    +---> Phase 2.5 (QR Check-in)     <-- independent
+    +---> Phase 2.6 (CSV/PDF Export)  <-- independent
+    |
+    +---> Phase 3.1 (Stripe)          <-- requires 2.1 (overdue) + 2.2 (email receipts)
+    +---> Phase 3.2 (Trainer Role)    <-- requires Phase 2.4 (auth hardening)
+    +---> Phase 3.3 (Multi-Branch)    <-- requires Phase 3.2 (role hierarchy)
+    +---> Phase 3.4 (PWA)             <-- independent of all others
+```
+
+---
+
+## Phase 2 & Phase 3 Delivery Status
+
+All delivery mechanisms scoped across Phase 2 and Phase 3 have been implemented and verified:
+
+| Feature Area | Delivery Mechanism | Status |
+| :--- | :--- | :---: |
+| Overdue fee automation | Vercel Cron (`/api/cron/overdue.js`) + scanner (`markOverdueFees.js`) | ✅ Completed |
+| Email notifications | Nodemailer SMTP pipeline with HTML templates (`mailer.js`) | ✅ Completed |
+| Trainer / Staff Role | Dedicated Trainer role, assigned client studio & prescriptions (`/trainer`) | ✅ Completed |
+| Receipt & Revenue Export | PDFKit + CSV generator (`adminRoutes.js` `/reports/export`) | ✅ Completed |
+| Photo & Logo Upload | Cloudinary API + Multer memory storage (`uploadRoutes.js`) | ✅ Completed |
+| Stripe Payments | Stripe checkout sessions, webhooks & simulated test mode | ✅ Completed |
+| Multi-Branch Hierarchy | Branch management console & facility capacities (`Branches.jsx`) | ✅ Completed |
+| Progressive Web App | `manifest.json`, `sw.js` service worker, and responsive mobile drawer | ✅ Completed |
+
+---
+
+## Changelog of Known Bug Fixes
+
+These bugs were identified and fixed across development cycles:
+
+| Bug | What Was Wrong | Fix Applied |
+| :--- | :--- | :--- |
+| BUG #2 | Temp password returned in HTTP response body | Now logged server-side only & sent via Nodemailer |
+| BUG #3 | Mass-assignment: `Object.assign(log, req.body)` allowed overwriting `customer._id` | Explicit field whitelisting on all PUT routes |
+| BUG #5 | Two separate `if` blocks for fee status — both ran even when only one should | Replaced with `if/else` |
+| BUG #6 | Deleting a customer left orphaned `Notification` documents in the DB | Added `Notification.deleteMany` to the cascading delete |
+| BUG #8 | Filter used `status: 'expired'` but UI displayed `'inactive'` | Standardised to `isActive: false` |
+| BUG #13 | Inactive plans appeared in customer-facing dropdown | Added `/api/admin/plans/active` endpoint that filters `isActive: true` |
+| BUG #16 | Streak check-in used local server time (`setHours`) — caused double check-ins near midnight | Replaced with `setUTCHours(0,0,0,0)` for consistent UTC day boundaries |
+| BUG #17 | Trainer login redirected to `/login` loop due to missing role in `roleHome` | Added `trainer: '/trainer'` to `roleHome` in `Login.jsx` |
+| BUG #18 | Customer had no in-app notification inbox to read alerts | Created `Notifications.jsx` and wired into navigation |
+
+---
+
+*Last updated: September 2026 — reflects codebase state at Phase 3 completion.*

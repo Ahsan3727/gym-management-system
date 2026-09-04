@@ -1,5 +1,6 @@
 const Admin = require('../models/Admin');
 const Customer = require('../models/Customer');
+const Trainer = require('../models/Trainer');
 const asyncHandler = require('../utils/asyncHandler');
 
 /**
@@ -38,4 +39,25 @@ const attachCustomerTenant = asyncHandler(async (req, res, next) => {
   next();
 });
 
-module.exports = { attachAdminTenant, attachCustomerTenant };
+/**
+ * Resolves the calling trainer's own Trainer document and attaches
+ * req.trainerDoc / req.trainerId / req.adminId.
+ * Use after protect() + authorize('trainer').
+ */
+const attachTrainerTenant = asyncHandler(async (req, res, next) => {
+  const trainerDoc = await Trainer.findOne({ user: req.user._id });
+  if (!trainerDoc || !trainerDoc.isActive) {
+    return res.status(403).json({ message: 'No active trainer profile is associated with this account.' });
+  }
+  const adminDoc = await Admin.findById(trainerDoc.admin);
+  if (!adminDoc || adminDoc.isSuspended) {
+    return res.status(403).json({ message: 'This gym account has been suspended.' });
+  }
+  req.trainerDoc = trainerDoc;
+  req.trainerId = trainerDoc._id;
+  req.adminId = trainerDoc.admin;
+  req.adminDoc = adminDoc;
+  next();
+});
+
+module.exports = { attachAdminTenant, attachCustomerTenant, attachTrainerTenant };

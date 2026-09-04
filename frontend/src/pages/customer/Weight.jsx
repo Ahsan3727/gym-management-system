@@ -1,16 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios.js';
 
 const emptyForm = {
-  weightKg: '', heightCm: '', chestCm: '', waistCm: '', hipsCm: '', armsCm: '', progressPhotoUrl: '',
+  weightKg: '',
+  heightCm: '',
+  chestCm: '',
+  waistCm: '',
+  hipsCm: '',
+  armsCm: '',
+  progressPhotoUrl: '',
 };
 
 export default function Weight() {
   const [logs, setLogs] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState('');
   const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
 
   async function load() {
     const { data } = await api.get('/customer/weight');
@@ -22,13 +31,44 @@ export default function Weight() {
   }, []);
 
   const latest = logs[0];
-  const bmi = latest?.weightKg && latest?.heightCm
-    ? (latest.weightKg / ((latest.heightCm / 100) ** 2)).toFixed(1)
-    : null;
+  const bmi =
+    latest?.weightKg && latest?.heightCm
+      ? (latest.weightKg / (latest.heightCm / 100) ** 2).toFixed(1)
+      : null;
 
   const chartData = [...logs]
     .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .map((l) => ({ date: new Date(l.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), weight: l.weightKg }));
+    .map((l) => ({
+      date: new Date(l.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      weight: l.weightKg,
+    }));
+
+  async function handlePhotoFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file);
+    setPhotoPreview(localUrl);
+
+    // Upload to server/Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploading(true);
+    setError('');
+    try {
+      const { data } = await api.post('/upload/progress-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setForm((prev) => ({ ...prev, progressPhotoUrl: data.url }));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to upload photo.');
+      setPhotoPreview('');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -47,6 +87,8 @@ export default function Weight() {
         progressPhotoUrl: form.progressPhotoUrl || undefined,
       });
       setForm(emptyForm);
+      setPhotoPreview('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       await load();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not save that entry.');
@@ -73,7 +115,9 @@ export default function Weight() {
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">BMI</div>
           <div className="stat-number mt-1">{bmi || '—'}</div>
-          <div className="mt-1 text-xs text-steel">{bmi ? 'Add height to keep this accurate' : 'Add height for BMI'}</div>
+          <div className="mt-1 text-xs text-steel">
+            {bmi ? 'Add height to keep this accurate' : 'Add height for BMI'}
+          </div>
         </div>
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Entries logged</div>
@@ -88,7 +132,12 @@ export default function Weight() {
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#14171A" strokeOpacity={0.08} />
               <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+              <YAxis
+                tick={{ fontSize: 12, fill: '#545B62' }}
+                axisLine={false}
+                tickLine={false}
+                domain={['dataMin - 2', 'dataMax + 2']}
+              />
               <Tooltip contentStyle={{ fontSize: 12, borderRadius: 2, border: '1px solid #14171A1A' }} />
               <Line type="monotone" dataKey="weight" stroke="#E1553A" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
@@ -99,35 +148,88 @@ export default function Weight() {
       <form onSubmit={handleSubmit} className="panel mb-8 grid grid-cols-2 gap-4 p-6 md:grid-cols-4">
         <div>
           <label className="field-label">Weight (kg)</label>
-          <input type="number" step="0.1" className="field-input" value={form.weightKg} onChange={(e) => setForm({ ...form, weightKg: e.target.value })} required />
+          <input
+            type="number"
+            step="0.1"
+            className="field-input"
+            value={form.weightKg}
+            onChange={(e) => setForm({ ...form, weightKg: e.target.value })}
+            required
+          />
         </div>
         <div>
           <label className="field-label">Height (cm)</label>
-          <input type="number" className="field-input" value={form.heightCm} onChange={(e) => setForm({ ...form, heightCm: e.target.value })} />
+          <input
+            type="number"
+            className="field-input"
+            value={form.heightCm}
+            onChange={(e) => setForm({ ...form, heightCm: e.target.value })}
+          />
         </div>
         <div>
           <label className="field-label">Chest (cm)</label>
-          <input type="number" className="field-input" value={form.chestCm} onChange={(e) => setForm({ ...form, chestCm: e.target.value })} />
+          <input
+            type="number"
+            className="field-input"
+            value={form.chestCm}
+            onChange={(e) => setForm({ ...form, chestCm: e.target.value })}
+          />
         </div>
         <div>
           <label className="field-label">Waist (cm)</label>
-          <input type="number" className="field-input" value={form.waistCm} onChange={(e) => setForm({ ...form, waistCm: e.target.value })} />
+          <input
+            type="number"
+            className="field-input"
+            value={form.waistCm}
+            onChange={(e) => setForm({ ...form, waistCm: e.target.value })}
+          />
         </div>
         <div>
           <label className="field-label">Hips (cm)</label>
-          <input type="number" className="field-input" value={form.hipsCm} onChange={(e) => setForm({ ...form, hipsCm: e.target.value })} />
+          <input
+            type="number"
+            className="field-input"
+            value={form.hipsCm}
+            onChange={(e) => setForm({ ...form, hipsCm: e.target.value })}
+          />
         </div>
         <div>
           <label className="field-label">Arms (cm)</label>
-          <input type="number" className="field-input" value={form.armsCm} onChange={(e) => setForm({ ...form, armsCm: e.target.value })} />
+          <input
+            type="number"
+            className="field-input"
+            value={form.armsCm}
+            onChange={(e) => setForm({ ...form, armsCm: e.target.value })}
+          />
         </div>
+
         <div className="col-span-2">
-          <label className="field-label">Progress photo URL</label>
-          <input className="field-input" value={form.progressPhotoUrl} onChange={(e) => setForm({ ...form, progressPhotoUrl: e.target.value })} placeholder="https://…" />
+          <label className="field-label">Progress photo</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handlePhotoFileChange}
+              className="text-xs text-steel file:mr-2 file:rounded file:border-0 file:bg-ink/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink hover:file:bg-ink/10 cursor-pointer"
+            />
+            {uploading && <span className="text-xs text-ember-dark">Uploading photo…</span>}
+          </div>
+          {(photoPreview || form.progressPhotoUrl) && (
+            <div className="mt-2 flex items-center gap-2">
+              <img
+                src={photoPreview || form.progressPhotoUrl}
+                alt="Preview"
+                className="h-12 w-12 rounded object-cover border border-ink/10"
+              />
+              <span className="text-xs text-chalk-dark font-medium">Photo attached</span>
+            </div>
+          )}
         </div>
+
         <div className="col-span-2 md:col-span-4">
           {error && <div className="mb-3 text-sm text-ember-dark">{error}</div>}
-          <button type="submit" disabled={saving} className="btn-primary">
+          <button type="submit" disabled={saving || uploading} className="btn-primary">
             {saving ? 'Saving…' : 'Log entry'}
           </button>
         </div>
@@ -150,15 +252,33 @@ export default function Weight() {
                 <td className="px-4 py-3 text-ink/70">{new Date(log.date).toLocaleDateString()}</td>
                 <td className="px-4 py-3 font-medium text-ink">{log.weightKg} kg</td>
                 <td className="px-4 py-3 text-ink/70">
-                  {log.measurements?.chestCm ?? '—'} / {log.measurements?.waistCm ?? '—'} / {log.measurements?.hipsCm ?? '—'} / {log.measurements?.armsCm ?? '—'}
+                  {log.measurements?.chestCm ?? '—'} / {log.measurements?.waistCm ?? '—'} /{' '}
+                  {log.measurements?.hipsCm ?? '—'} / {log.measurements?.armsCm ?? '—'}
                 </td>
                 <td className="px-4 py-3 text-ink/70">
                   {log.progressPhotoUrl ? (
-                    <a href={log.progressPhotoUrl} target="_blank" rel="noreferrer" className="text-iron hover:underline">View</a>
-                  ) : '—'}
+                    <a
+                      href={log.progressPhotoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-iron font-medium hover:underline"
+                    >
+                      <img
+                        src={log.progressPhotoUrl}
+                        alt="thumb"
+                        className="h-6 w-6 rounded object-cover border border-ink/10"
+                      />
+                      <span>View photo</span>
+                    </a>
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button onClick={() => handleDelete(log._id)} className="text-xs font-medium text-steel hover:text-ember-dark">
+                  <button
+                    onClick={() => handleDelete(log._id)}
+                    className="text-xs font-medium text-steel hover:text-ember-dark"
+                  >
                     Delete
                   </button>
                 </td>
@@ -166,7 +286,9 @@ export default function Weight() {
             ))}
             {logs.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-steel">No weight entries yet.</td>
+                <td colSpan={5} className="px-4 py-8 text-center text-steel">
+                  No weight entries yet.
+                </td>
               </tr>
             )}
           </tbody>

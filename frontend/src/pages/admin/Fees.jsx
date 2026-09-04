@@ -10,6 +10,7 @@ export default function Fees() {
   const [allTotals, setAllTotals] = useState({});
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ customerId: '', amount: '', dueDate: '', isRecurring: false });
@@ -40,6 +41,33 @@ export default function Fees() {
     load().catch(() => setError('Could not load fees.'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
+
+  async function handleExport(format) {
+    setExporting(true);
+    try {
+      const params = { format };
+      if (status) params.status = status;
+      const res = await api.get('/admin/fees/export', {
+        params,
+        responseType: 'blob',
+      });
+      const blob = new Blob([res.data], {
+        type: format === 'pdf' ? 'application/pdf' : 'text/csv;charset=utf-8;',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fees-report-${Date.now()}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      setError(`Failed to export fees as ${format.toUpperCase()}.`);
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -75,12 +103,32 @@ export default function Fees() {
 
   return (
     <div>
-      <div className="mb-8 flex items-start justify-between">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="mb-1 text-2xl font-semibold text-ink">Fees</h1>
           <p className="text-sm text-steel">Track dues, mark payments and keep an eye on overdue accounts.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary">Add fee</button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={exporting}
+            className="btn-secondary text-xs"
+            title="Download fee records as CSV"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={exporting}
+            className="btn-secondary text-xs"
+            title="Download formatted PDF report"
+          >
+            Export PDF
+          </button>
+          <button onClick={() => setShowCreate(true)} className="btn-primary">
+            Add fee
+          </button>
+        </div>
       </div>
 
       {/* BUG #7 FIX: Summary cards use allTotals (unfiltered), not the filtered list */}

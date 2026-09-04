@@ -14,3 +14,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+// Register service worker for PWA installability and offline support
+if ('serviceWorker' in navigator && !window.location.host.startsWith('localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('[pwa] Service worker registration failed:', err);
+    });
+  });
+}
