@@ -22,7 +22,11 @@ export default function Login() {
       const dest = location.state?.from || roleHome[user.role] || '/login';
       navigate(dest, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not log in. Check your details and try again.');
+      if (!err.response) {
+        setError('Cannot connect to the server. Please check that your backend is running on port 5000.');
+      } else {
+        setError(err.response?.data?.message || 'Could not log in. Check your details and try again.');
+      }
     } finally {
       setSubmitting(false);
     }
