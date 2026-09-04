@@ -114,9 +114,16 @@ function announcementEmail(gymName, title, message) {
     <h2 style="color: #ffffff; margin-top: 0; font-size: 20px;">${title || 'Gym Announcement'}</h2>
     <p style="color: #94a3b8; font-size: 14px;">From: <strong>${gymName || 'Ironline Gym'}</strong></p>
     <div style="background: #0f172a; border-radius: 8px; border: 1px solid #334155; padding: 20px; margin: 20px 0;">
-      ${message.replace(/\n/g, '<br>')}
+      ${message ? message.replace(/\n/g, '<br>') : ''}
     </div>
   `;
+
+  return baseLayout({
+    title: title || 'Gym Announcement',
+    preheader: message ? message.slice(0, 100) : 'Announcement from gym administration',
+    content,
+  });
+}
 
 function paymentReceiptEmail(customerName, amount, receiptNumber, gymName) {
   const content = `

@@ -24,14 +24,26 @@ app.set('trust proxy', 1);
 // BUG #4 FIX: CLIENT_ORIGIN must be set — never fall back to wildcard '*'
 // in production. If it's missing we refuse to start rather than silently
 // opening the API to every origin.
-const allowedOrigin = process.env.CLIENT_ORIGIN;
-if (!allowedOrigin) {
-  console.warn('[cors] WARNING: CLIENT_ORIGIN is not set. Defaulting to http://localhost:5173. Set it in .env for production.');
-}
-app.use(cors({
-  origin: allowedOrigin || 'http://localhost:5173',
-  credentials: true,
-}));
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
+  : ['http://localhost:5173'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, uptime monitors, same-domain requests)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        (process.env.VERCEL && origin.endsWith('.vercel.app'))
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, allowedOrigins[0] || true);
+    },
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 
