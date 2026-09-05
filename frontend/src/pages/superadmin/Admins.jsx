@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 const emptyForm = { username: '', password: '', gymName: '', address: '', contact: '', workingHours: '' };
 
@@ -123,60 +125,55 @@ export default function Admins() {
           <h1 className="mb-1 text-2xl font-semibold text-ink">Gym accounts</h1>
           <p className="text-sm text-steel">Create, monitor and manage every gym on the platform.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary">Add gym</button>
+        <button onClick={() => setShowCreate(true)} className="btn-primary">
+          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+          Add gym
+        </button>
       </div>
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Gym</th>
-              <th className="px-4 py-3">Username</th>
-              <th className="px-4 py-3">Login</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {admins.map((admin) => (
-              <tr key={admin._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 font-medium text-ink">{admin.gymName}</td>
-                <td className="px-4 py-3 text-ink/70">{admin.user?.username}</td>
-                <td className="px-4 py-3">
-                  <span className={admin.user?.isActive === false ? 'text-ember-dark' : 'text-chalk-dark'}>
-                    {admin.user?.isActive === false ? 'Disabled' : 'Enabled'}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span className={admin.isSuspended ? 'text-ember-dark' : 'text-chalk-dark'}>
-                    {admin.isSuspended ? 'Suspended' : 'Active'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-3">
-                  <button onClick={() => openSummary(admin)} className="text-xs font-medium text-iron hover:underline">Summary</button>
-                  <button onClick={() => setEditing({ ...admin })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
-                  <button onClick={() => toggleSuspend(admin)} className="text-xs font-medium text-steel hover:text-ink">
-                    {admin.isSuspended ? 'Unsuspend' : 'Suspend'}
-                  </button>
-                  <button onClick={() => toggleLogin(admin)} className="text-xs font-medium text-steel hover:text-ink">
-                    {admin.user?.isActive === false ? 'Enable login' : 'Disable login'}
-                  </button>
-                  <button onClick={() => resetPassword(admin)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                    Reset password
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {admins.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-steel">No gym accounts yet.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ListCard>
+        {admins.map((admin) => (
+          <ListRow
+            key={admin._id}
+            icon="building"
+            iconBg={admin.isSuspended ? 'bg-ember/15 text-ember-dark' : 'bg-chalk/15 text-chalk-dark'}
+            title={admin.gymName}
+            subtitle={
+              <>
+                {admin.user?.username} ·{' '}
+                <span className={admin.user?.isActive === false ? 'text-ember-dark' : 'text-chalk-dark'}>
+                  {admin.user?.isActive === false ? 'Login disabled' : 'Login enabled'}
+                </span>{' '}
+                ·{' '}
+                <span className={admin.isSuspended ? 'text-ember-dark font-medium' : 'text-chalk-dark font-medium'}>
+                  {admin.isSuspended ? 'Suspended' : 'Active'}
+                </span>
+              </>
+            }
+            trailing={
+              <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                <button onClick={() => openSummary(admin)} className="text-xs font-medium text-iron hover:underline">Summary</button>
+                <button onClick={() => setEditing({ ...admin })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
+                <button onClick={() => toggleSuspend(admin)} className="text-xs font-medium text-steel hover:text-ink">
+                  {admin.isSuspended ? 'Unsuspend' : 'Suspend'}
+                </button>
+                <button onClick={() => toggleLogin(admin)} className="text-xs font-medium text-steel hover:text-ink">
+                  {admin.user?.isActive === false ? 'Enable login' : 'Disable login'}
+                </button>
+                <button onClick={() => resetPassword(admin)} className="text-xs font-medium text-steel hover:text-ember-dark">
+                  Reset password
+                </button>
+              </div>
+            }
+          />
+        ))}
+        {admins.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-steel">No gym accounts yet.</div>
+        )}
+      </ListCard>
+
 
       {showCreate && (
         <Modal title="Add gym" onClose={() => setShowCreate(false)}>

@@ -1,27 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
+import SegmentedControl from '../../components/SegmentedControl.jsx';
 
 const TYPE_CONFIG = {
-  fee_due: {
-    label: 'Fee Due',
-    bg: 'bg-amber-100 text-amber-900 border-amber-300',
-    icon: '💳',
-  },
-  streak_reminder: {
-    label: 'Streak',
-    bg: 'bg-orange-100 text-orange-900 border-orange-300',
-    icon: '🔥',
-  },
-  admin_alert: {
-    label: 'Announcement',
-    bg: 'bg-red-100 text-red-900 border-red-300',
-    icon: '📢',
-  },
-  general: {
-    label: 'Update',
-    bg: 'bg-slate-100 text-slate-800 border-slate-300',
-    icon: 'ℹ️',
-  },
+  fee_due: { label: 'Fee Due', icon: 'card', accent: 'ember' },
+  streak_reminder: { label: 'Streak', icon: 'flame', accent: 'ember' },
+  admin_alert: { label: 'Announcement', icon: 'bell', accent: 'iron' },
+  general: { label: 'Update', icon: 'note', accent: 'chalk' },
+};
+
+const ACCENT_CLASSES = {
+  ember: { chip: 'border-ember/25 bg-ember/10 text-ember-dark', iconBg: 'bg-ember/15 text-ember-dark', bar: 'border-l-ember' },
+  iron: { chip: 'border-iron/25 bg-iron/10 text-iron', iconBg: 'bg-iron/15 text-iron', bar: 'border-l-iron' },
+  chalk: { chip: 'border-chalk/25 bg-chalk/10 text-chalk-dark', iconBg: 'bg-chalk/15 text-chalk-dark', bar: 'border-l-chalk' },
 };
 
 export default function Notifications() {
@@ -80,57 +71,40 @@ export default function Notifications() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-ink">Notifications</h1>
+          <h1 className="text-2xl font-semibold text-ink">Notifications</h1>
           <p className="mt-1 text-sm text-steel">
             Stay up to date with fee notices, workout streak reminders, and gym announcements.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllRead}
-              className="btn-secondary text-xs"
-            >
+            <button onClick={handleMarkAllRead} className="btn-secondary text-xs">
               Mark all read ({unreadCount})
             </button>
           )}
           <button
             onClick={loadNotifications}
-            className="btn-secondary text-xs"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-steel transition-colors hover:border-ink/30 hover:text-ink"
             title="Refresh"
+            aria-label="Refresh notifications"
           >
-            ↻ Refresh
+            <svg className="icon !h-4 !w-4"><use href="#i-arrow-r" /></svg>
           </button>
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex border-b border-ink/10 pb-2 gap-4 text-sm font-medium">
-        <button
-          onClick={() => setFilter('all')}
-          className={`pb-1 transition-colors ${
-            filter === 'all'
-              ? 'border-b-2 border-ember font-semibold text-ink'
-              : 'text-steel hover:text-ink'
-          }`}
-        >
-          All ({notifications.length})
-        </button>
-        <button
-          onClick={() => setFilter('unread')}
-          className={`pb-1 transition-colors ${
-            filter === 'unread'
-              ? 'border-b-2 border-ember font-semibold text-ink'
-              : 'text-steel hover:text-ink'
-          }`}
-        >
-          Unread ({unreadCount})
-        </button>
-      </div>
+      <SegmentedControl
+        options={[
+          { value: 'all', label: `All (${notifications.length})` },
+          { value: 'unread', label: `Unread (${unreadCount})` },
+        ]}
+        value={filter}
+        onChange={setFilter}
+      />
 
       {error && (
-        <div className="rounded-sm border border-ember/30 bg-ember/5 px-4 py-3 text-sm text-ember-dark">
+        <div className="rounded-2xl border border-ember/30 bg-ember/5 px-4 py-3 text-sm text-ember-dark">
           {error}
         </div>
       )}
@@ -140,8 +114,8 @@ export default function Notifications() {
         <div className="panel p-8 text-center text-steel">Loading notifications…</div>
       ) : filteredNotifications.length === 0 ? (
         <div className="panel p-12 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-bone text-2xl">
-            🔔
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-ink/5 text-steel">
+            <svg className="icon !h-6 !w-6"><use href="#i-bell" /></svg>
           </div>
           <h3 className="text-lg font-semibold text-ink">No notifications</h3>
           <p className="mt-1 text-sm text-steel">
@@ -155,6 +129,7 @@ export default function Notifications() {
           {filteredNotifications.map((notif) => {
             const isUnread = !notif.readAt;
             const config = TYPE_CONFIG[notif.type] || TYPE_CONFIG.general;
+            const classes = ACCENT_CLASSES[config.accent];
             const formattedDate = notif.sentAt
               ? new Date(notif.sentAt).toLocaleString(undefined, {
                   month: 'short',
@@ -171,23 +146,19 @@ export default function Notifications() {
                 onClick={() => isUnread && handleMarkRead(notif._id)}
                 className={`panel p-4 transition-all ${
                   isUnread
-                    ? 'border-l-4 border-l-ember bg-white shadow-sm cursor-pointer hover:bg-bone/40'
-                    : 'bg-bone/30 opacity-80'
+                    ? `border-l-4 ${classes.bar} cursor-pointer hover:bg-ink/[0.03]`
+                    : 'opacity-70'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl mt-0.5">{config.icon}</span>
+                    <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${classes.iconBg}`}>
+                      <svg className="icon !h-[18px] !w-[18px]"><use href={`#i-${config.icon}`} /></svg>
+                    </span>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-block rounded px-2 py-0.5 text-xs font-semibold border ${config.bg}`}
-                        >
-                          {config.label}
-                        </span>
-                        {isUnread && (
-                          <span className="inline-block h-2 w-2 rounded-full bg-ember" title="Unread" />
-                        )}
+                        <span className={`chip ${classes.chip}`}>{config.label}</span>
+                        {isUnread && <span className="inline-block h-2 w-2 rounded-full bg-ember" title="Unread" />}
                         <span className="text-xs text-steel">{formattedDate}</span>
                       </div>
                       <p className={`text-sm ${isUnread ? 'font-medium text-ink' : 'text-steel'}`}>
@@ -202,10 +173,10 @@ export default function Notifications() {
                         e.stopPropagation();
                         handleMarkRead(notif._id);
                       }}
-                      className="shrink-0 text-xs text-steel hover:text-ember transition-colors"
+                      className="shrink-0 text-xs text-steel hover:text-ink transition-colors"
                       title="Mark as read"
                     >
-                      ✓ Mark read
+                      Mark read
                     </button>
                   )}
                 </div>

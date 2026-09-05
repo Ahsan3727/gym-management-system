@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import DashboardShell from './components/DashboardShell.jsx';
+import IconSprite from './components/IconSprite.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 const Login = lazy(() => import('./pages/Login.jsx'));
@@ -31,36 +32,38 @@ const SuperAdminAdmins = lazy(() => import('./pages/superadmin/Admins.jsx'));
 const SuperAdminSettings = lazy(() => import('./pages/superadmin/Settings.jsx'));
 const SuperAdminAuditLog = lazy(() => import('./pages/superadmin/AuditLog.jsx'));
 
+// `icon` refers to an IconSprite id (components/IconSprite.jsx) and drives
+// the icon-pill nav rendered by the Phase 1 DashboardShell.
 const customerNav = [
-  { to: '/customer', label: 'Overview', end: true },
-  { to: '/customer/workouts', label: 'Workouts' },
-  { to: '/customer/diet', label: 'Diet & water' },
-  { to: '/customer/weight', label: 'Weight & body' },
-  { to: '/customer/analytics', label: 'Analytics' },
-  { to: '/customer/notifications', label: 'Notifications' },
-  { to: '/customer/account', label: 'Account' },
+  { to: '/customer', label: 'Overview', end: true, icon: 'home' },
+  { to: '/customer/workouts', label: 'Workouts', icon: 'dumbbell' },
+  { to: '/customer/diet', label: 'Diet & water', icon: 'drop' },
+  { to: '/customer/weight', label: 'Weight & body', icon: 'trend' },
+  { to: '/customer/analytics', label: 'Analytics', icon: 'zap' },
+  { to: '/customer/notifications', label: 'Notifications', icon: 'bell' },
+  { to: '/customer/account', label: 'Account', icon: 'user' },
 ];
 
 const adminNav = [
-  { to: '/admin', label: 'Overview', end: true },
-  { to: '/admin/customers', label: 'Customers' },
-  { to: '/admin/trainers', label: 'Trainers' },
-  { to: '/admin/branches', label: 'Locations' },
-  { to: '/admin/fees', label: 'Fees' },
-  { to: '/admin/plans', label: 'Plans & pricing' },
-  { to: '/admin/profile', label: 'Gym profile' },
+  { to: '/admin', label: 'Overview', end: true, icon: 'home' },
+  { to: '/admin/customers', label: 'Customers', icon: 'user' },
+  { to: '/admin/trainers', label: 'Trainers', icon: 'dumbbell' },
+  { to: '/admin/branches', label: 'Locations', icon: 'building' },
+  { to: '/admin/fees', label: 'Fees', icon: 'card' },
+  { to: '/admin/plans', label: 'Plans & pricing', icon: 'tag' },
+  { to: '/admin/profile', label: 'Gym profile', icon: 'shield' },
 ];
 
 const trainerNav = [
-  { to: '/trainer', label: 'Overview', end: true },
-  { to: '/trainer/clients', label: 'Client Studio' },
+  { to: '/trainer', label: 'Overview', end: true, icon: 'home' },
+  { to: '/trainer/clients', label: 'Client Studio', icon: 'runner' },
 ];
 
 const superAdminNav = [
-  { to: '/superadmin', label: 'Overview', end: true },
-  { to: '/superadmin/admins', label: 'Gym accounts' },
-  { to: '/superadmin/audit-log', label: 'Audit log' },
-  { to: '/superadmin/settings', label: 'Platform settings' },
+  { to: '/superadmin', label: 'Overview', end: true, icon: 'home' },
+  { to: '/superadmin/admins', label: 'Gym accounts', icon: 'briefcase' },
+  { to: '/superadmin/audit-log', label: 'Audit log', icon: 'clipboard' },
+  { to: '/superadmin/settings', label: 'Platform settings', icon: 'sliders' },
 ];
 
 function RoleHome() {
@@ -88,8 +91,10 @@ function PageFallback() {
 
 export default function App() {
   return (
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
+    <>
+      <IconSprite />
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<RoleHome />} />
 
@@ -158,7 +163,8 @@ export default function App() {
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </>
   );
 }

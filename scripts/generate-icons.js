@@ -53,13 +53,15 @@ function generatePng(size) {
   const rowBytes = 1 + width * 4;
   const rawData = Buffer.alloc(rowBytes * height);
 
-  // Color constants
-  // Background: #0f172a (15, 23, 42)
-  const bgR = 15, bgG = 23, bgB = 42;
-  // Accent: #e11d48 (225, 29, 72)
-  const acR = 225, acG = 29, acB = 72;
-  // Barbell bar: #f8fafc (248, 250, 252)
-  const brR = 248, brG = 250, brB = 252;
+  // Color constants — Phase 3 (§7): realigned to the Apex Elite palette
+  // (previously the pre-redesign IRONLINE navy/rose colors, unchanged
+  // since Phase 0 even though every other theme surface moved to it).
+  // Background (dark bone): #0b0c10 (11, 12, 16)
+  const bgR = 11, bgG = 12, bgB = 16;
+  // Accent (ember): #ff4e1f (255, 78, 31)
+  const acR = 255, acG = 78, acB = 31;
+  // Barbell bar (ink): #f6f6f8 (246, 246, 248)
+  const brR = 246, brG = 246, brB = 248;
 
   const cx = size / 2;
   const cy = size / 2;

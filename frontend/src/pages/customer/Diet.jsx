@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 const emptyForm = { meal: '', calories: '', proteinG: '', carbsG: '', fatG: '', waterMl: '' };
 
@@ -22,6 +24,8 @@ export default function Diet() {
   const todaysWater = logs
     .filter((l) => new Date(l.date).toDateString() === today)
     .reduce((sum, l) => sum + (l.waterMl || 0), 0);
+  const waterGoalMl = 2500;
+  const waterPct = Math.min(100, Math.round((todaysWater / waterGoalMl) * 100));
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -62,14 +66,31 @@ export default function Diet() {
       <h1 className="mb-1 text-2xl font-semibold text-ink">Diet & water</h1>
       <p className="mb-8 text-sm text-steel">Log meals, macros and how much water you're drinking.</p>
 
-      <div className="panel mb-8 flex items-center justify-between px-6 py-5">
-        <div>
-          <div className="text-sm font-medium text-steel">Today's water</div>
-          <div className="stat-number mt-1">{(todaysWater / 1000).toFixed(1)} L</div>
+      <div className="panel card--tint mb-8 flex flex-wrap items-center justify-between gap-4 px-6 py-5">
+        <div className="relative flex items-center gap-4">
+          <svg viewBox="0 0 44 44" className="h-11 w-11 shrink-0 -rotate-90">
+            <circle cx="22" cy="22" r="18" fill="none" stroke="rgb(var(--c-ink) / 0.08)" strokeWidth="5" />
+            <circle
+              cx="22"
+              cy="22"
+              r="18"
+              fill="none"
+              stroke="rgb(var(--c-iron))"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeDasharray={2 * Math.PI * 18}
+              strokeDashoffset={2 * Math.PI * 18 * (1 - waterPct / 100)}
+            />
+          </svg>
+          <div>
+            <div className="text-sm font-medium text-steel">Today's water</div>
+            <div className="stat-number mt-1">{(todaysWater / 1000).toFixed(1)} L</div>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="relative flex gap-2">
           {[250, 500, 750].map((ml) => (
             <button key={ml} onClick={() => quickWater(ml)} className="btn-secondary">
+              <svg className="icon !h-4 !w-4"><use href="#i-drop" /></svg>
               +{ml} ml
             </button>
           ))}
@@ -111,45 +132,28 @@ export default function Diet() {
         </div>
       </form>
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Meal</th>
-              <th className="px-4 py-3">Calories</th>
-              <th className="px-4 py-3">Macros (P/C/F)</th>
-              <th className="px-4 py-3">Water</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 text-ink/70">{new Date(log.date).toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-ink">{log.meal}</td>
-                <td className="px-4 py-3 text-ink/70">{log.calories ?? '—'}</td>
-                <td className="px-4 py-3 text-ink/70">
-                  {log.macros?.proteinG ?? '—'}g / {log.macros?.carbsG ?? '—'}g / {log.macros?.fatG ?? '—'}g
-                </td>
-                <td className="px-4 py-3 text-ink/70">{log.waterMl ? `${log.waterMl} ml` : '—'}</td>
-                <td className="px-4 py-3 text-right">
-                  <button onClick={() => handleDelete(log._id)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {logs.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-steel">
-                  No meals logged yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ListCard>
+        {logs.map((log) => (
+          <ListRow
+            key={log._id}
+            icon="note"
+            title={log.meal}
+            subtitle={`${new Date(log.date).toLocaleDateString()}${log.calories != null ? ` · ${log.calories} cal` : ''}${
+              log.macros?.proteinG != null ? ` · P${log.macros.proteinG}/C${log.macros.carbsG ?? '—'}/F${log.macros.fatG ?? '—'}` : ''
+            }${log.waterMl ? ` · ${log.waterMl} ml water` : ''}`}
+            trailing={
+              <button
+                onClick={() => handleDelete(log._id)}
+                aria-label="Delete entry"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-steel transition-colors hover:bg-ember/10 hover:text-ember-dark"
+              >
+                <svg className="icon !h-4 !w-4"><use href="#i-minus" /></svg>
+              </button>
+            }
+          />
+        ))}
+        {logs.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No meals logged yet.</div>}
+      </ListCard>
     </div>
   );
 }

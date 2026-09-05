@@ -19,9 +19,9 @@ export default function SuperAdminOverview() {
       <p className="mb-8 text-sm text-steel">Totals across every gym on Ironline.</p>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <StatCard label="Gyms on platform" value={stats.totalGyms} accent="text-chalk-dark" />
-        <StatCard label="Total customers" value={stats.totalCustomers} />
-        <StatCard label="Revenue collected" value={`$${stats.totalRevenueCollected.toLocaleString()}`} />
+        <StatCard icon="building" hi label="Gyms on platform" value={stats.totalGyms} accent="text-chalk-dark" />
+        <StatCard icon="user" label="Total customers" value={stats.totalCustomers} />
+        <StatCard icon="card" label="Revenue collected" value={`$${stats.totalRevenueCollected.toLocaleString()}`} />
       </div>
     </div>
   );

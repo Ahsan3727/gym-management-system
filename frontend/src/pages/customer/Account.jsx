@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 export default function Account() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -115,7 +117,7 @@ export default function Account() {
   if (error && !profile) return <div className="text-sm text-ember-dark">{error}</div>;
   if (!profile) return <div className="text-sm text-steel">Loading…</div>;
 
-  const statusColor = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-ember-dark' };
+  const statusAccent = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-ember-dark' };
 
   function fmtAmount(amount) {
     return Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -127,23 +129,28 @@ export default function Account() {
       <p className="mb-8 text-sm text-steel">Profile, notification preferences, passwords, and dues.</p>
 
       {paymentNotice && (
-        <div className="mb-6 rounded-lg border border-chalk/30 bg-chalk/10 p-4 text-sm font-medium text-chalk-dark">
+        <div className="mb-6 rounded-2xl border border-chalk/30 bg-chalk/10 p-4 text-sm font-medium text-chalk-dark">
           {paymentNotice}
         </div>
       )}
 
       {/* Plan Card */}
-      <div className="panel mb-8 flex flex-wrap items-center justify-between gap-4 p-6">
-        <div>
-          <div className="text-xs font-medium uppercase tracking-wide text-steel">Current Plan</div>
-          <div className="mt-1 text-xl font-bold text-ink">{profile.plan?.planName || 'No active plan assigned'}</div>
-          {profile.plan?.price !== undefined && (
-            <div className="text-xs text-steel mt-0.5">
-              ${fmtAmount(profile.plan.price)} / {profile.plan.durationMonths} month(s)
-            </div>
-          )}
+      <div className="panel card--tint mb-8 flex flex-wrap items-center justify-between gap-4 p-6">
+        <div className="relative flex items-center gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ember/15 text-ember">
+            <svg className="icon !h-5 !w-5"><use href="#i-card" /></svg>
+          </span>
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-steel">Current Plan</div>
+            <div className="mt-1 text-xl font-bold text-ink">{profile.plan?.planName || 'No active plan assigned'}</div>
+            {profile.plan?.price !== undefined && (
+              <div className="text-xs text-steel mt-0.5">
+                ${fmtAmount(profile.plan.price)} / {profile.plan.durationMonths} month(s)
+              </div>
+            )}
+          </div>
         </div>
-        <div className="text-right">
+        <div className="relative text-right">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Member Since</div>
           <div className="mt-1 text-sm font-medium text-ink">
             {profile.joinDate ? new Date(profile.joinDate).toLocaleDateString() : '—'}
@@ -237,64 +244,37 @@ export default function Account() {
       </div>
 
       {/* Fee History & Online Payment */}
-      <div className="panel overflow-hidden">
-        <div className="border-b border-ink/10 px-6 py-4 text-sm font-medium text-steel">
-          Fee history & Online Payment
-        </div>
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Due date</th>
-              <th className="px-4 py-3">Amount</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Receipt / Paid on</th>
-              <th className="px-4 py-3 text-right">Payment</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fees.map((fee) => (
-              <tr key={fee._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 text-ink/70">{new Date(fee.dueDate).toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-ink">${fmtAmount(fee.amount)}</td>
-                <td className={`px-4 py-3 font-medium capitalize ${statusColor[fee.status]}`}>{fee.status}</td>
-                <td className="px-4 py-3 text-xs text-ink/70">
-                  {fee.status === 'paid' ? (
-                    <div>
-                      <span className="font-mono text-ink">{fee.receiptNumber || 'Paid'}</span>
-                      {fee.paidOn && (
-                        <span className="block text-steel">{new Date(fee.paidOn).toLocaleDateString()}</span>
-                      )}
-                    </div>
-                  ) : (
-                    '—'
-                  )}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  {fee.status !== 'paid' ? (
-                    <button
-                      type="button"
-                      onClick={() => handlePayFee(fee)}
-                      disabled={payingFeeId === fee._id}
-                      className="btn-primary text-xs"
-                    >
-                      {payingFeeId === fee._id ? 'Opening checkout…' : 'Pay Now'}
-                    </button>
-                  ) : (
-                    <span className="text-xs font-medium text-chalk-dark">Paid</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {fees.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-steel">
-                  No fee records yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <div className="mb-3 text-sm font-medium text-steel">Fee history & online payment</div>
+      <ListCard>
+        {fees.map((fee) => (
+          <ListRow
+            key={fee._id}
+            icon="card"
+            iconBg={fee.status === 'paid' ? 'bg-chalk/15 text-chalk-dark' : fee.status === 'overdue' ? 'bg-ember/15 text-ember-dark' : 'bg-ink/5'}
+            title={`$${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
+            subtitle={
+              fee.status === 'paid'
+                ? `${fee.receiptNumber ? `Receipt ${fee.receiptNumber}` : 'Paid'}${fee.paidOn ? ` · ${new Date(fee.paidOn).toLocaleDateString()}` : ''}`
+                : <span className={`font-medium capitalize ${statusAccent[fee.status]}`}>{fee.status}</span>
+            }
+            trailing={
+              fee.status !== 'paid' ? (
+                <button
+                  type="button"
+                  onClick={() => handlePayFee(fee)}
+                  disabled={payingFeeId === fee._id}
+                  className="btn-primary py-1.5 px-3 text-xs"
+                >
+                  {payingFeeId === fee._id ? 'Opening…' : 'Pay now'}
+                </button>
+              ) : (
+                <span className="text-xs font-medium text-chalk-dark">Paid</span>
+              )
+            }
+          />
+        ))}
+        {fees.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No fee records yet.</div>}
+      </ListCard>
     </div>
   );
 }

@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios.js';
+import SegmentedControl from '../../components/SegmentedControl.jsx';
+import { useChartColors } from '../../utils/chartTheme.js';
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -21,9 +23,13 @@ function consistencyByDay(items, days = 30) {
   return Object.entries(map).map(([date, count]) => ({ date: fmtDate(date), sessions: count }));
 }
 
+const RANGE_DAYS = { '7d': 7, '30d': 30, '90d': 90 };
+
 export default function Analytics() {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
+  const [range, setRange] = useState('30d');
+  const chart = useChartColors();
 
   useEffect(() => {
     api.get('/customer/analytics')
@@ -31,30 +37,48 @@ export default function Analytics() {
       .catch(() => setError('Could not load analytics.'));
   }, []);
 
+  const days = RANGE_DAYS[range];
+  const cutoff = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d;
+  }, [days]);
+
   if (error) return <div className="text-sm text-ember-dark">{error}</div>;
   if (!data) return <div className="text-sm text-steel">Loading…</div>;
 
-  const weightSeries = data.weight.map((w) => ({ date: fmtDate(w.date), weight: w.weightKg }));
+  const weightSeries = data.weight
+    .filter((w) => new Date(w.date) >= cutoff)
+    .map((w) => ({ date: fmtDate(w.date), weight: w.weightKg }));
   const calorieSeries = data.diet
-    .filter((d) => d.calories != null)
+    .filter((d) => d.calories != null && new Date(d.date) >= cutoff)
     .map((d) => ({ date: fmtDate(d.date), calories: d.calories }));
-  const workoutSeries = consistencyByDay(data.workouts);
+  const workoutSeries = consistencyByDay(data.workouts, days);
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">Analytics</h1>
-      <p className="mb-8 text-sm text-steel">Last 30 days across weight, training and nutrition.</p>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="mb-1 text-2xl font-semibold text-ink">Analytics</h1>
+          <p className="text-sm text-steel">Weight, training and nutrition over the selected window.</p>
+        </div>
+        <SegmentedControl
+          options={[{ value: '7d', label: '7D' }, { value: '30d', label: '30D' }, { value: '90d', label: '90D' }]}
+          value={range}
+          onChange={setRange}
+        />
+      </div>
 
       <div className="mb-8 panel p-6">
         <div className="mb-4 text-sm font-medium text-steel">Weight over time</div>
         {weightSeries.length > 1 ? (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={weightSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#14171A" strokeOpacity={0.08} />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
-              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 2, border: '1px solid #14171A1A' }} />
-              <Line type="monotone" dataKey="weight" stroke="#E1553A" strokeWidth={2} dot={{ r: 3 }} />
+              <CartesianGrid {...chart.gridProps} />
+              <XAxis dataKey="date" tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} />
+              <YAxis tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} domain={['dataMin - 2', 'dataMax + 2']} />
+              <Tooltip contentStyle={chart.tooltipContentStyle} cursor={chart.tooltipCursor} />
+              <Line type="monotone" dataKey="weight" stroke={chart.ember} strokeWidth={2} dot={{ r: 3, fill: chart.ember }} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
@@ -66,11 +90,11 @@ export default function Analytics() {
         <div className="mb-4 text-sm font-medium text-steel">Workout consistency</div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={workoutSeries}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#14171A" strokeOpacity={0.08} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#545B62' }} axisLine={false} tickLine={false} interval={4} />
-            <YAxis tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip contentStyle={{ fontSize: 12, borderRadius: 2, border: '1px solid #14171A1A' }} />
-            <Bar dataKey="sessions" fill="#2F5D8A" radius={[2, 2, 0, 0]} />
+            <CartesianGrid {...chart.gridProps} />
+            <XAxis dataKey="date" tick={chart.axisTickStyle(11)} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(days / 7))} />
+            <YAxis tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip contentStyle={chart.tooltipContentStyle} cursor={chart.tooltipCursor} />
+            <Bar dataKey="sessions" fill={chart.iron} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -80,11 +104,11 @@ export default function Analytics() {
         {calorieSeries.length > 1 ? (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={calorieSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#14171A" strokeOpacity={0.08} />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 2, border: '1px solid #14171A1A' }} />
-              <Line type="monotone" dataKey="calories" stroke="#A8C23A" strokeWidth={2} dot={{ r: 3 }} />
+              <CartesianGrid {...chart.gridProps} />
+              <XAxis dataKey="date" tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} />
+              <YAxis tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={chart.tooltipContentStyle} cursor={chart.tooltipCursor} />
+              <Line type="monotone" dataKey="calories" stroke={chart.chalk} strokeWidth={2} dot={{ r: 3, fill: chart.chalk }} />
             </LineChart>
           </ResponsiveContainer>
         ) : (

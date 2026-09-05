@@ -80,7 +80,8 @@ export default function Branches() {
           <p className="text-sm text-steel">Manage physical facilities, branch operating hours, and location managers.</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary">
-          + Add Location
+          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+          Add Location
         </button>
       </div>
 
@@ -90,11 +91,14 @@ export default function Branches() {
         {branches.map((b) => (
           <div key={b._id} className="panel p-6 relative flex flex-col justify-between">
             <div>
-              <div className="flex items-start justify-between">
-                <h3 className="text-base font-bold text-ink">{b.name}</h3>
-                <span className="rounded bg-chalk/10 px-2 py-0.5 text-xs font-semibold text-chalk-dark">
-                  Active Location
-                </span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+                    <svg className="icon !h-[18px] !w-[18px]"><use href="#i-building" /></svg>
+                  </span>
+                  <h3 className="text-base font-bold text-ink">{b.name}</h3>
+                </div>
+                <span className="chip border-chalk/25 bg-chalk/10 text-chalk-dark">Active</span>
               </div>
               <p className="mt-2 text-xs text-steel">{b.address || 'Address not specified'}</p>
 
@@ -131,7 +135,7 @@ export default function Branches() {
 
         {branches.length === 0 && (
           <div className="col-span-full panel p-12 text-center text-sm text-steel">
-            No additional branches added yet. Click "+ Add Location" to manage multi-facility chains.
+            No additional branches added yet. Click "Add Location" to manage multi-facility chains.
           </div>
         )}
       </div>

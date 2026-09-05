@@ -33,84 +33,114 @@ export default function Login() {
   }
 
   return (
-    <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
-      {/* Left: brand panel */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 text-bone md:flex">
-        <div className="flex items-center gap-2">
-          <div className="h-2.5 w-2.5 bg-ember" />
+    <div className="grid min-h-screen grid-cols-1 bg-bone md:grid-cols-2">
+      {/* Left: brand panel — pinned to fixed dark colors (marketing surface,
+          not page chrome) with Apex's radial-glow tint. See implementation
+          plan §5. Phase 4 QA: the logo badge and "Zero crossover." used the
+          theme-relative `ember` token, so they quietly shifted tone in light
+          mode while every other color on this panel stayed fixed — pinned
+          to the literal dark-ember hex to match. */}
+      <div className="card--tint relative hidden flex-col justify-between overflow-hidden bg-[#0b0c10] p-12 text-[#f6f6f8] md:flex">
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff4e1f] shadow-soft">
+            <svg className="icon !h-5 !w-5 text-white">
+              <use href="#i-zap" />
+            </svg>
+          </div>
           <span className="font-display text-lg tracking-wide">IRONLINE</span>
         </div>
 
-        <div>
-          <h1 className="font-display text-5xl font-semibold leading-[1.05] text-bone">
+        <div className="relative">
+          <span className="chip mb-6 border-white/15 bg-white/5 text-[#9a9ba5]">
+            <svg className="icon !h-3.5 !w-3.5">
+              <use href="#i-shield" />
+            </svg>
+            Multi-gym platform
+          </span>
+          <h1 className="font-display text-5xl font-extrabold leading-[1.05] tracking-[-0.02em] text-[#f6f6f8]">
             Every gym.
             <br />
             One system.
             <br />
-            <span className="text-ember">Zero crossover.</span>
+            <span className="text-[#ff4e1f]">Zero crossover.</span>
           </h1>
-          <p className="mt-6 max-w-sm text-steel-light">
+          <p className="mt-6 max-w-sm text-[#9a9ba5]">
             Members log their own training and progress. Owners run fees, plans and
             rosters. Each gym's data stays walled off from every other gym on the platform.
           </p>
         </div>
 
-        <div className="flex gap-8 text-sm text-steel-light">
-          <div>
-            <div className="font-display text-2xl text-bone">4</div>
+        <div className="relative flex gap-3 text-sm text-[#9a9ba5]">
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <div className="font-display text-2xl text-[#f6f6f8]">4</div>
             roles, one login
           </div>
-          <div>
-            <div className="font-display text-2xl text-bone">1</div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <div className="font-display text-2xl text-[#f6f6f8]">1</div>
             codebase, many gyms
           </div>
         </div>
       </div>
 
       {/* Right: login form */}
-      <div className="flex items-center justify-center bg-bone p-8">
-        <form onSubmit={handleSubmit} className="w-full max-w-sm">
-          <div className="mb-8 md:hidden">
-            <div className="flex items-center gap-2">
-              <div className="h-2.5 w-2.5 bg-ember" />
-              <span className="font-display text-lg tracking-wide text-ink">IRONLINE</span>
+      <div className="flex items-center justify-center p-8">
+        <form onSubmit={handleSubmit} className="panel w-full max-w-sm px-7 py-8 shadow-soft">
+          <div className="mb-8 flex items-center gap-2 md:hidden">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-ember">
+              <svg className="icon !h-4 !w-4 text-white">
+                <use href="#i-zap" />
+              </svg>
             </div>
+            <span className="font-display text-lg tracking-wide text-ink">IRONLINE</span>
           </div>
 
-          <h2 className="mb-1 text-2xl font-semibold text-ink">Log in</h2>
+          <h2 className="mb-1 font-display text-2xl font-extrabold tracking-[-0.02em] text-ink">Log in</h2>
           <p className="mb-8 text-sm text-steel">
             Members, gym owners and platform admins all sign in here.
           </p>
 
           {error && (
-            <div className="mb-4 rounded-sm border border-ember/30 bg-ember/5 px-3 py-2 text-sm text-ember-dark">
-              {error}
+            <div className="mb-4 flex items-start gap-2 rounded-2xl border border-ember/30 bg-ember/5 px-3.5 py-3 text-sm text-ember-dark">
+              <svg className="icon !h-4 !w-4 mt-0.5 shrink-0">
+                <use href="#i-close" />
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
           <div className="mb-4">
             <label className="field-label" htmlFor="username">Username</label>
-            <input
-              id="username"
-              className="field-input"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              required
-            />
+            <div className="relative">
+              <svg className="icon pointer-events-none absolute left-3.5 top-1/2 !h-[18px] !w-[18px] -translate-y-1/2 text-steel-light">
+                <use href="#i-user" />
+              </svg>
+              <input
+                id="username"
+                className="field-input pl-10"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+              />
+            </div>
           </div>
 
           <div className="mb-6">
             <label className="field-label" htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="field-input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
+            <div className="relative">
+              <svg className="icon pointer-events-none absolute left-3.5 top-1/2 !h-[18px] !w-[18px] -translate-y-1/2 text-steel-light">
+                <use href="#i-lock" />
+              </svg>
+              <input
+                id="password"
+                type="password"
+                className="field-input pl-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </div>
           </div>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full">

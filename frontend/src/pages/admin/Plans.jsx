@@ -74,7 +74,10 @@ export default function Plans() {
           <h1 className="mb-1 text-2xl font-semibold text-ink">Plans & pricing</h1>
           <p className="text-sm text-steel">Membership tiers customers can be assigned to.</p>
         </div>
-        <button onClick={openCreate} className="btn-primary">Add plan</button>
+        <button onClick={openCreate} className="btn-primary">
+          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+          Add plan
+        </button>
       </div>
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
@@ -84,7 +87,7 @@ export default function Plans() {
           <div key={plan._id} className="panel p-5">
             <div className="mb-1 flex items-start justify-between">
               <div className="font-display text-lg font-semibold text-ink">{plan.planName}</div>
-              <span className={plan.isActive ? 'text-xs text-chalk-dark' : 'text-xs text-steel'}>
+              <span className={`chip ${plan.isActive ? 'border-chalk/25 bg-chalk/10 text-chalk-dark' : ''}`}>
                 {plan.isActive ? 'Active' : 'Inactive'}
               </span>
             </div>

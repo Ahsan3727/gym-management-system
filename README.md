@@ -1,5 +1,9 @@
 # Ironline — Multi-Tenant Gym Management System
 
+> **Apex Elite redesign:** see `apex-elite-implementation-plan.md` in this
+> folder for the full dark/light theme system, its design tokens, and the
+> Phase 0–4 changelog (Phase 4 = QA — contrast, drawer/modal, and PWA fixes).
+
 > A multi-tenant SaaS platform for gyms, fitness clubs, and health studios.
 > Ironline gives gym owners a full operational dashboard, members a self-service
 > fitness portal, and a super administrator complete platform governance — all

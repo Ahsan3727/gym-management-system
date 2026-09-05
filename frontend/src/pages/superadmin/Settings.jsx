@@ -58,7 +58,12 @@ export default function Settings() {
           <label className="field-label">Platform billing note</label>
           <textarea className="field-input" rows={3} value={settings.platformBillingNote} onChange={(e) => setSettings({ ...settings, platformBillingNote: e.target.value })} />
         </div>
-        {message && <div className="text-sm text-chalk-dark">{message}</div>}
+        {message && (
+          <div className="flex items-center gap-2 text-sm text-chalk-dark">
+            <svg className="icon !h-4 !w-4"><use href="#i-check-circle" /></svg>
+            {message}
+          </div>
+        )}
         {error && <div className="text-sm text-ember-dark">{error}</div>}
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Saving…' : 'Save settings'}

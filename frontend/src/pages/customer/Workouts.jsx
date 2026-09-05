@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 const emptyForm = { exercise: '', sets: '', reps: '', weight: '', durationMinutes: '', isRestDay: false, notes: '' };
 
@@ -99,43 +101,28 @@ export default function Workouts() {
         </div>
       </form>
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Exercise</th>
-              <th className="px-4 py-3">Sets × reps</th>
-              <th className="px-4 py-3">Weight</th>
-              <th className="px-4 py-3">Duration</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 text-ink/70">{new Date(log.date).toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-ink">{log.isRestDay ? 'Rest day' : log.exercise}</td>
-                <td className="px-4 py-3 text-ink/70">{log.sets && log.reps ? `${log.sets} × ${log.reps}` : '—'}</td>
-                <td className="px-4 py-3 text-ink/70">{log.weight ? `${log.weight} kg` : '—'}</td>
-                <td className="px-4 py-3 text-ink/70">{log.durationMinutes ? `${log.durationMinutes} min` : '—'}</td>
-                <td className="px-4 py-3 text-right">
-                  <button onClick={() => handleDelete(log._id)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {logs.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-steel">
-                  No workouts logged yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ListCard>
+        {logs.map((log) => (
+          <ListRow
+            key={log._id}
+            icon={log.isRestDay ? 'moon' : 'dumbbell'}
+            title={log.isRestDay ? 'Rest day' : log.exercise}
+            subtitle={`${new Date(log.date).toLocaleDateString()}${
+              log.sets && log.reps ? ` · ${log.sets} × ${log.reps}` : ''
+            }${log.weight ? ` · ${log.weight} kg` : ''}${log.durationMinutes ? ` · ${log.durationMinutes} min` : ''}`}
+            trailing={
+              <button
+                onClick={() => handleDelete(log._id)}
+                aria-label="Delete entry"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-steel transition-colors hover:bg-ember/10 hover:text-ember-dark"
+              >
+                <svg className="icon !h-4 !w-4"><use href="#i-minus" /></svg>
+              </button>
+            }
+          />
+        ))}
+        {logs.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No workouts logged yet.</div>}
+      </ListCard>
     </div>
   );
 }

@@ -152,7 +152,7 @@ export default function GymProfile() {
       {/* Gym Details & Logo Upload */}
       <form onSubmit={handleSubmit} className="panel mb-8 grid gap-6 p-6 md:grid-cols-2">
         <div className="md:col-span-2 flex flex-col sm:flex-row items-start sm:items-center gap-6 pb-6 border-b border-ink/10">
-          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-ink/20 bg-ink/[0.02]">
+          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-ink/20 bg-ink/[0.02]">
             {profile.gymLogoUrl ? (
               <img src={profile.gymLogoUrl} alt="Gym Logo" className="h-full w-full object-cover" />
             ) : (
@@ -249,11 +249,16 @@ export default function GymProfile() {
       {/* QR Code Reception Check-In */}
       <div className="panel mb-8 p-6">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-base font-semibold text-ink">Reception QR Check-In</h2>
-            <p className="text-xs text-steel">
-              Display this QR code at your front desk. Members scan it on their phone to verify attendance and increment daily streaks.
-            </p>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+              <svg className="icon !h-[18px] !w-[18px]"><use href="#i-shield" /></svg>
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-ink">Reception QR Check-In</h2>
+              <p className="text-xs text-steel">
+                Display this QR code at your front desk. Members scan it on their phone to verify attendance and increment daily streaks.
+              </p>
+            </div>
           </div>
           <button
             type="button"
@@ -281,14 +286,12 @@ export default function GymProfile() {
         {qrMessage && <div className="mb-4 text-xs font-medium text-chalk-dark">{qrMessage}</div>}
 
         {qrData.qrDataUrl ? (
-          <div className="mt-4 flex flex-col sm:flex-row items-center gap-6 rounded-xl border border-ink/10 bg-ink/[0.02] p-6">
-            <div className="rounded-lg bg-white p-3 shadow-sm border border-ink/10">
+          <div className="mt-4 flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-ink/10 bg-ink/[0.02] p-6">
+            <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
               <img src={qrData.qrDataUrl} alt="Check-in QR Code" className="h-44 w-44" />
             </div>
             <div className="flex-1 space-y-2 text-center sm:text-left">
-              <div className="inline-block rounded bg-chalk/20 px-2 py-0.5 text-xs font-medium text-chalk-dark">
-                Active Reception QR
-              </div>
+              <span className="chip border-chalk/25 bg-chalk/10 text-chalk-dark">Active Reception QR</span>
               <p className="text-xs text-steel">
                 Valid until:{' '}
                 <strong className="text-ink">
@@ -321,7 +324,7 @@ export default function GymProfile() {
             </div>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-ink/20 p-8 text-center text-xs text-steel">
+          <div className="rounded-2xl border border-dashed border-ink/20 p-8 text-center text-xs text-steel">
             No active QR code generated. Click "Generate QR Code" to create a check-in token for your reception desk.
           </div>
         )}
@@ -329,7 +332,10 @@ export default function GymProfile() {
 
       {/* Announcements */}
       <form onSubmit={handleAnnounce} className="panel p-6">
-        <div className="mb-1 text-sm font-medium text-steel">Send an announcement</div>
+        <div className="mb-1 flex items-center gap-2 text-sm font-medium text-steel">
+          <svg className="icon !h-4 !w-4"><use href="#i-bell" /></svg>
+          Send an announcement
+        </div>
         <p className="mb-4 text-xs text-steel">Delivered as a notification to every customer at your gym.</p>
         <textarea
           className="field-input mb-4"

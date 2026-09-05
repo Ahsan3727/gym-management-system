@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
+import Timeline from '../../components/Timeline.jsx';
 
 export default function AuditLog() {
   const [logs, setLogs] = useState([]);
@@ -9,6 +10,18 @@ export default function AuditLog() {
     api.get('/superadmin/audit-log').then((res) => setLogs(res.data)).catch(() => setError('Could not load the audit log.'));
   }, []);
 
+  const items = logs.map((log) => ({
+    id: log._id,
+    title: log.action,
+    time: new Date(log.created_at).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    description: `${log.actor?.username || 'Unknown actor'}${log.targetType ? ` → ${log.targetType}` : ''}`,
+  }));
+
   return (
     <div>
       <h1 className="mb-1 text-2xl font-semibold text-ink">Audit log</h1>
@@ -16,32 +29,12 @@ export default function AuditLog() {
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">When</th>
-              <th className="px-4 py-3">Actor</th>
-              <th className="px-4 py-3">Action</th>
-              <th className="px-4 py-3">Target</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 text-ink/70">{new Date(log.created_at).toLocaleString()}</td>
-                <td className="px-4 py-3 text-ink/70">{log.actor?.username || '—'}</td>
-                <td className="px-4 py-3 font-medium text-ink">{log.action}</td>
-                <td className="px-4 py-3 text-ink/70">{log.targetType || '—'}</td>
-              </tr>
-            ))}
-            {logs.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-steel">No actions logged yet.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="panel p-6">
+        {items.length > 0 ? (
+          <Timeline accent="iron" items={items} />
+        ) : (
+          <div className="py-8 text-center text-sm text-steel">No actions logged yet.</div>
+        )}
       </div>
     </div>
   );

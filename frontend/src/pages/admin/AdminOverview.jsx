@@ -56,10 +56,10 @@ export default function AdminOverview() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard label="Active customers" value={activeCount} accent="text-iron" />
-        <StatCard label="Total customers" value={customers.length} />
-        <StatCard label="Unpaid fees" value={unpaidFees.length} accent={unpaidFees.length ? 'text-ember-dark' : 'text-ink'} />
-        <StatCard label="Overdue fees" value={overdueFees.length} accent={overdueFees.length ? 'text-ember-dark' : 'text-ink'} />
+        <StatCard icon="user" hi label="Active customers" value={activeCount} accent="text-iron" />
+        <StatCard icon="briefcase" label="Total customers" value={customers.length} />
+        <StatCard icon="card" label="Unpaid fees" value={unpaidFees.length} accent={unpaidFees.length ? 'text-ember-dark' : 'text-ink'} />
+        <StatCard icon="bell" label="Overdue fees" value={overdueFees.length} accent={overdueFees.length ? 'text-ember-dark' : 'text-ink'} />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -79,14 +79,16 @@ export default function AdminOverview() {
           </div>
 
           {announceSuccess && (
-            <div className="mb-3 rounded-sm border border-emerald-500/30 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-              ✓ {announceSuccess}
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-chalk/30 bg-chalk/10 px-3 py-2 text-xs font-medium text-chalk-dark">
+              <svg className="icon !h-4 !w-4 shrink-0"><use href="#i-check-circle" /></svg>
+              {announceSuccess}
             </div>
           )}
 
           {announceError && (
-            <div className="mb-3 rounded-sm border border-ember/30 bg-ember/5 px-3 py-2 text-xs text-ember-dark">
-              ✕ {announceError}
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-ember/30 bg-ember/5 px-3 py-2 text-xs font-medium text-ember-dark">
+              <svg className="icon !h-4 !w-4 shrink-0"><use href="#i-close" /></svg>
+              {announceError}
             </div>
           )}
 
@@ -105,7 +107,8 @@ export default function AdminOverview() {
                 disabled={announcing || !announcement.trim()}
                 className="btn-primary text-xs"
               >
-                {announcing ? 'Broadcasting…' : 'Broadcast to Members 📢'}
+                <svg className="icon !h-4 !w-4"><use href="#i-bell" /></svg>
+                {announcing ? 'Broadcasting…' : 'Broadcast to Members'}
               </button>
             </div>
           </form>

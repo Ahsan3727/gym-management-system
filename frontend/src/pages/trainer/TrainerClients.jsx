@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
+import SegmentedControl from '../../components/SegmentedControl.jsx';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 export default function TrainerClients() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -154,8 +157,9 @@ export default function TrainerClients() {
             <div className="flex gap-6">
               <div>
                 <div className="text-xs font-medium uppercase tracking-wide text-steel">Attendance Streak</div>
-                <div className="text-base font-semibold text-ember mt-0.5">
-                  {clientProgress?.streak?.currentStreak || 0} Days 🔥
+                <div className="flex items-center gap-1.5 text-base font-semibold text-ember-dark mt-0.5">
+                  <svg className="icon !h-4 !w-4"><use href="#i-flame" /></svg>
+                  {clientProgress?.streak?.currentStreak || 0} Days
                 </div>
               </div>
               <div>
@@ -168,31 +172,17 @@ export default function TrainerClients() {
           </div>
 
           {/* Action Tabs */}
-          <div className="mb-6 flex gap-2 border-b border-ink/10 pb-2">
-            <button
-              onClick={() => setActiveTab('workout')}
-              className={`rounded px-3 py-1.5 text-xs font-medium ${
-                activeTab === 'workout' ? 'bg-iron text-white' : 'text-steel hover:text-ink'
-              }`}
-            >
-              + Prescribe Workout
-            </button>
-            <button
-              onClick={() => setActiveTab('diet')}
-              className={`rounded px-3 py-1.5 text-xs font-medium ${
-                activeTab === 'diet' ? 'bg-iron text-white' : 'text-steel hover:text-ink'
-              }`}
-            >
-              + Prescribe Nutrition
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`rounded px-3 py-1.5 text-xs font-medium ${
-                activeTab === 'history' ? 'bg-iron text-white' : 'text-steel hover:text-ink'
-              }`}
-            >
-              View Client History
-            </button>
+          <div className="mb-6">
+            <SegmentedControl
+              accent="iron"
+              options={[
+                { value: 'workout', label: 'Prescribe Workout' },
+                { value: 'diet', label: 'Prescribe Nutrition' },
+                { value: 'history', label: 'Client History' },
+              ]}
+              value={activeTab}
+              onChange={setActiveTab}
+            />
           </div>
 
           {/* Tab 1: Prescribe Workout Form */}
@@ -330,74 +320,42 @@ export default function TrainerClients() {
           {/* Tab 3: History & Logged Activity */}
           {activeTab === 'history' && (
             <div className="grid gap-8 md:grid-cols-2">
-              <div className="panel overflow-hidden">
-                <div className="border-b border-ink/10 px-5 py-3 text-xs font-semibold text-steel uppercase tracking-wider">
-                  Recent Workouts
-                </div>
-                <table className="w-full text-xs">
-                  <thead className="bg-ink/[0.02] border-b border-ink/5 text-left text-steel">
-                    <tr>
-                      <th className="px-4 py-2">Date</th>
-                      <th className="px-4 py-2">Exercise</th>
-                      <th className="px-4 py-2">Sets × Reps</th>
-                      <th className="px-4 py-2">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {clientProgress?.workouts?.slice(0, 10).map((w) => (
-                      <tr key={w._id} className="border-b border-ink/5 last:border-0">
-                        <td className="px-4 py-2.5 text-steel">{new Date(w.date).toLocaleDateString()}</td>
-                        <td className="px-4 py-2.5 font-medium text-ink">{w.exercise}</td>
-                        <td className="px-4 py-2.5 text-ink/70">
-                          {w.sets && w.reps ? `${w.sets} × ${w.reps}` : '—'} {w.weight ? `(${w.weight}kg)` : ''}
-                        </td>
-                        <td className="px-4 py-2.5 text-steel">{w.notes || '—'}</td>
-                      </tr>
-                    ))}
-                    {(!clientProgress?.workouts || clientProgress.workouts.length === 0) && (
-                      <tr>
-                        <td colSpan={4} className="px-4 py-6 text-center text-steel">
-                          No workouts recorded yet.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              <div>
+                <div className="mb-2 px-1 text-xs font-semibold text-steel uppercase tracking-wider">Recent Workouts</div>
+                <ListCard>
+                  {clientProgress?.workouts?.slice(0, 10).map((w) => (
+                    <ListRow
+                      key={w._id}
+                      icon="dumbbell"
+                      title={w.exercise}
+                      subtitle={`${new Date(w.date).toLocaleDateString()}${
+                        w.sets && w.reps ? ` · ${w.sets} × ${w.reps}` : ''
+                      }${w.weight ? ` · ${w.weight}kg` : ''}${w.notes ? ` · ${w.notes}` : ''}`}
+                    />
+                  ))}
+                  {(!clientProgress?.workouts || clientProgress.workouts.length === 0) && (
+                    <div className="px-4 py-6 text-center text-sm text-steel">No workouts recorded yet.</div>
+                  )}
+                </ListCard>
               </div>
 
-              <div className="panel overflow-hidden">
-                <div className="border-b border-ink/10 px-5 py-3 text-xs font-semibold text-steel uppercase tracking-wider">
-                  Recent Nutrition Logs
-                </div>
-                <table className="w-full text-xs">
-                  <thead className="bg-ink/[0.02] border-b border-ink/5 text-left text-steel">
-                    <tr>
-                      <th className="px-4 py-2">Date</th>
-                      <th className="px-4 py-2">Meal</th>
-                      <th className="px-4 py-2">Calories</th>
-                      <th className="px-4 py-2">P / C / F</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {clientProgress?.diet?.slice(0, 10).map((d) => (
-                      <tr key={d._id} className="border-b border-ink/5 last:border-0">
-                        <td className="px-4 py-2.5 text-steel">{new Date(d.date).toLocaleDateString()}</td>
-                        <td className="px-4 py-2.5 font-medium text-ink">{d.meal}</td>
-                        <td className="px-4 py-2.5 text-ink/70">{d.calories ? `${d.calories} kcal` : '—'}</td>
-                        <td className="px-4 py-2.5 text-steel">
-                          {d.macros?.proteinG ?? '—'}g / {d.macros?.carbsG ?? '—'}g / {d.macros?.fatG ?? '—'}g
-                        </td>
-                      </tr>
-                    ))}
-                    {(!clientProgress?.diet || clientProgress.diet.length === 0) && (
-                      <tr>
-                        <td colSpan={4} className="px-4 py-6 text-center text-steel">
-                          No diet entries logged yet.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              <div>
+                <div className="mb-2 px-1 text-xs font-semibold text-steel uppercase tracking-wider">Recent Nutrition Logs</div>
+                <ListCard>
+                  {clientProgress?.diet?.slice(0, 10).map((d) => (
+                    <ListRow
+                      key={d._id}
+                      icon="note"
+                      title={d.meal}
+                      subtitle={`${new Date(d.date).toLocaleDateString()}${d.calories ? ` · ${d.calories} kcal` : ''} · P${
+                        d.macros?.proteinG ?? '—'
+                      }/C${d.macros?.carbsG ?? '—'}/F${d.macros?.fatG ?? '—'}`}
+                    />
+                  ))}
+                  {(!clientProgress?.diet || clientProgress.diet.length === 0) && (
+                    <div className="px-4 py-6 text-center text-sm text-steel">No diet entries logged yet.</div>
+                  )}
+                </ListCard>
               </div>
             </div>
           )}

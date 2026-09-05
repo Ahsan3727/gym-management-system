@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 export default function Trainers() {
   const [trainers, setTrainers] = useState([]);
@@ -108,60 +110,39 @@ export default function Trainers() {
           <p className="text-sm text-steel">Manage coaching staff, specialty assignments, and member allocations.</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary">
-          + Add Trainer
+          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+          Add Trainer
         </button>
       </div>
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Trainer</th>
-              <th className="px-4 py-3">Username / Login</th>
-              <th className="px-4 py-3">Specialty</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Assigned Clients</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trainers.map((t) => (
-              <tr key={t._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 font-medium text-ink">Coach {t.name}</td>
-                <td className="px-4 py-3 text-xs font-mono text-steel">{t.user?.username || '—'}</td>
-                <td className="px-4 py-3 text-xs text-ink/70">{t.specialty || 'General'}</td>
-                <td className="px-4 py-3 text-xs text-steel">{t.phone || '—'}</td>
-                <td className="px-4 py-3 text-xs font-medium text-ink">
-                  {t.assignedCustomers?.length || 0} client(s)
-                </td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <button
-                    onClick={() => openAssignModal(t)}
-                    className="text-xs font-medium text-iron hover:underline"
-                  >
-                    Assign clients
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTrainer(t._id)}
-                    className="text-xs font-medium text-steel hover:text-ember-dark"
-                  >
-                    Remove
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {trainers.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-steel">
-                  No personal trainers added yet. Click "+ Add Trainer" to onboard coaches.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ListCard>
+        {trainers.map((t) => (
+          <ListRow
+            key={t._id}
+            icon="user"
+            iconBg="bg-iron/15 text-iron"
+            title={`Coach ${t.name}`}
+            subtitle={`${t.specialty || 'General'} · ${t.phone || 'No phone'} · ${t.assignedCustomers?.length || 0} client(s)`}
+            trailing={
+              <div className="flex items-center gap-3">
+                <button onClick={() => openAssignModal(t)} className="text-xs font-medium text-iron hover:underline">
+                  Assign clients
+                </button>
+                <button onClick={() => handleDeleteTrainer(t._id)} className="text-xs font-medium text-steel hover:text-ember-dark">
+                  Remove
+                </button>
+              </div>
+            }
+          />
+        ))}
+        {trainers.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-steel">
+            No personal trainers added yet. Click "Add Trainer" to onboard coaches.
+          </div>
+        )}
+      </ListCard>
 
       {/* Add Trainer Modal */}
       {showAdd && (

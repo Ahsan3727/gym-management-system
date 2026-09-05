@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function TrainerOverview() {
@@ -56,9 +57,9 @@ export default function TrainerOverview() {
       </div>
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3">
-        <StatCard label="Assigned Clients" value={activeClientsCount} />
-        <StatCard label="Combined Streaks" value={`${totalStreakDays}d`} accent="text-ember" />
-        <StatCard label="Specialty" value={trainer?.specialty || 'General'} />
+        <StatCard icon="user" hi label="Assigned Clients" value={activeClientsCount} />
+        <StatCard icon="flame" label="Combined Streaks" value={`${totalStreakDays}d`} accent="text-ember" />
+        <StatCard icon="sliders" label="Specialty" value={trainer?.specialty || 'General'} />
       </div>
 
       <div className="panel mb-8 overflow-hidden">
@@ -68,52 +69,36 @@ export default function TrainerOverview() {
             <p className="text-xs text-steel">Members assigned to your training sessions and fitness tracking.</p>
           </div>
           <Link to="/trainer/clients" className="btn-secondary text-xs">
-            Open Training Studio →
+            Open Training Studio
+            <svg className="icon !h-4 !w-4"><use href="#i-arrow-r" /></svg>
           </Link>
         </div>
 
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Member</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Plan</th>
-              <th className="px-4 py-3">Streak</th>
-              <th className="px-4 py-3">Last Active</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((c) => (
-              <tr key={c._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 font-medium text-ink">{c.name}</td>
-                <td className="px-4 py-3 text-xs text-ink/70">{c.phone || '—'}</td>
-                <td className="px-4 py-3 text-xs text-ink/70">{c.plan?.planName || 'No plan'}</td>
-                <td className="px-4 py-3 font-semibold text-ember">
-                  {c.streak > 0 ? `${c.streak} days 🔥` : '0 days'}
-                </td>
-                <td className="px-4 py-3 text-xs text-ink/70">
-                  {c.lastWorkoutDate ? new Date(c.lastWorkoutDate).toLocaleDateString() : 'No recent log'}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    to={`/trainer/clients?client=${c._id}`}
-                    className="btn-primary py-1 px-2.5 text-xs inline-block"
-                  >
-                    View & Prescribe
+        <div className="divide-y divide-ink/10">
+          {clients.map((c) => (
+            <ListRow
+              key={c._id}
+              icon="user"
+              title={c.name}
+              subtitle={`${c.phone || 'No phone'} · ${c.plan?.planName || 'No plan'} · ${
+                c.lastWorkoutDate ? `Active ${new Date(c.lastWorkoutDate).toLocaleDateString()}` : 'No recent log'
+              }`}
+              trailing={
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-ember-dark">{c.streak > 0 ? `${c.streak}d` : '0d'}</span>
+                  <Link to={`/trainer/clients?client=${c._id}`} className="btn-primary py-1.5 px-3 text-xs">
+                    Prescribe
                   </Link>
-                </td>
-              </tr>
-            ))}
-            {clients.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-steel">
-                  No clients currently assigned. Your gym administrator can assign members from the Admin Trainers console.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                </div>
+              }
+            />
+          ))}
+          {clients.length === 0 && (
+            <div className="px-4 py-8 text-center text-sm text-steel">
+              No clients currently assigned. Your gym administrator can assign members from the Admin Trainers console.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

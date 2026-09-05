@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
 
 const emptyForm = { username: '', password: '', name: '', phone: '', planId: '' };
 
@@ -118,7 +120,10 @@ export default function Customers() {
           <h1 className="mb-1 text-2xl font-semibold text-ink">Customers</h1>
           <p className="text-sm text-steel">Add, manage and monitor everyone at your gym.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary">Add customer</button>
+        <button onClick={() => setShowCreate(true)} className="btn-primary">
+          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+          Add customer
+        </button>
       </div>
 
       <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-wrap gap-3">
@@ -140,41 +145,27 @@ export default function Customers() {
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Phone</th>
-              <th className="px-4 py-3">Plan</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {customers.map((c) => (
-              <tr key={c._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 font-medium text-ink">{c.name}</td>
-                <td className="px-4 py-3 text-ink/70">{c.phone || '—'}</td>
-                <td className="px-4 py-3 text-ink/70">{c.plan?.planName || '—'}</td>
-                <td className="px-4 py-3">
-                  <span className={c.isActive ? 'text-chalk-dark' : 'text-steel'}>{c.isActive ? 'Active' : 'Inactive'}</span>
-                </td>
-                <td className="px-4 py-3 text-right space-x-3">
-                  <button onClick={() => openProgress(c)} className="text-xs font-medium text-iron hover:underline">Progress</button>
-                  <button onClick={() => setEditing({ ...c })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
-                  <button onClick={() => handleDelete(c)} className="text-xs font-medium text-steel hover:text-ember-dark">Remove</button>
-                </td>
-              </tr>
-            ))}
-            {customers.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-steel">No customers match this view.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ListCard>
+        {customers.map((c) => (
+          <ListRow
+            key={c._id}
+            icon="user"
+            iconBg={c.isActive ? 'bg-chalk/15 text-chalk-dark' : 'bg-ink/5'}
+            title={c.name}
+            subtitle={`${c.phone || 'No phone'} · ${c.plan?.planName || 'No plan'} · ${c.isActive ? 'Active' : 'Inactive'}`}
+            trailing={
+              <div className="flex items-center gap-3">
+                <button onClick={() => openProgress(c)} className="text-xs font-medium text-iron hover:underline">Progress</button>
+                <button onClick={() => setEditing({ ...c })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
+                <button onClick={() => handleDelete(c)} className="text-xs font-medium text-steel hover:text-ember-dark">Remove</button>
+              </div>
+            }
+          />
+        ))}
+        {customers.length === 0 && (
+          <div className="px-4 py-8 text-center text-sm text-steel">No customers match this view.</div>
+        )}
+      </ListCard>
 
       {showCreate && (
         <Modal title="Add customer" onClose={() => setShowCreate(false)}>

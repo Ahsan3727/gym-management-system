@@ -1,45 +1,189 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =========================================================
+   THEME TOKENS
+   :root = dark (default, Apex Elite palette)
+   html.light = light override (original IRONLINE brand palette)
+   Values are "R G B" triples (no commas) so Tailwind's
+   rgb(var(--x) / <alpha-value>) pattern can apply opacity,
+   e.g. border-ink/10, bg-ember/40 keep working in both themes.
+========================================================= */
+:root {
+  --c-bone: 11 12 16;          /* page background            #0b0c10 */
+  --c-bone-dim: 8 9 12;        /* recessed background        #08090c */
+  --c-panel: 21 23 28;         /* card / surface              #15171c */
+  --c-panel-2: 25 27 33;       /* secondary surface           #191b21 */
+
+  --c-ink: 246 246 248;        /* primary text                #f6f6f8 */
+  --c-ink-soft: 33 36 41;      /* elevated dark fill          #212429 */
+  --c-ink-line: 43 48 54;      /* hairline on elevated fill   #2b3036 */
+
+  --c-steel: 154 155 165;      /* secondary text              #9a9ba5 */
+  --c-steel-light: 92 93 103;  /* faint / tertiary text       #5c5d67 */
+
+  --c-ember: 255 78 31;        /* accent                      #ff4e1f */
+  --c-ember-dark: 255 107 71;  /* accent on dark (errors etc) #ff6b47 */
+  --c-ember-light: 255 122 61; /* accent-2 / gradient end     #ff7a3d */
+
+  --c-chalk: 126 231 135;      /* success                     #7ee787 */
+  --c-chalk-dark: 74 196 106;  /* success text on dark        #4ac46a */
+
+  --c-iron: 94 168 255;        /* info accent                 #5ea8ff */
+  --c-iron-dark: 59 130 246;
+  --c-iron-light: 147 197 253;
+}
+
+html.light {
+  --c-bone: 246 245 241;       /* #F6F5F1 */
+  --c-bone-dim: 234 232 225;   /* #EAE8E1 */
+  --c-panel: 255 255 255;      /* was hardcoded bg-white */
+  --c-panel-2: 234 232 225;
+
+  --c-ink: 20 23 26;           /* #14171A */
+  --c-ink-soft: 30 34 38;      /* #1E2226 */
+  --c-ink-line: 43 48 54;      /* #2B3036 */
+
+  --c-steel: 84 91 98;         /* #545B62 */
+  --c-steel-light: 138 144 153;/* #8A9099 */
+
+  --c-ember: 225 85 58;        /* #E1553A */
+  --c-ember-dark: 196 63 39;   /* #C43F27 */
+  --c-ember-light: 242 161 142;/* #F2A18E */
+
+  --c-chalk: 168 194 58;       /* #A8C23A */
+  --c-chalk-dark: 126 149 40;  /* #7E9528 */
+
+  --c-iron: 47 93 138;         /* #2F5D8A */
+  --c-iron-dark: 35 71 100;    /* #234764 */
+  --c-iron-light: 108 147 184; /* #6C93B8 */
+}
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
   }
   body {
-    @apply bg-bone text-ink font-body;
+    @apply bg-bone text-ink font-body transition-colors duration-300;
   }
   h1, h2, h3, h4 {
-    @apply font-display;
+    @apply font-display font-extrabold tracking-[-0.02em];
   }
   :focus-visible {
-    outline: 2px solid #E1553A;
+    outline: 2px solid rgb(var(--c-ember));
     outline-offset: 2px;
   }
 }
 
 @layer components {
+  /* Icons from IconSprite.jsx — mirrors apex-elite's .icon defaults */
+  .icon {
+    @apply h-[22px] w-[22px] shrink-0;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm bg-ember px-4 py-2.5 text-sm font-semibold text-bone transition-colors hover:bg-ember-dark disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-soft transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)) 70%);
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06);
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-ink/15 bg-transparent px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-panel px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/30 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-sm border border-ember/40 bg-transparent px-4 py-2.5 text-sm font-semibold text-ember-dark transition-colors hover:bg-ember/10;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ember/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-ember-dark transition-colors hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .field-label {
     @apply mb-1.5 block text-sm font-medium text-steel;
   }
   .field-input {
-    @apply w-full rounded-sm border border-ink/15 bg-white px-3 py-2 text-sm text-ink placeholder:text-steel-light focus:border-ember focus:outline-none;
+    @apply w-full rounded-[16px] border border-ink/15 bg-panel px-3.5 py-2.5 text-sm text-ink placeholder:text-steel-light transition-colors focus:border-ember focus:outline-none;
   }
   .panel {
-    @apply rounded-sm border border-ink/10 bg-white;
+    @apply rounded-[26px] border border-ink/10 bg-panel;
   }
   .stat-number {
-    @apply font-display text-4xl font-semibold leading-none;
+    @apply font-display text-4xl font-extrabold leading-none tracking-[-0.02em];
+  }
+
+  /* ============ Phase 1: shared shell & primitives ============ */
+
+  /* StatCard surface + optional radial-glow "highlight" variant */
+  .stat-card {
+    @apply relative overflow-hidden rounded-[26px] border border-ink/10 bg-panel px-5 py-4;
+  }
+  .stat-card--hi::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(140px 90px at 88% -15%, rgb(var(--c-ember) / 0.35), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Modal surface */
+  .modal-panel {
+    @apply rounded-[26px] border border-ink/10 bg-panel shadow-soft;
+    animation: modal-in 0.18s ease-out;
+  }
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Toast / snackbar (see components/Toast.jsx, useToast()) */
+  .toast {
+    @apply flex items-center gap-2 rounded-full border border-ink/10 bg-panel px-4 py-2.5 text-sm font-semibold text-ink shadow-soft;
+    animation: toast-in 0.2s ease-out;
+  }
+  .toast--success {
+    @apply border-chalk/30 text-chalk-dark;
+  }
+  .toast--error {
+    @apply border-ember/30 text-ember-dark;
+  }
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Small pill badge — eyebrow tags, inline meta */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-ink/5 px-3 py-1 text-xs font-semibold text-steel;
+  }
+
+  /* Radial-glow tinted card (Login brand panel, hero stat cards, ...) */
+  .card--tint {
+    position: relative;
+    overflow: hidden;
+  }
+  .card--tint::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(600px 400px at 12% 10%, rgb(var(--c-ember) / 0.28), transparent 60%),
+      radial-gradient(480px 360px at 92% 88%, rgb(var(--c-ember-light) / 0.16), transparent 55%);
+    pointer-events: none;
   }
 }

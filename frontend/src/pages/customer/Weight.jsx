@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios.js';
+import StatCard from '../../components/StatCard.jsx';
+import ListCard from '../../components/ListCard.jsx';
+import ListRow from '../../components/ListRow.jsx';
+import { useChartColors } from '../../utils/chartTheme.js';
 
 const emptyForm = {
   weightKg: '',
@@ -12,7 +16,60 @@ const emptyForm = {
   progressPhotoUrl: '',
 };
 
+// BMI category → ring color + label, clamped to a 15–35 gauge range.
+function bmiGauge(bmi) {
+  if (!bmi) return null;
+  const clamped = Math.min(Math.max(bmi, 15), 35);
+  const pct = (clamped - 15) / (35 - 15);
+  let color = 'iron';
+  let category = 'Underweight';
+  if (bmi >= 18.5 && bmi < 25) {
+    color = 'chalk';
+    category = 'Normal';
+  } else if (bmi >= 25 && bmi < 30) {
+    color = 'ember';
+    category = 'Overweight';
+  } else if (bmi >= 30) {
+    color = 'ember';
+    category = 'High';
+  }
+  return { pct, color, category };
+}
+
+function BmiRing({ bmi }) {
+  const gauge = bmiGauge(bmi);
+  const r = 30;
+  const c = 2 * Math.PI * r;
+  const strokeColor = { iron: 'rgb(var(--c-iron))', chalk: 'rgb(var(--c-chalk))', ember: 'rgb(var(--c-ember))' };
+
+  return (
+    <div className="flex items-center gap-4">
+      <svg viewBox="0 0 72 72" className="h-16 w-16 shrink-0 -rotate-90">
+        <circle cx="36" cy="36" r={r} fill="none" stroke="rgb(var(--c-ink) / 0.08)" strokeWidth="7" />
+        {gauge && (
+          <circle
+            cx="36"
+            cy="36"
+            r={r}
+            fill="none"
+            stroke={strokeColor[gauge.color]}
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeDasharray={c}
+            strokeDashoffset={c * (1 - gauge.pct)}
+          />
+        )}
+      </svg>
+      <div>
+        <div className="stat-number">{bmi || '—'}</div>
+        <div className="mt-0.5 text-xs text-steel">{gauge ? gauge.category : 'Add height for BMI'}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function Weight() {
+  const chart = useChartColors();
   const [logs, setLogs] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
@@ -33,7 +90,7 @@ export default function Weight() {
   const latest = logs[0];
   const bmi =
     latest?.weightKg && latest?.heightCm
-      ? (latest.weightKg / (latest.heightCm / 100) ** 2).toFixed(1)
+      ? Number((latest.weightKg / (latest.heightCm / 100) ** 2).toFixed(1))
       : null;
 
   const chartData = [...logs]
@@ -108,21 +165,12 @@ export default function Weight() {
       <p className="mb-8 text-sm text-steel">Track weight trend, BMI, measurements and progress photos.</p>
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3">
-        <div className="panel px-5 py-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-steel">Latest weight</div>
-          <div className="stat-number mt-1">{latest ? `${latest.weightKg} kg` : '—'}</div>
+        <StatCard icon="drop" hi label="Latest weight" value={latest ? `${latest.weightKg} kg` : '—'} />
+        <div className="stat-card">
+          <div className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-steel">BMI</div>
+          <BmiRing bmi={bmi} />
         </div>
-        <div className="panel px-5 py-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-steel">BMI</div>
-          <div className="stat-number mt-1">{bmi || '—'}</div>
-          <div className="mt-1 text-xs text-steel">
-            {bmi ? 'Add height to keep this accurate' : 'Add height for BMI'}
-          </div>
-        </div>
-        <div className="panel px-5 py-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-steel">Entries logged</div>
-          <div className="stat-number mt-1">{logs.length}</div>
-        </div>
+        <StatCard icon="note" label="Entries logged" value={logs.length} />
       </div>
 
       {chartData.length > 1 && (
@@ -130,16 +178,16 @@ export default function Weight() {
           <div className="mb-4 text-sm font-medium text-steel">Weight trend</div>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#14171A" strokeOpacity={0.08} />
-              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#545B62' }} axisLine={false} tickLine={false} />
+              <CartesianGrid {...chart.gridProps} />
+              <XAxis dataKey="date" tick={chart.axisTickStyle(12)} axisLine={false} tickLine={false} />
               <YAxis
-                tick={{ fontSize: 12, fill: '#545B62' }}
+                tick={chart.axisTickStyle(12)}
                 axisLine={false}
                 tickLine={false}
                 domain={['dataMin - 2', 'dataMax + 2']}
               />
-              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 2, border: '1px solid #14171A1A' }} />
-              <Line type="monotone" dataKey="weight" stroke="#E1553A" strokeWidth={2} dot={{ r: 3 }} />
+              <Tooltip contentStyle={chart.tooltipContentStyle} cursor={chart.tooltipCursor} />
+              <Line type="monotone" dataKey="weight" stroke={chart.ember} strokeWidth={2} dot={{ r: 3, fill: chart.ember }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -211,7 +259,7 @@ export default function Weight() {
               ref={fileInputRef}
               accept="image/*"
               onChange={handlePhotoFileChange}
-              className="text-xs text-steel file:mr-2 file:rounded file:border-0 file:bg-ink/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink hover:file:bg-ink/10 cursor-pointer"
+              className="text-xs text-steel file:mr-2 file:rounded-full file:border-0 file:bg-ink/5 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-ink hover:file:bg-ink/10 cursor-pointer"
             />
             {uploading && <span className="text-xs text-ember-dark">Uploading photo…</span>}
           </div>
@@ -220,7 +268,7 @@ export default function Weight() {
               <img
                 src={photoPreview || form.progressPhotoUrl}
                 alt="Preview"
-                className="h-12 w-12 rounded object-cover border border-ink/10"
+                className="h-12 w-12 rounded-2xl object-cover border border-ink/10"
               />
               <span className="text-xs text-chalk-dark font-medium">Photo attached</span>
             </div>
@@ -235,65 +283,46 @@ export default function Weight() {
         </div>
       </form>
 
-      <div className="panel overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="border-b border-ink/10 bg-ink/[0.02] text-left text-xs font-medium uppercase tracking-wide text-steel">
-            <tr>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Weight</th>
-              <th className="px-4 py-3">Chest / Waist / Hips / Arms</th>
-              <th className="px-4 py-3">Photo</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map((log) => (
-              <tr key={log._id} className="border-b border-ink/5 last:border-0">
-                <td className="px-4 py-3 text-ink/70">{new Date(log.date).toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-ink">{log.weightKg} kg</td>
-                <td className="px-4 py-3 text-ink/70">
-                  {log.measurements?.chestCm ?? '—'} / {log.measurements?.waistCm ?? '—'} /{' '}
-                  {log.measurements?.hipsCm ?? '—'} / {log.measurements?.armsCm ?? '—'}
-                </td>
-                <td className="px-4 py-3 text-ink/70">
-                  {log.progressPhotoUrl ? (
-                    <a
-                      href={log.progressPhotoUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-iron font-medium hover:underline"
-                    >
+      <ListCard>
+        {logs.map((log) => {
+          const m = log.measurements || {};
+          const meta = [
+            m.chestCm != null ? `C ${m.chestCm}` : null,
+            m.waistCm != null ? `W ${m.waistCm}` : null,
+            m.hipsCm != null ? `H ${m.hipsCm}` : null,
+            m.armsCm != null ? `A ${m.armsCm}` : null,
+          ].filter(Boolean);
+          return (
+            <ListRow
+              key={log._id}
+              icon="drop"
+              title={`${log.weightKg} kg`}
+              subtitle={`${new Date(log.date).toLocaleDateString()}${meta.length ? ' · ' + meta.join(' / ') : ''}`}
+              trailing={
+                <div className="flex items-center gap-3">
+                  {log.progressPhotoUrl && (
+                    <a href={log.progressPhotoUrl} target="_blank" rel="noreferrer">
                       <img
                         src={log.progressPhotoUrl}
                         alt="thumb"
-                        className="h-6 w-6 rounded object-cover border border-ink/10"
+                        className="h-8 w-8 rounded-xl object-cover border border-ink/10"
                       />
-                      <span>View photo</span>
                     </a>
-                  ) : (
-                    '—'
                   )}
-                </td>
-                <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => handleDelete(log._id)}
-                    className="text-xs font-medium text-steel hover:text-ember-dark"
+                    aria-label="Delete entry"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-steel transition-colors hover:bg-ember/10 hover:text-ember-dark"
                   >
-                    Delete
+                    <svg className="icon !h-4 !w-4"><use href="#i-minus" /></svg>
                   </button>
-                </td>
-              </tr>
-            ))}
-            {logs.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-steel">
-                  No weight entries yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              }
+            />
+          );
+        })}
+        {logs.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No weight entries yet.</div>}
+      </ListCard>
     </div>
   );
 }
