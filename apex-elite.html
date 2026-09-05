@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>APEX ELITE — Command Center</title>
+<meta name="theme-color" content="#0b0c10" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<!-- =========================================================
+     ICON SPRITE — all icons used throughout the app
+========================================================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9a1 1 0 0 0 1 1h4v-5.5h2V20h4a1 1 0 0 0 1-1v-9" /></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M4 9v6M2.5 10.5v3M20 9v6M21.5 10.5v3" /><rect x="6" y="7.5" width="3" height="9" rx="1"/><rect x="15" y="7.5" width="3" height="9" rx="1"/><path d="M9 12h6"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.3l2.3 2.3 4.7-5"/></symbol>
+    <symbol id="i-book-open" viewBox="0 0 24 24"><path d="M12 6.2c-1.6-1.1-4-1.7-6.3-1.7-1 0-1.7.1-1.7.1v13.4s1-.2 2-.2c2 0 4.3.6 6 1.7 1.7-1.1 4-1.7 6-1.7 1 0 2 .2 2 .2V4.6s-.7-.1-1.7-.1c-2.3 0-4.7.6-6.3 1.7Z"/><path d="M12 6.2v13.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.3" r="3.3"/><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.7v14.6a1 1 0 0 0 1.5.9l12-7.3a1 1 0 0 0 0-1.8l-12-7.3A1 1 0 0 0 7 4.7Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chevron-r" viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></symbol>
+    <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4.5 12h15M13.5 5.5 20 12l-6.5 6.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.4-4.6-9.8-9.4C.6 6.7 3 3.4 6.6 3.4c2 0 3.7 1 5.4 3 1.7-2 3.4-3 5.4-3 3.6 0 6 3.3 4.4 7.2C19.4 15.4 12 20 12 20Z"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M14.8 8.2 9 14l-.8 2.8L11 16l5.8-5.8-2-2Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v6c0 4.6-3 7.6-7 8.5-4-.9-7-3.9-7-8.5V6l7-2.5Z"/><path d="M9 12l2 2 4-4.3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="2"/><path d="M8.5 10.5V7.6a3.5 3.5 0 0 1 7 0v2.9"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M6.8 17.5a3.8 3.8 0 0 1-.6-7.5 5 5 0 0 1 9.6-1.6 4.2 4.2 0 0 1-.5 9.1H6.8Z"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8V21M21 12h-2.2M5.2 12H3M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6M18.4 18.4l-1.6-1.6M7.2 7.2 5.6 5.6"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21.5c-4 0-6.5-2.6-6.5-6.2 0-3 1.9-4.7 2.8-7 .5 1.6 1.6 2.5 2.6 2.5-.3-2.9.6-5.3 3-7.3.2 2.7 1.1 4 2.6 5.7 1.7 1.9 2.5 3.6 2.5 6.1 0 3.6-2.6 6.2-6.5 6.2Z"/><path d="M12 21.5c1.7 0 3-1.2 3-3 0-1.7-1.1-2.6-1.9-3.6-.3 1-.9 1.6-1.6 1.6.1-1.5-.3-2.6-1.4-3.7-.5 3-1.6 3.9-1.6 5.7 0 1.8 1.4 3 2.5 3Z" fill="currentColor" stroke="none" opacity=".0"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 3 5 13.2h5.3L11 21l8-10.2h-5.3L13 3Z"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M4 16.5 9.5 11l4 3.5L21 6.5"/><path d="M15.5 6.5H21v5.5"/></symbol>
+    <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.4" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-runner" viewBox="0 0 24 24"><circle cx="14.5" cy="5" r="1.9"/><path d="M9 20l2.6-4.3-1.8-3 2-3.6 3 2 2.8-1.3M11.5 12.7 7 14.5M13.4 16.1 17 18.6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5S6 10.8 6 14.8a6 6 0 0 0 12 0c0-4-6-11.3-6-11.3Z"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v3M15.5 3.5v3"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 4h9l3 3v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M9 10h6M9 13.5h6M9 17h3.5"/></symbol>
+  </defs>
+</svg>
+
+<style>
+/* =========================================================
+   TOKENS
+========================================================= */
+:root{
+  --bg:#0b0c10;
+  --surface:#15171c;
+  --surface-2:#191b21;
+  --tint:#241209;
+  --tint-strong:#2c1509;
+  --border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.16);
+  --accent:#ff4e1f;
+  --accent-2:#ff7a3d;
+  --accent-dim:rgba(255,78,31,.16);
+  --text:#f6f6f8;
+  --text-dim:#9a9ba5;
+  --text-faint:#5c5d67;
+  --r-xl:26px;
+  --r-lg:20px;
+  --r-md:16px;
+  --r-sm:11px;
+  --shadow-soft:0 18px 40px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:#000;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  color:var(--text);
+}
+button{font-family:inherit;}
+::-webkit-scrollbar{width:0;height:0;}
+*{scrollbar-width:none;}
+
+svg{display:block;}
+.icon{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+a,button{-webkit-tap-highlight-color:transparent;}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px;border-radius:6px;}
+
+/* =========================================================
+   APP FRAME
+========================================================= */
+.app-wrap{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 50% 0%, #141416 0%, #000 62%);
+  padding:0;
+}
+.app{
+  position:relative;
+  width:100%;
+  max-width:430px;
+  height:100vh;
+  height:100dvh;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  isolation:isolate;
+}
+@media (min-width:540px){
+  .app-wrap{padding:28px 0;}
+  .app{
+    height:900px;
+    max-height:94vh;
+    border-radius:44px;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:var(--shadow-soft), 0 0 0 8px #0a0a0b, 0 0 0 9px rgba(255,255,255,.06);
+  }
+}
+
+.app__scroll{
+  flex:1 1 auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:22px 20px 0;
+  scroll-behavior:smooth;
+}
+.app__spacer{height:28px;}
+
+/* =========================================================
+   TYPE HELPERS
+========================================================= */
+.eyebrow{
+  font-size:11.5px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--accent);
+}
+.eyebrow--dim{color:var(--text-dim);}
+h1.page-title{
+  margin:4px 0 0;
+  font-size:32px;
+  line-height:1.12;
+  font-weight:800;
+  letter-spacing:-.02em;
+  color:var(--text);
+}
+.dot{width:9px;height:9px;background:var(--accent);border-radius:2px;display:inline-block;}
+
+/* =========================================================
+   HEADER
+========================================================= */
+.page-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:22px;
+}
+.icon-btn{
+  flex-shrink:0;
+  width:44px;height:44px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:transform .15s ease, background .15s ease, color .15s ease;
+}
+.icon-btn:active{transform:scale(.92);}
+.icon-btn--accent{color:var(--accent);}
+
+/* =========================================================
+   CARD PRIMITIVES
+========================================================= */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:22px;
+}
+.card--tint{
+  background:linear-gradient(155deg, var(--tint-strong) 0%, var(--tint) 46%, #180d08 100%);
+  border-color:rgba(255,120,60,.22);
+  position:relative;
+  overflow:hidden;
+}
+.card--tint::before{
+  content:"";
+  position:absolute;
+  top:-40%; right:-30%;
+  width:280px;height:280px;
+  background:radial-gradient(circle, rgba(255,90,30,.30) 0%, rgba(255,90,30,0) 68%);
+  pointer-events:none;
+}
+.card--tint::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,140,80,.05) 0 2px, transparent 2px 34px);
+  mask-image:linear-gradient(160deg, black, transparent 60%);
+  pointer-events:none;
+}
+.card > *{position:relative;z-index:1;}
+
+.section{margin-top:28px;}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.section-head h2{
+  font-size:21px;font-weight:800;letter-spacing:-.01em;margin:0;color:var(--text);
+}
+.link{
+  background:none;border:none;color:var(--accent);
+  font-size:14px;font-weight:600;cursor:pointer;padding:4px 0;
+}
+.link:active{opacity:.6;}
+
+/* buttons */
+.btn{
+  border:none;border-radius:100px;
+  font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  transition:transform .12s ease, filter .12s ease;
+}
+.btn:active{transform:scale(.98);filter:brightness(.94);}
+.btn--primary{
+  width:100%;
+  background:linear-gradient(135deg, var(--accent-2), var(--accent) 70%);
+  color:#fff;
+  font-size:16px;
+  padding:17px 20px;
+  box-shadow:0 14px 28px -10px rgba(255,78,31,.55);
+}
+.btn--primary .icon{width:16px;height:16px;}
+
+/* =========================================================
+   HOME — hero
+========================================================= */
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.pill{
+  font-size:11.5px;font-weight:800;letter-spacing:.06em;
+  color:#2a0e00;
+  background:linear-gradient(135deg, var(--accent-2), var(--accent));
+  padding:7px 13px;border-radius:100px;
+}
+.hero h2{
+  font-size:38px;line-height:1.06;letter-spacing:-.02em;
+  font-weight:800;margin:0 0 12px;
+}
+.hero p{
+  margin:0 0 22px;color:var(--text-dim);font-size:15px;line-height:1.5;max-width:280px;
+}
+
+/* stats row */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px 14px;
+}
+.stat-card--hi{border-color:var(--accent);background:linear-gradient(160deg, rgba(255,78,31,.10), rgba(255,78,31,.02));}
+.stat-num{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--text);}
+.stat-card--hi .stat-num{color:var(--accent);}
+.stat-label{font-size:13px;font-weight:600;color:var(--text);margin-top:6px;}
+.stat-sub{font-size:12px;color:var(--text-faint);margin-top:3px;line-height:1.35;}
+
+/* quick actions */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.quick-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;
+  text-align:left;cursor:pointer;color:var(--text);
+  display:flex;flex-direction:column;gap:26px;
+  transition:transform .12s ease;
+}
+.quick-card:active{transform:scale(.97);}
+.quick-card--active{
+  background:linear-gradient(160deg, rgba(255,78,31,.14), rgba(255,78,31,.03));
+  border-color:var(--accent);
+}
+.quick-ico{
+  width:38px;height:38px;border-radius:11px;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.quick-ico .icon{width:19px;height:19px;}
+.quick-bottom{display:flex;align-items:center;justify-content:space-between;}
+.quick-card span.qlabel{font-size:15px;font-weight:700;}
+.quick-card .icon{width:18px;height:18px;color:var(--text-faint);}
+.quick-card--active .icon{color:var(--accent);}
+
+/* timeline */
+.timeline{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px 20px 6px;}
+.t-item{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+.t-item:not(:last-child)::before{
+  content:"";position:absolute;left:5.5px;top:16px;bottom:-2px;width:1.5px;background:var(--border-strong);
+}
+.t-time{width:44px;flex-shrink:0;font-size:12.5px;color:var(--text-faint);padding-top:1px;font-variant-numeric:tabular-nums;}
+.t-dot-wrap{width:12px;display:flex;justify-content:center;flex-shrink:0;padding-top:3px;}
+.t-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--text-faint);background:var(--bg);}
+.t-dot--on{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 4px var(--accent-dim);}
+.t-body{flex:1;}
+.t-title{font-size:15px;font-weight:700;color:var(--text);}
+.t-sub{font-size:13px;color:var(--text-dim);margin-top:2px;}
+
+/* membership row */
+.row-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 16px;
+  display:flex;align-items:center;gap:14px;cursor:pointer;
+}
+.row-card:active{transform:scale(.985);}
+.row-ico{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.row-ico .icon{width:20px;height:20px;}
+.row-text{flex:1;min-width:0;}
+.row-title{font-size:15px;font-weight:700;}
+.row-sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+.row-card>.icon{color:var(--text-faint);width:19px;height:19px;}
+
+/* =========================================================
+   SEGMENTED CONTROL
+========================================================= */
+.segmented{
+  display:flex;gap:8px;margin-bottom:22px;
+  overflow-x:auto;padding-bottom:2px;
+}
+.seg-btn{
+  border:none;border-radius:100px;padding:10px 18px;
+  font-size:14px;font-weight:700;white-space:nowrap;cursor:pointer;
+  background:var(--surface);color:var(--text-dim);border:1px solid var(--border);
+  flex-shrink:0;
+}
+.seg-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* start-session style card */
+.start-card{
+  display:flex;align-items:center;gap:14px;
+  padding:18px 18px;margin-bottom:28px;cursor:pointer;
+}
+.start-ico{
+  width:52px;height:52px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg, var(--accent-2), var(--accent));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 10px 20px -8px rgba(255,78,31,.7);
+}
+.start-ico .icon{width:20px;height:20px;}
+.start-text{flex:1;}
+.start-text .row-title{font-size:16px;}
+.start-text .row-sub{color:#e2ac96;}
+.start-card>.icon{color:var(--accent);width:20px;height:20px;}
+
+/* list card w/ rows */
+.list-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;}
+.list-row{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;
+}
+.list-row + .list-row{border-top:1px solid var(--border);}
+.list-row:active{background:rgba(255,255,255,.02);}
+.li-ico{
+  width:44px;height:44px;border-radius:12px;flex-shrink:0;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.li-ico .icon{width:20px;height:20px;}
+.li-text{flex:1;min-width:0;}
+.li-title{font-size:15px;font-weight:700;}
+.li-meta{font-size:12.5px;color:var(--text-dim);margin-top:3px;}
+.li-meta2{font-size:12px;color:var(--text-faint);margin-top:3px;}
+.list-row>.icon{color:var(--text-faint);width:18px;height:18px;flex-shrink:0;}
+
+/* mini stat strip (This week / Fuel check) */
+.mini-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.mini-strip .m-item{text-align:left;padding:4px 0;}
+.mini-strip .m-item + .m-item{border-left:1px solid var(--border);padding-left:14px;margin-left:0;}
+.mini-num{font-size:19px;font-weight:800;}
+.mini-lab{font-size:11.5px;color:var(--text-dim);margin-top:3px;}
+
+/* =========================================================
+   LIFE
+========================================================= */
+.focus-card{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+.focus-text{flex:1;}
+.focus-text .eyebrow{margin-bottom:8px;display:block;}
+.focus-text h3{font-size:22px;line-height:1.24;font-weight:800;margin:0;letter-spacing:-.01em;}
+.focus-frac{font-size:30px;font-weight:800;color:var(--accent);flex-shrink:0;}
+
+.task-row{display:flex;align-items:center;gap:13px;padding:15px 18px;}
+.task-row + .task-row{border-top:1px solid var(--border);}
+.task-check{
+  width:24px;height:24px;border-radius:8px;flex-shrink:0;
+  border:2px solid var(--text-faint);background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:#fff;padding:0;
+}
+.task-check .icon{width:14px;height:14px;stroke-width:3;opacity:0;transition:opacity .12s;}
+.task-check.done{background:var(--accent);border-color:var(--accent);}
+.task-check.done .icon{opacity:1;}
+.task-text{flex:1;min-width:0;}
+.task-title{font-size:15px;font-weight:700;color:var(--text);transition:color .15s;}
+.task-row.done .task-title{color:var(--text-faint);text-decoration:line-through;}
+.task-meta{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+.task-menu{background:none;border:none;color:var(--text-faint);cursor:pointer;padding:6px;flex-shrink:0;}
+
+/* add-task inline form */
+.inline-form{
+  background:var(--surface-2);border:1px dashed var(--border-strong);
+  border-radius:var(--r-lg);padding:14px;margin-bottom:14px;
+  display:none;gap:10px;flex-direction:column;
+}
+.inline-form.open{display:flex;}
+.inline-form input, .inline-form textarea{
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:12px 14px;color:var(--text);font-size:14px;font-family:inherit;width:100%;
+}
+.inline-form textarea{resize:vertical;min-height:70px;}
+.inline-form input::placeholder, .inline-form textarea::placeholder{color:var(--text-faint);}
+.inline-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-ghost{
+  background:none;border:1px solid var(--border);color:var(--text-dim);
+  padding:9px 16px;border-radius:100px;font-size:13.5px;font-weight:600;cursor:pointer;
+}
+.btn-solid-sm{
+  background:var(--accent);border:none;color:#fff;
+  padding:9px 18px;border-radius:100px;font-size:13.5px;font-weight:700;cursor:pointer;
+}
+
+/* fuel / water */
+.water-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.progress-track{flex:1;height:8px;border-radius:100px;background:var(--surface-2);overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg, var(--accent-2), var(--accent));border-radius:100px;}
+
+/* habits */
+.habit-row{display:flex;align-items:center;gap:14px;padding:15px 18px;}
+.habit-row + .habit-row{border-top:1px solid var(--border);}
+.streak-badge{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:44px;height:44px;border-radius:12px;background:var(--accent-dim);color:var(--accent);flex-shrink:0;
+}
+.streak-badge b{font-size:15px;line-height:1;}
+.streak-badge span{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.habit-toggle{
+  width:30px;height:30px;border-radius:50%;border:2px solid var(--text-faint);
+  background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.habit-toggle .icon{width:15px;height:15px;stroke-width:3;opacity:0;}
+.habit-toggle.done{background:var(--accent);border-color:var(--accent);}
+.habit-toggle.done .icon{opacity:1;}
+
+/* notes */
+.note-row{padding:16px 18px;}
+.note-row + .note-row{border-top:1px solid var(--border);}
+.note-title{font-size:15px;font-weight:700;}
+.note-snip{font-size:13px;color:var(--text-dim);margin-top:4px;line-height:1.45;}
+.note-date{font-size:11.5px;color:var(--text-faint);margin-top:8px;text-transform:uppercase;letter-spacing:.04em;}
+
+/* calendar */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:22px;}
+.day-cell{
+  aspect-ratio:1/1.15;border-radius:14px;background:var(--surface);border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+}
+.day-cell span:first-child{font-size:10.5px;color:var(--text-faint);text-transform:uppercase;font-weight:700;}
+.day-cell b{font-size:15px;font-weight:700;}
+.day-cell.today{background:linear-gradient(160deg, var(--accent-2), var(--accent));border-color:transparent;}
+.day-cell.today span, .day-cell.today b{color:#fff;}
+
+/* =========================================================
+   REFLECT
+========================================================= */
+.recovery-card{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;}
+.rc-num{font-size:42px;font-weight:800;letter-spacing:-.02em;margin:6px 0 6px;}
+.rc-sub{font-size:13px;color:var(--text-dim);}
+.ring-wrap{position:relative;width:104px;height:104px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.ring-pct{font-size:18px;font-weight:800;}
+.ring-lab{font-size:9.5px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:1px;}
+
+.mood-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.mood-btn{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:pointer;color:var(--text-dim);
+}
+.mood-btn .icon{width:20px;height:20px;}
+.mood-btn span{font-size:12px;font-weight:600;}
+.mood-btn.active{background:linear-gradient(160deg, rgba(255,78,31,.16), rgba(255,78,31,.03));border-color:var(--accent);color:var(--accent);}
+.mood-btn.active span{color:var(--accent);font-weight:700;}
+
+.weekly-card{margin-top:22px;}
+.weekly-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.weekly-head .icon{width:18px;height:18px;color:var(--accent);}
+.weekly-text{font-size:16px;font-weight:700;line-height:1.4;margin:0 0 20px;color:var(--text);}
+.bars{display:flex;align-items:flex-end;justify-content:space-between;height:110px;gap:8px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px;}
+.bar{width:100%;border-radius:7px;background:var(--surface-2);transition:height .5s cubic-bezier(.2,.7,.3,1);}
+.bar.on{background:linear-gradient(180deg, var(--accent-2), var(--accent));}
+.bar-day{font-size:11px;color:var(--text-faint);font-weight:600;}
+
+.journal-item{padding:18px;display:flex;gap:14px;}
+.journal-item + .journal-item{border-top:1px solid var(--border);}
+.j-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:var(--accent-dim);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.j-avatar .icon{width:16px;height:16px;}
+.j-body{flex:1;min-width:0;}
+.j-time{font-size:11px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+.j-title{font-size:16px;font-weight:800;margin:5px 0 6px;}
+.j-text{font-size:13.5px;color:var(--text-dim);line-height:1.5;}
+.tag-pill{
+  display:inline-block;margin-top:10px;font-size:11.5px;font-weight:600;
+  background:var(--surface-2);color:var(--text-dim);padding:5px 12px;border-radius:100px;border:1px solid var(--border);
+}
+
+/* =========================================================
+   BOTTOM NAV
+========================================================= */
+.bottom-nav{
+  flex:0 0 auto;
+  display:flex;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  padding:10px 6px calc(10px + env(safe-area-inset-bottom));
+  position:relative;
+  z-index:5;
+}
+.nav-btn{
+  flex:1;background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:6px 2px;color:var(--text-faint);
+}
+.nav-btn .icon{width:23px;height:23px;}
+.nav-btn span{font-size:11px;font-weight:600;}
+.nav-btn.active{color:var(--accent);}
+.nav-btn:active{transform:scale(.93);}
+
+/* =========================================================
+   PAGES / TABS / MOTION
+========================================================= */
+.page{display:none;}
+.page.active{display:block;animation:fadeIn .28s ease;}
+.subview{display:none;}
+.subview.active{display:block;animation:fadeIn .22s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@media (prefers-reduced-motion:reduce){
+  .page.active, .subview.active{animation:none;}
+  .bar{transition:none;}
+}
+
+/* toast */
+.toast{
+  position:absolute;left:20px;right:20px;bottom:92px;
+  background:#1d1f26;border:1px solid var(--border-strong);
+  color:var(--text);font-size:13.5px;font-weight:600;
+  padding:13px 16px;border-radius:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,.45);
+  display:flex;align-items:center;gap:10px;
+  transform:translateY(16px);opacity:0;pointer-events:none;
+  transition:transform .25s cubic-bezier(.2,.8,.3,1), opacity .25s ease;
+  z-index:40;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="app-wrap">
+<div class="app" id="app">
+  <div class="app__scroll" id="scroll">
+
+  <!-- ================= HOME ================= -->
+  <section class="page active" id="page-home">
+    <div class="page-header">
+      <div>
+        <span class="eyebrow">Good morning, Alex</span>
+        <h1 class="page-title">Your command<br/>center</h1>
+      </div>
+      <button class="icon-btn" aria-label="Profile" data-toast="Profile & settings">
+        <svg class="icon"><use href="#i-user"/></svg>
+      </button>
+    </div>
+
+    <div class="card card--tint">
+      <div class="hero-top">
+        <span class="eyebrow eyebrow--dim">Member access</span>
+        <span class="pill">APEX ELITE</span>
+      </div>
+      <div class="hero">
+        <h2>Ready when<br/>you are.</h2>
+        <p>Your next strong choice starts here.</p>
+        <button class="btn btn--primary" data-goto="train">
+          <svg class="icon"><use href="#i-play"/></svg>
+          Start quick workout
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card stat-card--hi">
+        <div class="stat-num">84</div>
+        <div class="stat-label">Readiness</div>
+        <div class="stat-sub">+8 from yesterday</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">04</div>
+        <div class="stat-label">Day streak</div>
+        <div class="stat-sub">Best: 12 days</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">12.4k</div>
+        <div class="stat-label">Steps</div>
+        <div class="stat-sub">Goal 10k</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h2>Make it happen</h2></div>
+      <div class="quick-grid">
+        <button class="quick-card quick-card--active" data-goto="train" data-sub="train-routines">
+          <div class="quick-ico"><svg class="icon"><use href="#i-dumbbell"/></svg></div>
+          <div class="quick-bottom"><span class="qlabel">Quick lift</span><svg class="icon"><use href="#i-arrow-r"/></svg></div>
+        </button>
+        <button class="quick-card" data-goto="life" data-sub="life-habits">
+          <div class="quick-ico"><svg class="icon"><use href="#i-check-circle"/></svg></div>
+          <div class="quick-bottom"><span class="qlabel">Log habit</span><svg class="icon"><use href="#i-arrow-r"/></svg></div>
+        </button>
+        <button class="quick-card" data-goto="life" data-sub="life-notes">
+          <div class="quick-ico"><svg class="icon"><use href="#i-pencil"/></svg></div>
+          <div class="quick-bottom"><span class="qlabel">Add note</span><svg class="icon"><use href="#i-arrow-r"/></svg></div>
+        </button>
+        <button class="quick-card" data-goto="reflect">
+          <div class="quick-ico"><svg class="icon"><use href="#i-heart"/></svg></div>
+          <div class="quick-bottom"><span class="qlabel">Check in</span><svg class="icon"><use href="#i-arrow-r"/></svg></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>Today</h2>
+        <button class="link" data-goto="life" data-sub="life-calendar">View calendar</button>
+      </div>
+      <div class="timeline">
+        <div class="t-item">
+          <div class="t-time">07:30</div>
+          <div class="t-dot-wrap"><div class="t-dot t-dot--on"></div></div>
+          <div class="t-body"><div class="t-title">Push power</div><div class="t-sub">Training block · Main floor</div></div>
+        </div>
+        <div class="t-item">
+          <div class="t-time">12:00</div>
+          <div class="t-dot-wrap"><div class="t-dot"></div></div>
+          <div class="t-body"><div class="t-title">Hydration check</div><div class="t-sub">Habit · 2 of 3 bottles</div></div>
+        </div>
+        <div class="t-item">
+          <div class="t-time">22:30</div>
+          <div class="t-dot-wrap"><div class="t-dot"></div></div>
+          <div class="t-body"><div class="t-title">Wind down</div><div class="t-sub">Recovery · 7h sleep target</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row-card" data-toast="Opening membership details…">
+        <div class="row-ico"><svg class="icon"><use href="#i-shield"/></svg></div>
+        <div class="row-text">
+          <div class="row-title">APEX ELITE membership</div>
+          <div class="row-sub">Renews 14 Sep 2025</div>
+        </div>
+        <svg class="icon"><use href="#i-chevron-r"/></svg>
+      </div>
+    </div>
+    <div class="app__spacer"></div>
+  </section>
+
+  <!-- ================= TRAIN ================= -->
+  <section class="page" id="page-train">
+    <div class="page-header">
+      <div><span class="eyebrow">Training floor</span><h1 class="page-title">Train smarter</h1></div>
+      <button class="icon-btn" aria-label="Create routine" data-toast="Create a new routine">
+        <svg class="icon"><use href="#i-plus"/></svg>
+      </button>
+    </div>
+
+    <div class="segmented" role="tablist" aria-label="Train views">
+      <button class="seg-btn active" data-sub="train-overview">Overview</button>
+      <button class="seg-btn" data-sub="train-routines">Routines</button>
+      <button class="seg-btn" data-sub="train-history">History</button>
+    </div>
+
+    <!-- Overview -->
+    <div class="subview active" id="train-overview">
+      <div class="card card--tint start-card" data-toast="Session started — Push power">
+        <div class="start-ico"><svg class="icon"><use href="#i-play"/></svg></div>
+        <div class="start-text">
+          <div class="row-title">Start a session</div>
+          <div class="row-sub">Pick up where you left off</div>
+        </div>
+        <svg class="icon"><use href="#i-arrow-r"/></svg>
+      </div>
+
+      <div class="section-head">
+        <h2>Your routines</h2>
+        <button class="link" data-sub="train-routines">See all</button>
+      </div>
+      <div class="list-card" id="routine-list-overview"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>This week</h2></div>
+        <div class="card mini-strip">
+          <div class="m-item"><div class="mini-num">4</div><div class="mini-lab">Sessions</div></div>
+          <div class="m-item"><div class="mini-num">20,940 kg</div><div class="mini-lab">Volume moved</div></div>
+          <div class="m-item"><div class="mini-num">48 min</div><div class="mini-lab">Avg length</div></div>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+
+    <!-- Routines -->
+    <div class="subview" id="train-routines">
+      <div class="section-head"><h2>All routines</h2></div>
+      <div class="list-card" id="routine-list-full"></div>
+      <div class="section">
+        <button class="row-card" style="width:100%;border-style:dashed;justify-content:center;" data-toast="Build a new routine">
+          <svg class="icon" style="color:var(--accent)"><use href="#i-plus"/></svg>
+          <div class="row-title">Create custom routine</div>
+        </button>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+
+    <!-- History -->
+    <div class="subview" id="train-history">
+      <div class="section-head"><h2>Recent sessions</h2></div>
+      <div class="list-card">
+        <div class="list-row" data-toast="Opening session log">
+          <div class="li-ico"><svg class="icon"><use href="#i-dumbbell"/></svg></div>
+          <div class="li-text"><div class="li-title">Push power</div><div class="li-meta">Tue, 2 Sep · 46 min</div><div class="li-meta2">6,620 kg moved</div></div>
+          <svg class="icon"><use href="#i-chevron-r"/></svg>
+        </div>
+        <div class="list-row" data-toast="Opening session log">
+          <div class="li-ico"><svg class="icon"><use href="#i-heart"/></svg></div>
+          <div class="li-text"><div class="li-title">Lower strength</div><div class="li-meta">Sun, 31 Aug · 54 min</div><div class="li-meta2">8,340 kg moved</div></div>
+          <svg class="icon"><use href="#i-chevron-r"/></svg>
+        </div>
+        <div class="list-row" data-toast="Opening session log">
+          <div class="li-ico"><svg class="icon"><use href="#i-runner"/></svg></div>
+          <div class="li-text"><div class="li-title">Pull volume</div><div class="li-meta">Fri, 29 Aug · 42 min</div><div class="li-meta2">5,760 kg moved</div></div>
+          <svg class="icon"><use href="#i-chevron-r"/></svg>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+  </section>
+
+  <!-- ================= LIFE ================= -->
+  <section class="page" id="page-life">
+    <div class="page-header">
+      <div><span class="eyebrow">Life system</span><h1 class="page-title">Stay in rhythm</h1></div>
+      <button class="icon-btn" aria-label="Add" data-toast="Quick add">
+        <svg class="icon"><use href="#i-plus"/></svg>
+      </button>
+    </div>
+
+    <div class="segmented" role="tablist" aria-label="Life views">
+      <button class="seg-btn active" data-sub="life-tasks">Tasks</button>
+      <button class="seg-btn" data-sub="life-habits">Habits</button>
+      <button class="seg-btn" data-sub="life-notes">Notes</button>
+      <button class="seg-btn" data-sub="life-calendar">Calendar</button>
+    </div>
+
+    <!-- Tasks -->
+    <div class="subview active" id="life-tasks">
+      <div class="card card--tint focus-card">
+        <div class="focus-text">
+          <span class="eyebrow">Today's focus</span>
+          <h3>Small actions. Big signal.</h3>
+        </div>
+        <div class="focus-frac" id="focus-frac">1/3</div>
+      </div>
+
+      <div class="section-head">
+        <h2>Priority list</h2>
+        <button class="link" id="btn-add-task">Add task</button>
+      </div>
+
+      <div class="inline-form" id="form-task">
+        <input type="text" id="input-task-title" placeholder="What needs to happen?" maxlength="60" />
+        <div class="inline-actions">
+          <button class="btn-ghost" data-cancel="form-task">Cancel</button>
+          <button class="btn-solid-sm" id="btn-save-task">Add to list</button>
+        </div>
+      </div>
+
+      <div class="list-card" id="task-list"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>Fuel check</h2></div>
+        <div class="card">
+          <div class="water-row">
+            <svg class="icon" style="color:var(--accent)"><use href="#i-drop"/></svg>
+            <div style="flex:1">
+              <div class="row-title" style="margin-bottom:8px;">Water · <span id="water-count">2</span> of 3 bottles</div>
+              <div class="progress-track"><div class="progress-fill" id="water-fill" style="width:66%"></div></div>
+            </div>
+          </div>
+          <div class="mini-strip" style="margin-top:14px;">
+            <div class="m-item"><div class="mini-num">2/3</div><div class="mini-lab">Meals logged</div></div>
+            <div class="m-item"><div class="mini-num">1,840</div><div class="mini-lab">Calories</div></div>
+            <div class="m-item"><div class="mini-num">96g</div><div class="mini-lab">Protein</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+
+    <!-- Habits -->
+    <div class="subview" id="life-habits">
+      <div class="section-head"><h2>Daily habits</h2></div>
+      <div class="list-card">
+        <div class="habit-row">
+          <div class="streak-badge"><b>5</b><span>days</span></div>
+          <div class="li-text"><div class="li-title">Morning stretch</div><div class="li-meta">10 min mobility flow</div></div>
+          <button class="habit-toggle done"><svg class="icon"><use href="#i-check-circle"/></svg></button>
+        </div>
+        <div class="habit-row">
+          <div class="streak-badge"><b>12</b><span>days</span></div>
+          <div class="li-text"><div class="li-title">No sugar after 8pm</div><div class="li-meta">Evening discipline</div></div>
+          <button class="habit-toggle done"><svg class="icon"><use href="#i-check-circle"/></svg></button>
+        </div>
+        <div class="habit-row">
+          <div class="streak-badge"><b>3</b><span>days</span></div>
+          <div class="li-text"><div class="li-title">10k steps</div><div class="li-meta">12.4k logged today</div></div>
+          <button class="habit-toggle"><svg class="icon"><use href="#i-check-circle"/></svg></button>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="subview" id="life-notes">
+      <div class="section-head">
+        <h2>Notes</h2>
+        <button class="link" id="btn-add-note">Add note</button>
+      </div>
+      <div class="inline-form" id="form-note">
+        <input type="text" id="input-note-title" placeholder="Title" maxlength="40" />
+        <textarea id="input-note-body" placeholder="Write it down before it slips…"></textarea>
+        <div class="inline-actions">
+          <button class="btn-ghost" data-cancel="form-note">Cancel</button>
+          <button class="btn-solid-sm" id="btn-save-note">Save note</button>
+        </div>
+      </div>
+      <div class="list-card" id="note-list">
+        <div class="note-row">
+          <div class="note-title">Knee feels tight</div>
+          <div class="note-snip">Ease off deep squats this week, keep range comfortable.</div>
+          <div class="note-date">2 Sep</div>
+        </div>
+        <div class="note-row">
+          <div class="note-title">Trainer feedback</div>
+          <div class="note-snip">Brace the core earlier on the pull — Sam wants tighter form.</div>
+          <div class="note-date">30 Aug</div>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="subview" id="life-calendar">
+      <div class="section-head"><h2>This week</h2></div>
+      <div class="week-strip">
+        <div class="day-cell"><span>Mon</span><b>31</b></div>
+        <div class="day-cell"><span>Tue</span><b>1</b></div>
+        <div class="day-cell"><span>Wed</span><b>2</b></div>
+        <div class="day-cell"><span>Thu</span><b>3</b></div>
+        <div class="day-cell"><span>Fri</span><b>4</b></div>
+        <div class="day-cell today"><span>Sat</span><b>5</b></div>
+        <div class="day-cell"><span>Sun</span><b>6</b></div>
+      </div>
+      <div class="section-head"><h2>Agenda</h2></div>
+      <div class="timeline">
+        <div class="t-item">
+          <div class="t-time">07:30</div>
+          <div class="t-dot-wrap"><div class="t-dot t-dot--on"></div></div>
+          <div class="t-body"><div class="t-title">Push power</div><div class="t-sub">Training block · Main floor</div></div>
+        </div>
+        <div class="t-item">
+          <div class="t-time">12:00</div>
+          <div class="t-dot-wrap"><div class="t-dot"></div></div>
+          <div class="t-body"><div class="t-title">Hydration check</div><div class="t-sub">Habit · 2 of 3 bottles</div></div>
+        </div>
+        <div class="t-item">
+          <div class="t-time">22:30</div>
+          <div class="t-dot-wrap"><div class="t-dot"></div></div>
+          <div class="t-body"><div class="t-title">Wind down</div><div class="t-sub">Recovery · 7h sleep target</div></div>
+        </div>
+      </div>
+      <div class="app__spacer"></div>
+    </div>
+  </section>
+
+  <!-- ================= REFLECT ================= -->
+  <section class="page" id="page-reflect">
+    <div class="page-header">
+      <div><span class="eyebrow">Daily reflection</span><h1 class="page-title">Check in with you</h1></div>
+      <button class="icon-btn" aria-label="More" data-toast="Reflection history">
+        <svg class="icon"><use href="#i-dots"/></svg>
+      </button>
+    </div>
+
+    <div class="card recovery-card">
+      <div>
+        <span class="eyebrow">Recovery score</span>
+        <div class="rc-num">78</div>
+        <div class="rc-sub">Good to train · 6h 48m sleep</div>
+      </div>
+      <div class="ring-wrap">
+        <svg viewBox="0 0 104 104" width="104" height="104">
+          <circle cx="52" cy="52" r="46" fill="none" stroke="var(--surface-2)" stroke-width="9"/>
+          <circle cx="52" cy="52" r="46" fill="none" stroke="url(#ringGrad)" stroke-width="9"
+                  stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="64"/>
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff7a3d"/>
+              <stop offset="100%" stop-color="#ff4e1f"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="ring-center"><div class="ring-pct">78%</div><div class="ring-lab">Ready</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>How are you feeling?</h2>
+        <button class="link" data-toast="Showing today's check-in">Today</button>
+      </div>
+      <div class="mood-grid" id="mood-grid">
+        <button class="mood-btn" data-mood="Low"><svg class="icon"><use href="#i-cloud"/></svg><span>Low</span></button>
+        <button class="mood-btn" data-mood="Flat"><svg class="icon"><use href="#i-minus"/></svg><span>Flat</span></button>
+        <button class="mood-btn" data-mood="Good"><svg class="icon"><use href="#i-sun"/></svg><span>Good</span></button>
+        <button class="mood-btn active" data-mood="Strong"><svg class="icon"><use href="#i-flame"/></svg><span>Strong</span></button>
+        <button class="mood-btn" data-mood="Locked in"><svg class="icon"><use href="#i-zap"/></svg><span>Locked in</span></button>
+      </div>
+    </div>
+
+    <div class="card weekly-card">
+      <div class="weekly-head">
+        <span class="eyebrow">Weekly signal</span>
+        <svg class="icon"><use href="#i-trend"/></svg>
+      </div>
+      <p class="weekly-text">Your best training days start with a quiet evening.</p>
+      <div class="bars" id="bars">
+        <div class="bar-col"><div class="bar" style="height:40%"></div><span class="bar-day">M</span></div>
+        <div class="bar-col"><div class="bar" style="height:55%"></div><span class="bar-day">T</span></div>
+        <div class="bar-col"><div class="bar" style="height:32%"></div><span class="bar-day">W</span></div>
+        <div class="bar-col"><div class="bar" style="height:74%"></div><span class="bar-day">T</span></div>
+        <div class="bar-col"><div class="bar" style="height:62%"></div><span class="bar-day">F</span></div>
+        <div class="bar-col"><div class="bar on" style="height:96%"></div><span class="bar-day">S</span></div>
+        <div class="bar-col"><div class="bar" style="height:48%"></div><span class="bar-day">S</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <h2>Private journal</h2>
+        <button class="link" data-toast="Opening full journal…">View all</button>
+      </div>
+      <div class="list-card" id="journal-list">
+        <div class="journal-item">
+          <div class="j-avatar"><svg class="icon"><use href="#i-lock"/></svg></div>
+          <div class="j-body">
+            <div class="j-time">Today · 08:14</div>
+            <div class="j-title">Strong start</div>
+            <div class="j-text">Energy felt steady. Kept the pace controlled and left room to recover.</div>
+            <span class="tag-pill">Focused</span>
+          </div>
+        </div>
+        <div class="journal-item">
+          <div class="j-avatar"><svg class="icon"><use href="#i-lock"/></svg></div>
+          <div class="j-body">
+            <div class="j-time">Yesterday · 21:40</div>
+            <div class="j-title">Reset evening</div>
+            <div class="j-text">A quiet walk helped clear the noise before tomorrow's lower session.</div>
+            <span class="tag-pill">Calm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="inline-form" id="form-reflect">
+        <input type="text" id="input-reflect-title" placeholder="Give it a title" maxlength="40" />
+        <textarea id="input-reflect-body" placeholder="How did today go?"></textarea>
+        <div class="inline-actions">
+          <button class="btn-ghost" data-cancel="form-reflect">Cancel</button>
+          <button class="btn-solid-sm" id="btn-save-reflect">Save entry</button>
+        </div>
+      </div>
+      <button class="btn btn--primary" id="btn-write-reflection">
+        <svg class="icon"><use href="#i-pencil"/></svg>
+        Write a reflection
+      </button>
+    </div>
+    <div class="app__spacer"></div>
+  </section>
+
+  </div><!-- /app__scroll -->
+
+  <div class="toast" id="toast">Saved</div>
+
+  <!-- ================= BOTTOM NAV ================= -->
+  <nav class="bottom-nav" aria-label="Primary">
+    <button class="nav-btn active" data-page="home"><svg class="icon"><use href="#i-home"/></svg><span>Home</span></button>
+    <button class="nav-btn" data-page="train"><svg class="icon"><use href="#i-dumbbell"/></svg><span>Train</span></button>
+    <button class="nav-btn" data-page="life"><svg class="icon"><use href="#i-check-circle"/></svg><span>Life</span></button>
+    <button class="nav-btn" data-page="reflect"><svg class="icon"><use href="#i-book-open"/></svg><span>Reflect</span></button>
+  </nav>
+</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- shared data ---------- */
+  var ROUTINES = [
+    {icon:'i-dumbbell', title:'Push power',    meta:'Chest · shoulders · triceps', stat:'48 min · 6,840 kg'},
+    {icon:'i-heart',    title:'Lower strength', meta:'Quads · glutes · core',       stat:'52 min · 8,120 kg'},
+    {icon:'i-runner',   title:'Pull volume',    meta:'Back · biceps · rear delts',  stat:'44 min · 5,980 kg'}
+  ];
+
+  function routineRow(r){
+    return '<div class="list-row" data-toast="Opening '+r.title+'">'+
+      '<div class="li-ico"><svg class="icon"><use href="#'+r.icon+'"/></svg></div>'+
+      '<div class="li-text"><div class="li-title">'+r.title+'</div><div class="li-meta">'+r.meta+'</div><div class="li-meta2">'+r.stat+'</div></div>'+
+      '<svg class="icon"><use href="#i-chevron-r"/></svg></div>';
+  }
+  ['routine-list-overview','routine-list-full'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.innerHTML = ROUTINES.map(routineRow).join('');
+  });
+
+  /* ---------- toast ---------- */
+  var toastEl = document.getElementById('toast');
+  var toastTimer;
+  function toast(msg){
+    if(!msg) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  /* ---------- delegated click for data-toast ---------- */
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-toast]');
+    if(t) toast(t.getAttribute('data-toast'));
+  });
+
+  /* ---------- bottom nav / page switching ---------- */
+  var scrollEl = document.getElementById('scroll');
+  var pages = document.querySelectorAll('.page');
+  var navBtns = document.querySelectorAll('.nav-btn');
+
+  function showPage(name, subId){
+    pages.forEach(function(p){ p.classList.toggle('active', p.id === 'page-'+name); });
+    navBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.page === name); });
+    if(subId) showSub(subId);
+    scrollEl.scrollTo({top:0, behavior:'auto'});
+  }
+
+  navBtns.forEach(function(b){
+    b.addEventListener('click', function(){ showPage(b.dataset.page); });
+  });
+
+  document.querySelectorAll('[data-goto]').forEach(function(el){
+    el.addEventListener('click', function(){
+      showPage(el.dataset.goto, el.dataset.sub);
+    });
+  });
+
+  /* ---------- segmented sub-tabs (Train / Life) ---------- */
+  function showSub(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var group = el.closest('.page');
+    group.querySelectorAll('.subview').forEach(function(s){ s.classList.toggle('active', s.id === id); });
+    group.querySelectorAll('.seg-btn').forEach(function(btn){ btn.classList.toggle('active', btn.dataset.sub === id); });
+  }
+  document.querySelectorAll('.seg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ showSub(btn.dataset.sub); });
+  });
+
+  /* ---------- tasks ---------- */
+  var TASKS = [
+    {title:'Drink 3L of water', meta:'Wellness · daily', done:true},
+    {title:'Mobility flow',      meta:'Training · 12 min', done:false},
+    {title:'Review weekly goal', meta:'Life · 5 min', done:false}
+  ];
+  var taskListEl = document.getElementById('task-list');
+  var fracEl = document.getElementById('focus-frac');
+
+  function renderTasks(){
+    taskListEl.innerHTML = TASKS.map(function(t, i){
+      return '<div class="task-row '+(t.done?'done':'')+'" data-i="'+i+'">'+
+        '<button class="task-check '+(t.done?'done':'')+'" aria-label="Toggle task"><svg class="icon"><use href="#i-check-circle"/></svg></button>'+
+        '<div class="task-text"><div class="task-title">'+t.title+'</div><div class="task-meta">'+t.meta+'</div></div>'+
+        '<button class="task-menu" data-toast="Edit or delete task" aria-label="More"><svg class="icon"><use href="#i-dots"/></svg></button>'+
+      '</div>';
+    }).join('');
+    var doneCount = TASKS.filter(function(t){return t.done;}).length;
+    fracEl.textContent = doneCount + '/' + TASKS.length;
+  }
+  renderTasks();
+
+  taskListEl.addEventListener('click', function(e){
+    var check = e.target.closest('.task-check');
+    if(!check) return;
+    var row = check.closest('.task-row');
+    var i = +row.dataset.i;
+    TASKS[i].done = !TASKS[i].done;
+    renderTasks();
+  });
+
+  var addTaskBtn = document.getElementById('btn-add-task');
+  var taskForm = document.getElementById('form-task');
+  var taskInput = document.getElementById('input-task-title');
+  addTaskBtn.addEventListener('click', function(){
+    taskForm.classList.add('open');
+    taskInput.focus();
+  });
+  document.getElementById('btn-save-task').addEventListener('click', function(){
+    var v = taskInput.value.trim();
+    if(!v) return;
+    TASKS.unshift({title:v, meta:'Life · just now', done:false});
+    taskInput.value = '';
+    taskForm.classList.remove('open');
+    renderTasks();
+    toast('Task added to priority list');
+  });
+
+  /* ---------- water tracker ---------- */
+  var waterCount = 2;
+  var waterCountEl = document.getElementById('water-count');
+  var waterFillEl = document.getElementById('water-fill');
+  document.querySelector('.water-row').addEventListener('click', function(){
+    waterCount = waterCount >= 3 ? 0 : waterCount + 1;
+    waterCountEl.textContent = waterCount;
+    waterFillEl.style.width = (waterCount/3*100) + '%';
+    if(waterCount >= 3) toast('Hydration goal hit 💧');
+  });
+
+  /* ---------- habit toggles ---------- */
+  document.querySelectorAll('.habit-toggle').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      btn.classList.toggle('done');
+      toast(btn.classList.contains('done') ? 'Habit logged for today' : 'Habit unmarked');
+    });
+  });
+
+  /* ---------- generic inline-form cancel ---------- */
+  document.querySelectorAll('[data-cancel]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById(btn.dataset.cancel).classList.remove('open');
+    });
+  });
+
+  /* ---------- notes ---------- */
+  var noteListEl = document.getElementById('note-list');
+  document.getElementById('btn-add-note').addEventListener('click', function(){
+    document.getElementById('form-note').classList.add('open');
+    document.getElementById('input-note-title').focus();
+  });
+  document.getElementById('btn-save-note').addEventListener('click', function(){
+    var title = document.getElementById('input-note-title').value.trim();
+    var body = document.getElementById('input-note-body').value.trim();
+    if(!title) return;
+    var row = document.createElement('div');
+    row.className = 'note-row';
+    row.innerHTML = '<div class="note-title">'+title+'</div><div class="note-snip">'+(body||'—')+'</div><div class="note-date">Just now</div>';
+    noteListEl.prepend(row);
+    document.getElementById('input-note-title').value = '';
+    document.getElementById('input-note-body').value = '';
+    document.getElementById('form-note').classList.remove('open');
+    toast('Note saved');
+  });
+
+  /* ---------- mood selector ---------- */
+  document.querySelectorAll('.mood-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      toast('Feeling logged: ' + btn.dataset.mood);
+    });
+  });
+
+  /* ---------- write a reflection ---------- */
+  var journalListEl = document.getElementById('journal-list');
+  document.getElementById('btn-write-reflection').addEventListener('click', function(){
+    document.getElementById('form-reflect').classList.add('open');
+    document.getElementById('input-reflect-title').focus();
+    document.getElementById('input-reflect-title').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  document.getElementById('btn-save-reflect').addEventListener('click', function(){
+    var title = document.getElementById('input-reflect-title').value.trim();
+    var body = document.getElementById('input-reflect-body').value.trim();
+    if(!title){ toast('Give your entry a title'); return; }
+    var item = document.createElement('div');
+    item.className = 'journal-item';
+    item.innerHTML = '<div class="j-avatar"><svg class="icon"><use href="#i-lock"/></svg></div>'+
+      '<div class="j-body"><div class="j-time">Today · just now</div><div class="j-title">'+title+'</div>'+
+      '<div class="j-text">'+(body||'No further notes.')+'</div><span class="tag-pill">New</span></div>';
+    journalListEl.prepend(item);
+    document.getElementById('input-reflect-title').value = '';
+    document.getElementById('input-reflect-body').value = '';
+    document.getElementById('form-reflect').classList.remove('open');
+    toast('Reflection saved');
+  });
+
+  /* ---------- calendar day cells ---------- */
+  document.querySelectorAll('.day-cell').forEach(function(cell){
+    cell.addEventListener('click', function(){
+      document.querySelectorAll('.day-cell').forEach(function(c){ c.classList.remove('today'); });
+      cell.classList.add('today');
+    });
+  });
+
+})();
+</script>
+</body>
+</html>
