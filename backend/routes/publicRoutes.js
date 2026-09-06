@@ -84,7 +84,8 @@ router.get(
 );
 
 // GET /api/public/branding/:slug
-// Small JSON payload the frontend reads on page load (src/main.jsx) to
+// Small JSON payload the customer app reads on page load
+// (frontend-customer/src/main.jsx) to
 // swap <title>, apple-touch-icon and the theme-color meta tag directly —
 // needed separately from the manifest because iOS Safari never reads
 // manifest.json at all.

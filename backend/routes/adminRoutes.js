@@ -54,7 +54,7 @@ router.put(
 );
 
 // Lets a gym owner pull up their own shareable install link + QR to print
-// or display in-club (frontend/src/pages/admin/GymProfile.jsx).
+// or display in-club (frontend-staff/src/pages/admin/GymProfile.jsx).
 router.get(
   '/install-qr',
   asyncHandler(async (req, res) => {
