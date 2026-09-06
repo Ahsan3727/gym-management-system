@@ -5,9 +5,10 @@
   "private": true,
   "main": "api/index.js",
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build": "npm --prefix frontend-customer install && npm --prefix frontend-customer run build && npm --prefix frontend-staff install && npm --prefix frontend-staff run build && cp -r frontend-staff/dist frontend-customer/dist/staff",
     "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:customer": "npm run dev --prefix frontend-customer",
+    "dev:staff": "npm run dev --prefix frontend-staff",
     "seed": "npm run seed --prefix backend",
     "backfill-slugs": "node scripts/backfill-slugs.js",
     "start": "npm run start --prefix backend"
