@@ -115,4 +115,28 @@ router.get(
   })
 );
 
+// GET /api/public/manifest/staff
+// Web App Manifest for the Staff Operations portal (Admin, Trainer, SuperAdmin).
+router.get(
+  '/manifest/staff',
+  asyncHandler(async (req, res) => {
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({
+      name: 'Ironline Staff & Operations',
+      short_name: 'Staff Portal',
+      description: 'Operations management, attendance check-in, billing, and trainer studio for gym staff.',
+      icons: [
+        { src: DEFAULT_ICON_192, type: 'image/png', sizes: '192x192' },
+        { src: DEFAULT_ICON_512, type: 'image/png', sizes: '512x512', purpose: 'any maskable' },
+      ],
+      start_url: '/staff',
+      background_color: DEFAULT_BACKGROUND_COLOR,
+      theme_color: DEFAULT_THEME_COLOR,
+      display: 'standalone',
+      orientation: 'any',
+    });
+  })
+);
+
 module.exports = router;
+

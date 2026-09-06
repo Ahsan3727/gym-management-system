@@ -31,18 +31,20 @@ export default function Analytics() {
   const [range, setRange] = useState('30d');
   const chart = useChartColors();
 
+  const days = RANGE_DAYS[range];
+
   useEffect(() => {
-    api.get('/customer/analytics')
+    api.get('/customer/analytics', { params: { days } })
       .then((res) => setData(res.data))
       .catch(() => setError('Could not load analytics.'));
-  }, []);
+  }, [days]);
 
-  const days = RANGE_DAYS[range];
   const cutoff = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - days);
     return d;
   }, [days]);
+
 
   if (error) return <div className="text-sm text-ember-dark">{error}</div>;
   if (!data) return <div className="text-sm text-steel">Loading…</div>;

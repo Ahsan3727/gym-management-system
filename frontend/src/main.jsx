@@ -43,31 +43,63 @@ async function resolveTenantBranding(slug) {
 
     const tenant = { slug, ...branding };
     try {
-      sessionStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(tenant));
+      localStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(tenant));
     } catch {
       // ignore storage failures — branding still applies for this load
     }
     return tenant;
   } catch {
-    // Network hiccup on a cold /g/:slug visit — fall through to whatever
-    // static index.html already has (default Ironline branding) rather
-    // than leaving the page half-swapped.
+    // Network hiccup on a cold /g/:slug visit — fall through to default index.html
     return null;
   }
 }
 
+function applyBrandingTags(tenant) {
+  if (!tenant?.gymName) return;
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+  if (manifestLink && tenant.slug) manifestLink.href = `${API_BASE}/public/manifest/${tenant.slug}`;
+
+  const appleIconLink = document.querySelector('link[rel="apple-touch-icon"]');
+  if (appleIconLink && tenant.gymLogoUrl) appleIconLink.href = tenant.gymLogoUrl;
+
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta && tenant.themeColor) themeMeta.content = tenant.themeColor;
+
+  document.title = `${tenant.gymName} · Powered by Ironline`;
+}
+
+function applyStaffBranding() {
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+  if (manifestLink) manifestLink.href = `${API_BASE}/public/manifest/staff`;
+
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.content = '#ff4e1f';
+
+  document.title = 'Ironline Staff · Operations & Studio';
+}
+
 async function bootstrap() {
-  const match = window.location.pathname.match(TENANT_PATH_RE);
+  const pathname = window.location.pathname;
+  const match = pathname.match(TENANT_PATH_RE);
+
   if (match) {
-    // Fresh visit to a gym's install link (or its installed shortcut's
-    // start_url) — resolve and apply branding before the first render.
+    // Fresh visit to a gym's install link — resolve and apply branding before the first render.
     await resolveTenantBranding(match[1]);
+  } else if (pathname.startsWith('/staff')) {
+    // Staff portal entry — apply Staff PWA manifest & title
+    applyStaffBranding();
+  } else {
+    // Check if we have a saved tenant in localStorage (e.g. launching installed member PWA)
+    try {
+      const stored = localStorage.getItem(TENANT_STORAGE_KEY);
+      if (stored) {
+        const tenant = JSON.parse(stored);
+        applyBrandingTags(tenant);
+      }
+    } catch {
+      // ignore storage parse errors
+    }
   }
-  // If there's no /g/:slug in the URL, leave index.html's static defaults
-  // untouched — that's the fallback path for direct/marketing/super-admin
-  // traffic. Whatever TenantContext finds in sessionStorage (from an
-  // earlier /g/:slug visit in this tab) still comes through for in-app
-  // branding like a dashboard header logo, via TenantProvider below.
 
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
@@ -96,3 +128,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

@@ -23,6 +23,24 @@ export default function SuperAdminOverview() {
         <StatCard icon="user" label="Total customers" value={stats.totalCustomers} />
         <StatCard icon="card" label="Revenue collected" value={`$${stats.totalRevenueCollected.toLocaleString()}`} />
       </div>
+
+      <div className="mt-8 panel p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember text-white shadow-soft">
+            <svg className="icon !h-6 !w-6"><use href="#i-briefcase" /></svg>
+          </div>
+          <div>
+            <h2 className="text-base font-semibold text-ink">Staff & Operations App</h2>
+            <p className="text-xs text-steel">
+              Distribute the installable management portal to Gym Owners, Admins, and Personal Trainers.
+            </p>
+          </div>
+        </div>
+        <a href="/superadmin/admins" className="btn-secondary text-xs shrink-0">
+          Manage Gyms & Staff QR
+        </a>
+      </div>
     </div>
   );
 }
+

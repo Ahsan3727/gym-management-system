@@ -114,6 +114,7 @@ export default function App() {
       <Suspense fallback={<PageFallback />}>
         <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/staff" element={<Login staffOnly={true} />} />
         <Route path="/" element={<RoleHome />} />
 
         {/* Per-gym install links (Option A branded PWA). Must come before

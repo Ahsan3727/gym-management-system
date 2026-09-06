@@ -316,10 +316,24 @@ export default function GymProfile() {
                   Copy
                 </button>
               </div>
-              <p className="text-xs text-steel">Print the QR code and display it at reception, or share the link directly.</p>
+              <p className="text-xs text-steel">Display this QR code at your reception counter so members can install your app.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  const win = window.open('');
+                  win.document.write(
+                    `<html><head><title>${profile.gymName} - Member App</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:32px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Official Mobile App</h2><h1>${profile.gymName}</h1><p>Scan with your phone's camera to install our official app directly to your home screen.</p><div class="card"><img src="${installData.qrDataUrl}"/><br/><span class="url">${installData.installUrl}</span></div><div class="instructions"><strong>How to Install:</strong><ol><li>Open your phone's camera and point it at the QR code.</li><li>Tap the link banner that appears on your screen.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your member credentials.</li></ol></div><script>window.print();</script></body></html>`
+                  );
+                  win.document.close();
+                }}
+                className="btn-secondary text-xs"
+              >
+                Print Reception Poster
+              </button>
             </div>
           </div>
         )}
+
       </div>
 
       {/* QR Code Reception Check-In */}

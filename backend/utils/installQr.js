@@ -27,4 +27,16 @@ async function buildInstallQr(req, slug) {
   return { installUrl, qrDataUrl };
 }
 
-module.exports = { buildInstallUrl, buildInstallQr };
+function buildStaffInstallUrl(req) {
+  const origin = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
+  return `${origin.replace(/\/$/, '')}/staff`;
+}
+
+async function buildStaffInstallQr(req) {
+  const staffInstallUrl = buildStaffInstallUrl(req);
+  const qrDataUrl = await qrcode.toDataURL(staffInstallUrl, { width: 320, margin: 2 });
+  return { staffInstallUrl, qrDataUrl };
+}
+
+module.exports = { buildInstallUrl, buildInstallQr, buildStaffInstallUrl, buildStaffInstallQr };
+

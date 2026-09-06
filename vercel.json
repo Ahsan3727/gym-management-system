@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm --prefix frontend-customer install && npm --prefix frontend-customer run build && npm --prefix frontend-staff install && npm --prefix frontend-staff run build && cp -r frontend-staff/dist frontend-customer/dist/staff",
-  "outputDirectory": "frontend-customer/dist",
+  "buildCommand": "npm --prefix frontend install && npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.js": { "includeFiles": "backend/**" },
     "api/cron/overdue.js": { "includeFiles": "backend/**" }
@@ -10,11 +10,6 @@
   "rewrites": [
     { "source": "/api/cron/overdue", "destination": "/api/cron/overdue.js" },
     { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/customer/:path*", "destination": "/:path*" },
-    { "source": "/admin/:path*", "destination": "/staff/admin/:path*" },
-    { "source": "/trainer/:path*", "destination": "/staff/trainer/:path*" },
-    { "source": "/superadmin/:path*", "destination": "/staff/superadmin/:path*" },
-    { "source": "/staff/(.*)", "destination": "/staff/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

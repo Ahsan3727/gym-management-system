@@ -14,7 +14,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { sendEmail } = require('../utils/mailer');
 const { passwordResetEmail } = require('../utils/emailTemplates');
 const { generateUniqueSlug } = require('../utils/slugify');
-const { buildInstallQr } = require('../utils/installQr');
+const { buildInstallQr, buildStaffInstallQr } = require('../utils/installQr');
 
 const router = express.Router();
 
@@ -112,6 +112,14 @@ router.get(
       return res.status(409).json({ message: 'This gym has no install slug yet — run the slug backfill migration.' });
     }
     res.json(await buildInstallQr(req, admin.slug));
+  })
+);
+
+// Generates a QR code and URL for installing the Staff Operations App (/staff)
+router.get(
+  '/staff-install-qr',
+  asyncHandler(async (req, res) => {
+    res.json(await buildStaffInstallQr(req));
   })
 );
 

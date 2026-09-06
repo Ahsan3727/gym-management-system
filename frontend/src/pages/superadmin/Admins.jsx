@@ -37,6 +37,12 @@ export default function Admins() {
   const [installFor, setInstallFor] = useState(null);
   const [installQr, setInstallQr] = useState(null);
   const [installError, setInstallError] = useState('');
+
+  // Staff operations app QR modal state
+  const [showStaffQr, setShowStaffQr] = useState(false);
+  const [staffQr, setStaffQr] = useState(null);
+  const [staffQrError, setStaffQrError] = useState('');
+
   const { showToast } = useToast();
 
   async function load() {
@@ -88,6 +94,45 @@ export default function Admins() {
     } catch {
       showToast('Could not copy — long-press the link to copy it manually.', { type: 'error' });
     }
+  }
+
+  async function openStaffQrModal() {
+    setShowStaffQr(true);
+    setStaffQr(null);
+    setStaffQrError('');
+    try {
+      const { data } = await api.get('/superadmin/staff-install-qr');
+      setStaffQr(data);
+    } catch (err) {
+      setStaffQrError(err.response?.data?.message || 'Could not generate staff app QR code.');
+    }
+  }
+
+  async function copyStaffInstallLink() {
+    if (!staffQr?.staffInstallUrl) return;
+    try {
+      await navigator.clipboard.writeText(staffQr.staffInstallUrl);
+      showToast('Staff app link copied.', { type: 'success' });
+    } catch {
+      showToast('Could not copy staff link.', { type: 'error' });
+    }
+  }
+
+  function printStaffFlyer() {
+    if (!staffQr?.qrDataUrl) return;
+    const win = window.open('');
+    win.document.write(
+      `<html><head><title>Staff Operations App - Setup Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:30px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Ironline Platform</h2><h1>Staff Operations App</h1><p>Dedicated management portal for Gym Admins, Front Desk Staff, and Personal Trainers.</p><div class="card"><img src="${staffQr.qrDataUrl}"/><br/><span class="url">${staffQr.staffInstallUrl}</span></div><div class="instructions"><strong>Setup Instructions:</strong><ol><li>Open the camera on your smartphone or tablet and scan the QR code.</li><li>Tap the link to open the Staff Portal.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your staff credentials.</li></ol></div><script>window.print();</script></body></html>`
+    );
+    win.document.close();
+  }
+
+  function printMemberFlyer(admin, qrDataUrl, installUrl) {
+    const win = window.open('');
+    win.document.write(
+      `<html><head><title>${admin.gymName} - Member App Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:32px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Official Gym App</h2><h1>${admin.gymName}</h1><p>Scan with your phone to install our official member app. Track workouts, diets, attendance streaks and dues.</p><div class="card"><img src="${qrDataUrl}"/><br/><span class="url">${installUrl}</span></div><div class="instructions"><strong>Quick Setup:</strong><ol><li>Scan the QR code with your smartphone camera.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your member username & password.</li></ol></div><script>window.print();</script></body></html>`
+    );
+    win.document.close();
   }
 
   async function handleSaveEdit(e) {
@@ -163,10 +208,16 @@ export default function Admins() {
           <h1 className="mb-1 text-2xl font-semibold text-ink">Gym accounts</h1>
           <p className="text-sm text-steel">Create, monitor and manage every gym on the platform.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary">
-          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-          Add gym
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="button" onClick={openStaffQrModal} className="btn-secondary">
+            <svg className="icon !h-4 !w-4"><use href="#i-briefcase" /></svg>
+            Staff App QR Code
+          </button>
+          <button type="button" onClick={() => setShowCreate(true)} className="btn-primary">
+            <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+            Add gym
+          </button>
+        </div>
       </div>
 
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
@@ -305,10 +356,9 @@ export default function Admins() {
       )}
 
       {installFor && (
-        <Modal title={`Install link — ${installFor.gymName}`} onClose={() => setInstallFor(null)}>
+        <Modal title={`Member App — ${installFor.gymName}`} onClose={() => setInstallFor(null)}>
           <p className="mb-4 text-xs text-steel">
-            Share this with {installFor.gymName} to install their own branded app — name, icon and accent color, via
-            "Add to Home Screen". No app store, no install file.
+            Share this QR code or link with members of {installFor.gymName}. Scanning it installs their own branded gym app (name, icon and theme color) directly to their home screen.
           </p>
           <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
             <code className="flex-1 truncate text-xs text-ink">{installUrlFor(installFor)}</code>
@@ -325,15 +375,63 @@ export default function Admins() {
           ) : !installQr ? (
             <div className="py-8 text-center text-sm text-steel">Generating QR code…</div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-3">
               <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
                 <img src={installQr.qrDataUrl} alt="Install link QR code" className="h-44 w-44" />
               </div>
-              <p className="text-xs text-steel">Scan to open the install link on a phone.</p>
+              <p className="text-xs text-steel">Scan with phone camera to open and install the member app.</p>
+              <button
+                type="button"
+                onClick={() => printMemberFlyer(installFor, installQr.qrDataUrl, installUrlFor(installFor))}
+                className="btn-secondary text-xs mt-1"
+              >
+                Print Member Flyer
+              </button>
             </div>
           )}
         </Modal>
       )}
+
+      {/* Staff Operations App QR Modal */}
+      {showStaffQr && (
+        <Modal title="Staff & Operations App — QR Code" onClose={() => setShowStaffQr(false)}>
+          <p className="mb-4 text-xs text-steel">
+            Installable management app for Gym Admins, Receptionists, and Personal Trainers. Scan with any mobile or tablet camera to install.
+          </p>
+          {staffQrError ? (
+            <div className="py-4 text-center text-sm text-ember-dark">{staffQrError}</div>
+          ) : !staffQr ? (
+            <div className="py-8 text-center text-sm text-steel">Generating Staff App QR…</div>
+          ) : (
+            <>
+              <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+                <code className="flex-1 truncate text-xs text-ink">{staffQr.staffInstallUrl}</code>
+                <button
+                  type="button"
+                  onClick={copyStaffInstallLink}
+                  className="shrink-0 text-xs font-medium text-iron hover:underline"
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="flex flex-col items-center gap-3">
+                <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
+                  <img src={staffQr.qrDataUrl} alt="Staff App QR" className="h-44 w-44" />
+                </div>
+                <p className="text-xs text-steel">Scan to install the Staff Operations portal on phone or front-desk tablet.</p>
+                <button
+                  type="button"
+                  onClick={printStaffFlyer}
+                  className="btn-secondary text-xs mt-1"
+                >
+                  Print Staff Setup Flyer
+                </button>
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
+
 
       {/* BUG #2 FIX: No longer shows a temp password — shows the server message instead */}
       {resetMessage && (
