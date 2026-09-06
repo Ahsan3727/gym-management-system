@@ -47,7 +47,7 @@ export default function SuperAdminOverview() {
         <StatCard
           icon="card"
           label="Gross Revenue"
-          value={`$${(analytics?.totalRevenue || 0).toLocaleString()}`}
+          value={`Rs. ${(analytics?.totalRevenue || 0).toLocaleString()}`}
           accent="text-iron"
           sub="Total payments processed"
         />
@@ -80,7 +80,7 @@ export default function SuperAdminOverview() {
               return (
                 <div key={idx} className="group relative flex flex-1 flex-col items-center h-full justify-end">
                   <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-paper shadow-md z-10 whitespace-nowrap">
-                    ${item.revenue.toLocaleString()}
+                    Rs. {item.revenue.toLocaleString()}
                   </div>
                   <div
                     style={{ height: `${heightPercent}%` }}
@@ -95,7 +95,7 @@ export default function SuperAdminOverview() {
           </div>
           <div className="mt-4 flex items-center justify-between text-xs text-steel">
             <span>Monthly Processed Volume</span>
-            <span>Hover bars for dollar values</span>
+            <span>Hover bars for exact amounts (PKR)</span>
           </div>
         </div>
 
@@ -166,7 +166,7 @@ export default function SuperAdminOverview() {
                   <td className="py-3 px-3 font-medium text-ink">{g.gymName}</td>
                   <td className="py-3 px-3 font-mono text-steel">/g/{g.slug}</td>
                   <td className="py-3 px-3 text-right font-medium text-ink">{g.memberCount}</td>
-                  <td className="py-3 px-3 text-right font-bold text-iron">${g.revenue.toLocaleString()}</td>
+                  <td className="py-3 px-3 text-right font-bold text-iron">Rs. {g.revenue.toLocaleString()}</td>
                   <td className="py-3 px-3 text-center">
                     <span
                       className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${

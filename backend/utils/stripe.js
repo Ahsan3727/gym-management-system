@@ -1,4 +1,5 @@
 const Stripe = require('stripe');
+const Settings = require('../models/Settings');
 
 const isConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
 
@@ -37,6 +38,16 @@ async function createFeeCheckoutSession({ fee, customer, gym, originUrl }) {
   const gymName = gym?.gymName || 'Ironline Gym';
   const customerEmail = customer?.user?.email || (customer?.user?.username?.includes('@') ? customer.user.username : undefined);
 
+  let currency = 'pkr';
+  try {
+    const platformSettings = await Settings.getSingleton();
+    if (platformSettings?.currency) {
+      currency = platformSettings.currency.toLowerCase();
+    }
+  } catch (err) {
+    // fallback to pkr
+  }
+
   const session = await stripeClient.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'payment',
@@ -51,8 +62,8 @@ async function createFeeCheckoutSession({ fee, customer, gym, originUrl }) {
     line_items: [
       {
         price_data: {
-          currency: 'usd',
-          unit_amount: Math.round(fee.amount * 100), // Stripe expects cents
+          currency,
+          unit_amount: Math.round(fee.amount * 100), // In smallest currency unit (e.g. cents/paisa)
           product_data: {
             name: `${gymName} — Membership Fee`,
             description: `Membership payment due ${new Date(fee.dueDate).toLocaleDateString()}`,

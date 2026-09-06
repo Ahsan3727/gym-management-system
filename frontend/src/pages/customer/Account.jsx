@@ -65,7 +65,7 @@ export default function Account() {
       if (data.isSimulated) {
         // Simulated checkout confirmation
         await api.post('/webhooks/confirm-simulation', { feeId: fee._id });
-        setPaymentNotice(`Simulated payment of $${fee.amount.toFixed(2)} completed! Receipt issued.`);
+        setPaymentNotice(`Simulated payment of Rs. ${fee.amount.toFixed(2)} completed! Receipt issued.`);
         await load();
       } else if (data.checkoutUrl) {
         // Real Stripe Checkout redirect
@@ -145,7 +145,7 @@ export default function Account() {
             <div className="mt-1 text-xl font-bold text-ink">{profile.plan?.planName || 'No active plan assigned'}</div>
             {profile.plan?.price !== undefined && (
               <div className="text-xs text-steel mt-0.5">
-                ${fmtAmount(profile.plan.price)} / {profile.plan.durationMonths} month(s)
+                Rs. {fmtAmount(profile.plan.price)} / {profile.plan.durationMonths} month(s)
               </div>
             )}
           </div>
@@ -251,7 +251,7 @@ export default function Account() {
             key={fee._id}
             icon="card"
             iconBg={fee.status === 'paid' ? 'bg-chalk/15 text-chalk-dark' : fee.status === 'overdue' ? 'bg-ember/15 text-ember-dark' : 'bg-ink/5'}
-            title={`$${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
+            title={`Rs. ${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
             subtitle={
               fee.status === 'paid'
                 ? `${fee.receiptNumber ? `Receipt ${fee.receiptNumber}` : 'Paid'}${fee.paidOn ? ` · ${new Date(fee.paidOn).toLocaleDateString()}` : ''}`

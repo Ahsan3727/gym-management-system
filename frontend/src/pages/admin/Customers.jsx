@@ -398,7 +398,7 @@ export default function Customers() {
                 <select className="field-input" value={createForm.planId} onChange={(e) => setCreateForm({ ...createForm, planId: e.target.value })}>
                   <option value="">No plan</option>
                   {plans.map((p) => (
-                    <option key={p._id} value={p._id}>{p.planName} — ${p.price}/{p.durationMonths}mo</option>
+                    <option key={p._id} value={p._id}>{p.planName} — Rs. {Number(p.price || 0).toLocaleString()}/{p.durationMonths}mo</option>
                   ))}
                 </select>
               </div>
@@ -465,7 +465,7 @@ export default function Customers() {
               <select className="field-input" value={editing.plan?._id || editing.plan || ''} onChange={(e) => setEditing({ ...editing, plan: e.target.value })}>
                 <option value="">No plan</option>
                 {plans.map((p) => (
-                  <option key={p._id} value={p._id}>{p.planName} — ${p.price}/{p.durationMonths}mo</option>
+                  <option key={p._id} value={p._id}>{p.planName} — Rs. {Number(p.price || 0).toLocaleString()}/{p.durationMonths}mo</option>
                 ))}
               </select>
             </div>

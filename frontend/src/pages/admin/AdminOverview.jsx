@@ -81,14 +81,14 @@ export default function AdminOverview() {
         <StatCard
           icon="card"
           label="Collected Revenue"
-          value={`$${(analytics?.totalRevenue || 0).toLocaleString()}`}
+          value={`Rs. ${(analytics?.totalRevenue || 0).toLocaleString()}`}
           accent="text-iron"
           sub={`${collectionRate}% fee collection`}
         />
         <StatCard
           icon="bell"
           label="Pending / Overdue"
-          value={`$${(analytics?.pendingRevenue || 0).toLocaleString()}`}
+          value={`Rs. ${(analytics?.pendingRevenue || 0).toLocaleString()}`}
           accent={(analytics?.pendingRevenue || 0) > 0 ? 'text-ember-dark' : 'text-ink'}
           sub={(analytics?.pendingRevenue || 0) > 0 ? 'Action required' : 'All fees settled'}
         />
@@ -104,7 +104,7 @@ export default function AdminOverview() {
               <p className="text-xs text-steel">Monthly membership dues collected</p>
             </div>
             <span className="rounded-lg bg-iron/10 px-2.5 py-1 text-xs font-semibold text-iron">
-              ${(analytics?.totalRevenue || 0).toLocaleString()} Total
+              Rs. ${(analytics?.totalRevenue || 0).toLocaleString()} Total
             </span>
           </div>
 
@@ -115,7 +115,7 @@ export default function AdminOverview() {
                 <div key={idx} className="group relative flex flex-1 flex-col items-center h-full justify-end">
                   {/* Tooltip */}
                   <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-paper shadow-md z-10 whitespace-nowrap">
-                    ${item.revenue.toLocaleString()}
+                    Rs. {item.revenue.toLocaleString()}
                   </div>
                   {/* Bar */}
                   <div
@@ -131,7 +131,7 @@ export default function AdminOverview() {
           </div>
           <div className="mt-4 flex items-center justify-between text-xs text-steel">
             <span>6-Month View</span>
-            <span>Hover bars for exact dollar totals</span>
+            <span>Hover bars for exact amounts (PKR)</span>
           </div>
         </div>
 

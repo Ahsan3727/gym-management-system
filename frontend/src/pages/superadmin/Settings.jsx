@@ -37,8 +37,9 @@ export default function Settings() {
 
       <form onSubmit={handleSubmit} className="panel grid max-w-xl gap-4 p-6">
         <div>
-          <label className="field-label">Currency</label>
-          <input className="field-input" value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })} />
+          <label className="field-label">Platform Currency</label>
+          <input className="field-input" value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })} placeholder="PKR" />
+          <p className="mt-1 text-xs text-steel">Standard ISO code (e.g. PKR, Rs.). All subscription dues and receipts adhere to this.</p>
         </div>
         <div>
           <label className="field-label">Terms URL</label>

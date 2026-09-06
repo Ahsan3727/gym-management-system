@@ -92,7 +92,7 @@ export default function Plans() {
               </span>
             </div>
             <div className="mb-4 text-2xl font-semibold text-iron">
-              ${plan.price}
+              Rs. {Number(plan.price || 0).toLocaleString()}
               <span className="text-sm font-normal text-steel"> / {plan.durationMonths}mo</span>
             </div>
             <div className="flex gap-3 text-xs font-medium">
@@ -115,8 +115,8 @@ export default function Plans() {
               <input className="field-input" value={form.planName} onChange={(e) => setForm({ ...form, planName: e.target.value })} placeholder="e.g. Premium" required />
             </div>
             <div className="mb-4">
-              <label className="field-label">Price</label>
-              <input type="number" className="field-input" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+              <label className="field-label">Price (PKR / Rs.)</label>
+              <input type="number" className="field-input" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="e.g. 5000" required />
             </div>
             <div className="mb-4">
               <label className="field-label">Duration (months)</label>

@@ -138,15 +138,15 @@ export default function Fees() {
       <div className="mb-8 grid grid-cols-3 gap-4">
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Paid</div>
-          <div className="stat-number mt-1 text-chalk-dark">${fmtAmount(allTotals.paid || 0)}</div>
+          <div className="stat-number mt-1 text-chalk-dark">Rs. {fmtAmount(allTotals.paid || 0)}</div>
         </div>
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Unpaid</div>
-          <div className="stat-number mt-1">${fmtAmount(allTotals.unpaid || 0)}</div>
+          <div className="stat-number mt-1">Rs. {fmtAmount(allTotals.unpaid || 0)}</div>
         </div>
         <div className="panel px-5 py-4">
           <div className="text-xs font-medium uppercase tracking-wide text-steel">Overdue</div>
-          <div className="stat-number mt-1 text-ember-dark">${fmtAmount(allTotals.overdue || 0)}</div>
+          <div className="stat-number mt-1 text-ember-dark">Rs. {fmtAmount(allTotals.overdue || 0)}</div>
         </div>
       </div>
 
@@ -170,7 +170,7 @@ export default function Fees() {
             title={fee.customer?.name || '—'}
             subtitle={
               <>
-                ${fmtAmount(fee.amount)} · due {new Date(fee.dueDate).toLocaleDateString()} ·{' '}
+                Rs. {fmtAmount(fee.amount)} · due {new Date(fee.dueDate).toLocaleDateString()} ·{' '}
                 <span className={`font-medium capitalize ${statusColor[fee.status]}`}>{fee.status}</span>
               </>
             }
@@ -213,8 +213,8 @@ export default function Fees() {
               </select>
             </div>
             <div className="mb-4">
-              <label className="field-label">Amount</label>
-              <input type="number" step="0.01" min="0" className="field-input" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required />
+              <label className="field-label">Amount (PKR)</label>
+              <input type="number" step="0.01" min="0" className="field-input" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="e.g. 5000" required />
             </div>
             <div className="mb-4">
               <label className="field-label">Due date</label>

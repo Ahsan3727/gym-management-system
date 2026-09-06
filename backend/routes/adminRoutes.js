@@ -659,7 +659,7 @@ router.get(
         .fontSize(10)
         .fillColor('#111827')
         .text(
-          `Total Records: ${fees.length}  |  Collected: $${totalPaid.toFixed(2)}  |  Pending/Overdue: $${totalUnpaid.toFixed(2)}`
+          `Total Records: ${fees.length}  |  Collected: Rs. ${totalPaid.toFixed(2)}  |  Pending/Overdue: Rs. ${totalUnpaid.toFixed(2)}`
         );
       doc.moveDown(0.8);
 
@@ -668,8 +668,8 @@ router.get(
       doc.fontSize(9).font('Helvetica-Bold').fillColor('#374151');
       doc.text('Receipt #', 40, tableTop, { width: 90 });
       doc.text('Customer', 130, tableTop, { width: 120 });
-      doc.text('Amount', 250, tableTop, { width: 60 });
-      doc.text('Status', 315, tableTop, { width: 60 });
+      doc.text('Amount (PKR)', 250, tableTop, { width: 65 });
+      doc.text('Status', 320, tableTop, { width: 55 });
       doc.text('Due Date', 380, tableTop, { width: 75 });
       doc.text('Paid On', 460, tableTop, { width: 95 });
       doc.moveDown(0.5);
@@ -685,8 +685,8 @@ router.get(
         const y = doc.y;
         doc.text(f.receiptNumber || '—', 40, y, { width: 90 });
         doc.text(f.customer?.name || 'Unknown', 130, y, { width: 120 });
-        doc.text(`$${f.amount.toFixed(2)}`, 250, y, { width: 60 });
-        doc.text(f.status.toUpperCase(), 315, y, { width: 60 });
+        doc.text(`Rs. ${f.amount.toFixed(2)}`, 250, y, { width: 65 });
+        doc.text(f.status.toUpperCase(), 320, y, { width: 55 });
         doc.text(new Date(f.dueDate).toISOString().split('T')[0], 380, y, { width: 75 });
         doc.text(f.paidOn ? new Date(f.paidOn).toISOString().split('T')[0] : '—', 460, y, { width: 95 });
         doc.moveDown(0.7);
@@ -701,7 +701,7 @@ router.get(
     res.setHeader('Content-Disposition', `attachment; filename="fees-export-${Date.now()}.csv"`);
 
     const escapeCsv = (str) => `"${String(str || '').replace(/"/g, '""')}"`;
-    const headers = ['Receipt Number', 'Customer Name', 'Phone', 'Amount', 'Status', 'Due Date', 'Paid On'];
+    const headers = ['Receipt Number', 'Customer Name', 'Phone', 'Amount (PKR)', 'Status', 'Due Date', 'Paid On'];
     const rows = fees.map((f) => [
       escapeCsv(f.receiptNumber),
       escapeCsv(f.customer?.name),
