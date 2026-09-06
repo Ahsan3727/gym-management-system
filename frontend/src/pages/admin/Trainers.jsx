@@ -22,6 +22,7 @@ export default function Trainers() {
   });
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState('');
+  const [trainerCreatedResult, setTrainerCreatedResult] = useState(null);
 
   // Assign clients modal
   const [editingTrainer, setEditingTrainer] = useState(null);
@@ -52,10 +53,19 @@ export default function Trainers() {
     setAdding(true);
     setAddError('');
     try {
-      await api.post('/admin/trainers', form);
-      setShowAdd(false);
-      setForm({ username: '', password: '', name: '', phone: '', specialty: '', bio: '' });
+      const { data } = await api.post('/admin/trainers', form);
       await load();
+      if (data.generatedPassword) {
+        setTrainerCreatedResult({
+          name: form.name,
+          username: form.username,
+          generatedPassword: data.generatedPassword,
+        });
+        setForm({ username: '', password: '', name: '', phone: '', specialty: '', bio: '' });
+      } else {
+        setShowAdd(false);
+        setForm({ username: '', password: '', name: '', phone: '', specialty: '', bio: '' });
+      }
     } catch (err) {
       setAddError(err.response?.data?.message || 'Failed to add trainer.');
     } finally {
@@ -146,77 +156,117 @@ export default function Trainers() {
 
       {/* Add Trainer Modal */}
       {showAdd && (
-        <Modal title="Add Personal Trainer" onClose={() => setShowAdd(false)}>
-          <form onSubmit={handleAddTrainer}>
-            <div className="mb-3">
-              <label className="field-label">Trainer Name</label>
-              <input
-                className="field-input"
-                placeholder="e.g. Marcus Vance"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="mb-3 grid grid-cols-2 gap-3">
-              <div>
-                <label className="field-label">Username</label>
+        <Modal title="Add Personal Trainer" onClose={() => { setShowAdd(false); setTrainerCreatedResult(null); }}>
+          {!trainerCreatedResult ? (
+            <form onSubmit={handleAddTrainer}>
+              <div className="mb-3">
+                <label className="field-label">Trainer Name</label>
                 <input
                   className="field-input"
-                  placeholder="e.g. coach.marcus"
-                  value={form.username}
-                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  placeholder="e.g. Marcus Vance"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
               </div>
-              <div>
-                <label className="field-label">Password</label>
-                <input
-                  type="password"
+              <div className="mb-3 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Username</label>
+                  <input
+                    className="field-input"
+                    placeholder="e.g. coach.marcus"
+                    value={form.username}
+                    onChange={(e) => setForm({ ...form, username: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="field-label">
+                    Password <span className="font-normal text-steel">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="field-input font-mono"
+                    placeholder="Blank = auto-generate"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    minLength={form.password ? 8 : undefined}
+                  />
+                </div>
+              </div>
+              <div className="mb-3 grid grid-cols-2 gap-3">
+                <div>
+                  <label className="field-label">Phone</label>
+                  <input
+                    className="field-input"
+                    placeholder="+1 (555) 000-0000"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="field-label">Specialty</label>
+                  <input
+                    className="field-input"
+                    placeholder="e.g. Hypertrophy, CrossFit"
+                    value={form.specialty}
+                    onChange={(e) => setForm({ ...form, specialty: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="field-label">Biography / Notes</label>
+                <textarea
                   className="field-input"
-                  placeholder="Min 8 characters"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required
-                  minLength={8}
+                  rows={2}
+                  placeholder="Certifications, experience..."
+                  value={form.bio}
+                  onChange={(e) => setForm({ ...form, bio: e.target.value })}
                 />
               </div>
-            </div>
-            <div className="mb-3 grid grid-cols-2 gap-3">
-              <div>
-                <label className="field-label">Phone</label>
-                <input
-                  className="field-input"
-                  placeholder="+1 (555) 000-0000"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
+              {addError && <div className="mb-3 text-sm text-ember-dark">{addError}</div>}
+              <button type="submit" disabled={adding} className="btn-primary w-full">
+                {adding ? 'Adding…' : 'Create Trainer Account'}
+              </button>
+            </form>
+          ) : (
+            <div className="text-center">
+              <div className="mb-4 flex items-center justify-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/15 text-green-500">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
-              <div>
-                <label className="field-label">Specialty</label>
-                <input
-                  className="field-input"
-                  placeholder="e.g. Hypertrophy, CrossFit"
-                  value={form.specialty}
-                  onChange={(e) => setForm({ ...form, specialty: e.target.value })}
-                />
+              <h3 className="mb-1 font-semibold text-ink">Trainer Account Created</h3>
+              <p className="mb-5 text-sm text-steel">
+                Give these login credentials to Coach <strong>{trainerCreatedResult.name}</strong>.
+              </p>
+
+              <div className="rounded-2xl border border-ink/10 bg-ink/5 px-5 py-4 text-left">
+                <div className="mb-3">
+                  <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-steel">Username</div>
+                  <div className="font-mono text-base text-ink select-all">{trainerCreatedResult.username}</div>
+                </div>
+                <div>
+                  <div className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-steel">
+                    Auto-Generated Password
+                  </div>
+                  <div className="font-mono text-xl font-bold tracking-wider text-ink select-all">{trainerCreatedResult.generatedPassword}</div>
+                </div>
               </div>
+
+              <p className="mt-4 text-xs text-steel">
+                ⚠️ Share this password with the coach. No email is required.
+              </p>
+              <button
+                onClick={() => { setShowAdd(false); setTrainerCreatedResult(null); }}
+                className="btn-primary mt-5 w-full"
+              >
+                Done
+              </button>
             </div>
-            <div className="mb-4">
-              <label className="field-label">Biography / Notes</label>
-              <textarea
-                className="field-input"
-                rows={2}
-                placeholder="Certifications, experience..."
-                value={form.bio}
-                onChange={(e) => setForm({ ...form, bio: e.target.value })}
-              />
-            </div>
-            {addError && <div className="mb-3 text-sm text-ember-dark">{addError}</div>}
-            <button type="submit" disabled={adding} className="btn-primary w-full">
-              {adding ? 'Adding…' : 'Create Trainer Account'}
-            </button>
-          </form>
+          )}
         </Modal>
       )}
 

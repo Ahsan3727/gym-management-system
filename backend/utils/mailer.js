@@ -38,7 +38,7 @@ function getTransporter() {
  * @param {string} [options.text] - Plaintext fallback content
  * @returns {Promise<{success?: boolean, skipped?: boolean, error?: string, messageId?: string}>}
  */
-async function sendEmail({ to, subject, html, text }) {
+async function sendEmail({ to, subject, html, text }, retries = 3) {
   if (!to) {
     return { skipped: true, error: 'No recipient specified' };
   }
@@ -52,19 +52,25 @@ async function sendEmail({ to, subject, html, text }) {
   const fromName = process.env.FROM_NAME || 'Ironline Gym';
   const fromEmail = process.env.FROM_EMAIL || process.env.SMTP_USER || 'noreply@ironlinegym.com';
 
-  try {
-    const info = await mailClient.sendMail({
-      from: `"${fromName}" <${fromEmail}>`,
-      to,
-      subject,
-      html,
-      text: text || (html ? html.replace(/<[^>]*>?/gm, '') : ''),
-    });
-    console.log(`[mailer] Email sent successfully to <${to}> (ID: ${info.messageId})`);
-    return { success: true, messageId: info.messageId };
-  } catch (err) {
-    console.error(`[mailer] Error sending email to <${to}>:`, err.message);
-    return { success: false, error: err.message };
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const info = await mailClient.sendMail({
+        from: `"${fromName}" <${fromEmail}>`,
+        to,
+        subject,
+        html,
+        text: text || (html ? html.replace(/<[^>]*>?/gm, '') : ''),
+      });
+      console.log(`[mailer] Email sent successfully to <${to}> (ID: ${info.messageId}) [attempt ${attempt}]`);
+      return { success: true, messageId: info.messageId };
+    } catch (err) {
+      console.warn(`[mailer] Attempt ${attempt}/${retries} failed for <${to}>:`, err.message);
+      if (attempt === retries) {
+        console.error(`[mailer] All ${retries} attempts failed for <${to}>`);
+        return { success: false, error: err.message };
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+    }
   }
 }
 

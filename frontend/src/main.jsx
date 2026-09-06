@@ -5,7 +5,7 @@ import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { TenantProvider, TENANT_STORAGE_KEY } from './context/TenantContext.jsx';
-import { ToastProvider } from './components/Toast.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
 import './index.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';

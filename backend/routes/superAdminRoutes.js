@@ -15,6 +15,14 @@ const { sendEmail } = require('../utils/mailer');
 const { passwordResetEmail } = require('../utils/emailTemplates');
 const { generateUniqueSlug } = require('../utils/slugify');
 const { buildInstallQr, buildStaffInstallQr } = require('../utils/installQr');
+const { validate } = require('../middleware/validate');
+const {
+  createAdminSchema,
+  updateAdminSchema,
+  updateSettingsSchema,
+  suspendAdminSchema,
+  disableAdminSchema,
+} = require('../schemas/superAdminSchemas');
 
 const router = express.Router();
 
@@ -44,6 +52,7 @@ router.get(
 // Creates a User (role=admin) + linked Admin/gym doc.
 router.post(
   '/admins',
+  validate(createAdminSchema),
   asyncHandler(async (req, res) => {
     const { username, password, gymName, address, contact, workingHours } = req.body;
     if (!username || !password || !gymName) {
@@ -83,6 +92,7 @@ router.post(
 
 router.put(
   '/admins/:id',
+  validate(updateAdminSchema),
   asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
     if (!admin) return res.status(404).json({ message: 'Admin not found.' });
@@ -125,6 +135,7 @@ router.get(
 
 router.put(
   '/admins/:id/suspend',
+  validate(suspendAdminSchema),
   asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
     if (!admin) return res.status(404).json({ message: 'Admin not found.' });
@@ -137,6 +148,7 @@ router.put(
 
 router.put(
   '/admins/:id/disable',
+  validate(disableAdminSchema),
   asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
     if (!admin) return res.status(404).json({ message: 'Admin not found.' });
@@ -251,6 +263,7 @@ router.get(
 
 router.put(
   '/settings',
+  validate(updateSettingsSchema),
   asyncHandler(async (req, res) => {
     const settings = await Settings.getSingleton();
     const { currency, termsUrl, platformBillingEnabled, platformBillingNote } = req.body;

@@ -7,6 +7,8 @@ const RefreshToken = require('../models/RefreshToken');
 const { generateToken, generateRefreshToken } = require('../utils/generateToken');
 const asyncHandler = require('../utils/asyncHandler');
 const { protect } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { loginSchema, changePasswordSchema } = require('../schemas/authSchemas');
 
 const router = express.Router();
 
@@ -25,6 +27,7 @@ const REFRESH_COOKIE_OPTIONS = {
  */
 router.post(
   '/login',
+  validate(loginSchema),
   asyncHandler(async (req, res) => {
     const { username, password, gymSlug } = req.body;
     if (!username || !password) {
@@ -196,6 +199,7 @@ router.get(
 router.put(
   '/change-password',
   protect,
+  validate(changePasswordSchema),
   asyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword || newPassword.length < 8) {
