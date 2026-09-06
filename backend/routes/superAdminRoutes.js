@@ -12,6 +12,8 @@ const asyncHandler = require('../utils/asyncHandler');
 const { protect, authorize } = require('../middleware/auth');
 const { sendEmail } = require('../utils/mailer');
 const { passwordResetEmail } = require('../utils/emailTemplates');
+const { generateUniqueSlug } = require('../utils/slugify');
+const { buildInstallQr } = require('../utils/installQr');
 
 const router = express.Router();
 
@@ -52,18 +54,26 @@ router.post(
     const existing = await User.findOne({ username: username.trim().toLowerCase() });
     if (existing) return res.status(409).json({ message: 'That username is already taken.' });
 
+    // Slug powers this gym's public install URL (/g/<slug>) and manifest,
+    // so it's generated once here, at creation time — never left for the
+    // client to supply. Collisions ("Iron Clad Gym" twice) auto-suffix.
+    const slug = await generateUniqueSlug(gymName);
+
     const passwordHash = await User.hashPassword(password);
     const user = await User.create({ username: username.trim().toLowerCase(), passwordHash, role: 'admin' });
     const admin = await Admin.create({
       user: user._id,
       gymName,
+      slug,
       address,
       contact,
       workingHours,
       createdBy: req.user._id,
     });
 
-    await logAction(req, 'admin.create', 'Admin', admin._id, { gymName });
+    await logAction(req, 'admin.create', 'Admin', admin._id, { gymName, slug });
+    // `slug` rides along on the Admin doc already — the super admin UI
+    // (Admins.jsx) reads it off the create response to show the install link.
     res.status(201).json(admin);
   })
 );
@@ -73,14 +83,32 @@ router.put(
   asyncHandler(async (req, res) => {
     const admin = await Admin.findById(req.params.id);
     if (!admin) return res.status(404).json({ message: 'Admin not found.' });
-    const { gymName, address, contact, workingHours } = req.body;
+    // `slug` is deliberately NOT accepted here. It's a public-facing install
+    // URL and installed home-screen shortcuts point at it via manifest
+    // start_url — changing it after the fact would break those shortcuts.
+    const { gymName, address, contact, workingHours, themeColor } = req.body;
     if (gymName !== undefined) admin.gymName = gymName;
     if (address !== undefined) admin.address = address;
     if (contact !== undefined) admin.contact = contact;
     if (workingHours !== undefined) admin.workingHours = workingHours;
+    if (themeColor !== undefined) admin.themeColor = themeColor;
     await admin.save();
     await logAction(req, 'admin.update', 'Admin', admin._id);
     res.json(admin);
+  })
+);
+
+// Lets the super admin pull up a printable/shareable QR for a specific
+// gym's install link without leaving the Gym accounts page.
+router.get(
+  '/admins/:id/install-qr',
+  asyncHandler(async (req, res) => {
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) return res.status(404).json({ message: 'Admin not found.' });
+    if (!admin.slug) {
+      return res.status(409).json({ message: 'This gym has no install slug yet — run the slug backfill migration.' });
+    }
+    res.json(await buildInstallQr(req, admin.slug));
   })
 );
 

@@ -1,0 +1,135 @@
+import React, { Suspense, lazy } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+import DashboardShell from './components/DashboardShell.jsx';
+import IconSprite from './components/IconSprite.jsx';
+import { useAuth } from './context/AuthContext.jsx';
+
+const Login = lazy(() => import('./pages/Login.jsx'));
+
+const AdminOverview = lazy(() => import('./pages/admin/AdminOverview.jsx'));
+const AdminCustomers = lazy(() => import('./pages/admin/Customers.jsx'));
+const AdminFees = lazy(() => import('./pages/admin/Fees.jsx'));
+const AdminPlans = lazy(() => import('./pages/admin/Plans.jsx'));
+const AdminGymProfile = lazy(() => import('./pages/admin/GymProfile.jsx'));
+const AdminTrainers = lazy(() => import('./pages/admin/Trainers.jsx'));
+const AdminBranches = lazy(() => import('./pages/admin/Branches.jsx'));
+
+const TrainerOverview = lazy(() => import('./pages/trainer/TrainerOverview.jsx'));
+const TrainerClients = lazy(() => import('./pages/trainer/TrainerClients.jsx'));
+
+const SuperAdminOverview = lazy(() => import('./pages/superadmin/SuperAdminOverview.jsx'));
+const SuperAdminAdmins = lazy(() => import('./pages/superadmin/Admins.jsx'));
+const SuperAdminSettings = lazy(() => import('./pages/superadmin/Settings.jsx'));
+const SuperAdminAuditLog = lazy(() => import('./pages/superadmin/AuditLog.jsx'));
+
+// `icon` refers to an IconSprite id (components/IconSprite.jsx) and drives
+// the icon-pill nav rendered by DashboardShell.
+const adminNav = [
+  { to: '/admin', label: 'Overview', end: true, icon: 'home' },
+  { to: '/admin/customers', label: 'Customers', icon: 'user' },
+  { to: '/admin/trainers', label: 'Trainers', icon: 'dumbbell' },
+  { to: '/admin/branches', label: 'Locations', icon: 'building' },
+  { to: '/admin/fees', label: 'Fees', icon: 'card' },
+  { to: '/admin/plans', label: 'Plans & pricing', icon: 'tag' },
+  { to: '/admin/profile', label: 'Gym profile', icon: 'shield' },
+];
+
+const trainerNav = [
+  { to: '/trainer', label: 'Overview', end: true, icon: 'home' },
+  { to: '/trainer/clients', label: 'Client Studio', icon: 'runner' },
+];
+
+const superAdminNav = [
+  { to: '/superadmin', label: 'Overview', end: true, icon: 'home' },
+  { to: '/superadmin/admins', label: 'Gym accounts', icon: 'briefcase' },
+  { to: '/superadmin/audit-log', label: 'Audit log', icon: 'clipboard' },
+  { to: '/superadmin/settings', label: 'Platform settings', icon: 'sliders' },
+];
+
+// Customer accounts never reach this bundle (they log into the customer
+// app), so this only ever needs to route the three staff roles.
+function RoleHome() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  const home = {
+    trainer: '/trainer',
+    admin: '/admin',
+    super_admin: '/superadmin',
+  }[user.role];
+  return <Navigate to={home || '/login'} replace />;
+}
+
+function PageFallback() {
+  return (
+    <div className="flex h-64 min-h-[300px] items-center justify-center">
+      <div className="flex items-center gap-3 text-steel">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-ember border-t-transparent" />
+        <span className="text-sm font-medium">Loading page…</span>
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <>
+      <IconSprite />
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<RoleHome />} />
+
+        {/* Trainer Routes */}
+        <Route
+          path="/trainer"
+          element={
+            <ProtectedRoute role="trainer">
+              <DashboardShell navItems={trainerNav} accent="iron" roleLabel="Personal Trainer" />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<TrainerOverview />} />
+          <Route path="clients" element={<TrainerClients />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute role="admin">
+              <DashboardShell navItems={adminNav} accent="iron" roleLabel="Gym admin" />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<AdminOverview />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          <Route path="trainers" element={<AdminTrainers />} />
+          <Route path="branches" element={<AdminBranches />} />
+          <Route path="fees" element={<AdminFees />} />
+          <Route path="plans" element={<AdminPlans />} />
+          <Route path="profile" element={<AdminGymProfile />} />
+        </Route>
+
+        {/* Super Admin Routes */}
+        <Route
+          path="/superadmin"
+          element={
+            <ProtectedRoute role="super_admin">
+              <DashboardShell navItems={superAdminNav} accent="chalk" roleLabel="Super admin" />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<SuperAdminOverview />} />
+          <Route path="admins" element={<SuperAdminAdmins />} />
+          <Route path="audit-log" element={<SuperAdminAuditLog />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+}

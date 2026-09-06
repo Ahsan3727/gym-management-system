@@ -135,11 +135,14 @@ function generatePng(size) {
   return Buffer.concat([signature, ihdrChunk, idatChunk, iendChunk]);
 }
 
-const publicDir = path.resolve(__dirname, '../frontend/public');
+// PWA installability (manifest + these icons) is a customer-app-only
+// concern now — the staff console is a plain desk console, not an
+// installable PWA (see IMPLEMENTATION_PLAN.md Phase 4/5).
+const publicDir = path.resolve(__dirname, '../frontend-customer/public');
 const icon192 = generatePng(192);
 const icon512 = generatePng(512);
 
 fs.writeFileSync(path.join(publicDir, 'icon-192.png'), icon192);
 fs.writeFileSync(path.join(publicDir, 'icon-512.png'), icon512);
 
-console.log('Successfully generated icon-192.png and icon-512.png in frontend/public/');
+console.log('Successfully generated icon-192.png and icon-512.png in frontend-customer/public/');

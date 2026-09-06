@@ -120,7 +120,8 @@ Browser (React SPA — code-split via React.lazy)
   +----------------------------------------------+
   |  /api/*      -> serverless Express (api/index) |
   |  /api/cron/* -> scheduled cron (overdue fees)  |
-  |  /*          -> static Vite build (frontend)   |
+  |  /*          -> customer app (frontend-customer)|
+  |  /staff/*    -> staff console (frontend-staff)  |
   +----------------------------------------------+
        |                     |                  |
        | Mongoose/TLS        | HTTPS             | HTTPS
@@ -208,21 +209,37 @@ curl http://localhost:5000/api/health
 
 ## 7. Frontend Setup
 
-In a **second terminal**:
+The member-facing app and the staff console are two separate Vite projects.
+Run whichever you need in a **second terminal** (a third if you want both):
 
 ```bash
-cd frontend
+# Member app (customer)
+cd frontend-customer
 npm install
 npm run dev
 ```
 
-The app opens at `http://localhost:5173`.
+Opens at `http://localhost:5173`.
 
-It automatically points to `http://localhost:5000/api`. To override, create `frontend/.env`:
+```bash
+# Staff console (admin / trainer / super admin)
+cd frontend-staff
+npm install
+npm run dev
+```
+
+Opens at `http://localhost:5174` (a different port so both can run side by side).
+
+Both automatically point to `http://localhost:5000/api`. To override, create a
+`.env` in either folder:
 
 ```env
 VITE_API_URL=http://your-api-host/api
 ```
+
+> In production both apps are built and served from the **same** Vercel
+> project and origin — the customer app at `/` and the staff console at
+> `/staff/*` — so there's no CORS to configure either way (see §13).
 
 ---
 
@@ -232,15 +249,17 @@ VITE_API_URL=http://your-api-host/api
    ```bash
    npm run seed:demo   # Seeds Super Admin, Demo Gym Admin, Demo Trainer, and Demo Member
    ```
-2. Open `http://localhost:5173/login`
-3. Test any of the four roles using unified login:
-   - **Super Admin**: `superadmin` / `ChangeMe123!` -> `/superadmin` (Platform Governance)
-   - **Gym Admin**: `demoadmin` / `Demo1234!` -> `/admin` (Gym Management & Branches)
-   - **Personal Trainer**: `demotrainer` / `Demo1234!` -> `/trainer` (Client Studio & Prescriptions)
-   - **Member**: `demomember` / `Demo1234!` -> `/customer` (Fitness Tracking & Notifications)
+2. Member: open `http://localhost:5173/login`. Staff: open `http://localhost:5174/login`
+   (or `/staff/login` once deployed behind the unified domain).
+3. Test any of the four roles:
+   - **Member** (frontend-customer): `demomember` / `Demo1234!` -> `/` (Fitness Tracking & Notifications)
+   - **Personal Trainer** (frontend-staff): `demotrainer` / `Demo1234!` -> `/trainer` (Client Studio & Prescriptions)
+   - **Gym Admin** (frontend-staff): `demoadmin` / `Demo1234!` -> `/admin` (Gym Management & Branches)
+   - **Super Admin** (frontend-staff): `superadmin` / `ChangeMe123!` -> `/superadmin` (Platform Governance)
 
-> All four roles share the single `/login` screen. The backend inspects the JWT role
-> and the frontend redirects each role to its dedicated dashboard automatically.
+> The member app and the staff console each have their own `/login` screen. The
+> backend inspects the JWT role either way; each app's login rejects (with a
+> "wrong portal" notice) a credential for a role that doesn't belong there.
 
 ---
 
@@ -267,7 +286,7 @@ VITE_API_URL=http://your-api-host/api
 | `STRIPE_SECRET_KEY` | Optional | Stripe API secret (enables live checkout) | `sk_test_...` |
 | `STRIPE_WEBHOOK_SECRET`| Optional | Stripe webhook signing secret | `whsec_...` |
 
-### Frontend (`frontend/.env`)
+### Frontend (`frontend-customer/.env` and/or `frontend-staff/.env`)
 
 | Variable | Required | Description | Example |
 | :--- | :---: | :--- | :--- |
@@ -283,8 +302,8 @@ gym-management-system/            <- monorepo root
 │   ├── index.js                 <- Vercel serverless entrypoint (wraps Express app)
 │   └── cron/
 │       └── overdue.js           <- Daily Vercel cron handler for overdue fees
-├── vercel.json                   <- Routes /api/* to function, /* to SPA + cron triggers
-├── package.json                  <- Root scripts: build, dev:backend, dev:frontend, seed
+├── vercel.json                   <- Routes /api/* to function, /staff/* to staff SPA, /* to customer SPA + cron triggers
+├── package.json                  <- Root scripts: build (both frontends), dev:backend, dev:customer, dev:staff, seed
 │
 ├── backend/
 │   ├── app.js                   <- Express app: routes + middleware (no listen)
@@ -328,30 +347,55 @@ gym-management-system/            <- monorepo root
 │       ├── cloudinary.js        <- Cloudinary asset upload helper
 │       └── stripe.js            <- Stripe checkout session builder
 │
-└── frontend/
-    ├── index.html               <- PWA meta tags, favicon & manifest links
-    ├── vite.config.js           <- Vite build configuration
-    ├── tailwind.config.js       <- Custom color palette & typography tokens
+├── frontend-customer/             <- Member-facing app. Served at "/" (root domain).
+│   ├── index.html                <- PWA meta tags, favicon & manifest links
+│   ├── vite.config.js            <- Vite build config (base "/")
+│   ├── tailwind.config.js        <- Custom color palette & typography tokens
+│   ├── public/
+│   │   ├── favicon.svg           <- Vector brand mark
+│   │   ├── manifest.json         <- PWA Web App Manifest
+│   │   └── sw.js                 <- Offline cache service worker (customer app only)
+│   └── src/
+│       ├── main.jsx              <- React + BrowserRouter + tenant branding bootstrap + SW registration
+│       ├── App.jsx               <- Flattened, single-role route tree (no /customer prefix)
+│       ├── index.css             <- Global design system & component utility classes
+│       ├── api/
+│       │   └── axios.js          <- Axios instance with auto-refresh token interceptor
+│       ├── context/
+│       │   ├── AuthContext.jsx   <- Auth state, login/logout, session management
+│       │   ├── ThemeContext.jsx  <- Light/dark theme toggle
+│       │   └── TenantContext.jsx <- Per-gym (/g/:slug) branding context
+│       ├── components/
+│       │   ├── DashboardShell.jsx     <- Responsive sidebar nav with mobile hamburger drawer
+│       │   ├── AuthGuard.jsx          <- Single-role route guard (replaces ProtectedRoute)
+│       │   ├── WrongPortalNotice.jsx  <- Shown when a staff credential lands here
+│       │   ├── StatCard.jsx, ListCard.jsx, ListRow.jsx, Modal.jsx, etc.
+│       └── pages/
+│           ├── Login.jsx         <- Member-only login (bounces staff creds via WrongPortalNotice)
+│           └── customer/         <- Overview, Workouts, Diet, Weight, Analytics, Notifications, Account
+│
+└── frontend-staff/                <- Admin/trainer/super-admin console. Served at "/staff/*".
+    ├── index.html                <- Plain favicon only — not a PWA install target
+    ├── vite.config.js            <- Vite build config (base "/staff/" in production)
+    ├── tailwind.config.js
     ├── public/
-    │   ├── favicon.svg          <- Vector brand mark
-    │   ├── manifest.json        <- PWA Web App Manifest
-    │   └── sw.js                <- Offline cache service worker
+    │   └── favicon.svg
     └── src/
-        ├── main.jsx             <- React + BrowserRouter + Service Worker registration
-        ├── App.jsx              <- Code-split route tree (React.lazy) across 4 role suites
-        ├── index.css            <- Global design system & component utility classes
+        ├── main.jsx              <- React + BrowserRouter (no tenant branding, no service worker)
+        ├── App.jsx               <- Code-split route tree (React.lazy) across 3 staff roles
+        ├── index.css
         ├── api/
-        │   └── axios.js         <- Axios instance with auto-refresh token interceptor
+        │   └── axios.js
         ├── context/
-        │   └── AuthContext.jsx  <- Auth state, login/logout, role session management
+        │   ├── AuthContext.jsx
+        │   └── ThemeContext.jsx
         ├── components/
-        │   ├── DashboardShell.jsx   <- Responsive sidebar nav with mobile hamburger drawer
-        │   ├── ProtectedRoute.jsx   <- Role-gated route guard
-        │   ├── StatCard.jsx         <- Metric card component
-        │   └── Modal.jsx            <- Accessible dialog overlay
+        │   ├── DashboardShell.jsx
+        │   ├── ProtectedRoute.jsx     <- Role-gated route guard
+        │   ├── WrongPortalNotice.jsx  <- Shown when a member credential lands here
+        │   └── StatCard.jsx, Modal.jsx, etc.
         └── pages/
-            ├── Login.jsx        <- Unified 4-role authentication portal
-            ├── customer/        <- Overview, Workouts, Diet, Weight, Analytics, Notifications, Account
+            ├── Login.jsx        <- Staff-only login (bounces member creds via WrongPortalNotice)
             ├── trainer/         <- TrainerOverview, TrainerClients (Studio & Prescriptions)
             ├── admin/           <- Overview, Customers, Trainers, Branches, Fees, Plans, GymProfile
             └── superadmin/      <- Overview, Admins, AuditLog, Settings
@@ -404,7 +448,8 @@ feeSchema.index({ admin: 1, status: 1, dueDate: 1 });
 
 ## 13. Deploying to Vercel
 
-This project deploys as a **single Vercel project** — no separate frontend/backend projects required.
+This project deploys as a **single Vercel project** — two frontends, one backend,
+no separate projects and no CORS to configure (both apps call `/api/*` same-origin).
 
 ### Deployment Steps
 
@@ -413,13 +458,25 @@ This project deploys as a **single Vercel project** — no separate frontend/bac
    - Go to [vercel.com](https://vercel.com) → **Add New → Project**.
    - Select your `gym-management-system` repository.
    - Leave **Root Directory** as `./` (default).
-   - Vercel auto-reads `vercel.json`, runs `npm run build` to produce `frontend/dist/`.
+   - Vercel auto-reads `vercel.json`, whose `buildCommand` builds
+     `frontend-customer` and `frontend-staff` and copies the staff build into
+     `frontend-customer/dist/staff/`, producing a single `outputDirectory`.
 3. **Set Environment Variables** in Vercel → Settings → Environment Variables:
    - **Required**: `MONGO_URI`, `JWT_SECRET`
    - **Optional** (for full feature operation): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
 4. **Click Deploy**.
-   - Frontend: `https://your-project.vercel.app/`
+   - Member app: `https://your-project.vercel.app/`
+   - Staff console: `https://your-project.vercel.app/staff/`
    - API: `https://your-project.vercel.app/api/`
+
+### Later, optional: separate subdomains
+
+If you outgrow the single-domain setup (independent deploys/scaling for the
+staff console), split `frontend-staff` into its own Vercel project on a
+separate subdomain (e.g. `staff.yourdomain.com`). The backend's CORS
+allow-list already supports this — `CLIENT_ORIGIN` in `backend/app.js` is a
+comma-separated list, so add both origins there and drop the `/staff/*`
+rewrites from `vercel.json`.
 
 ### Caveats
 
@@ -444,7 +501,8 @@ This project deploys as a **single Vercel project** — no separate frontend/bac
 | **Self-Service Stripe Payments** | <span style="color:green">Completed</span> | Stripe Checkout sessions + webhooks (`checkout.session.completed`) + simulated test mode fallback. |
 | **Personal Trainer / Staff Role** | <span style="color:green">Completed</span> | Dedicated Trainer role, assigned client studio, workout & nutrition prescription pipeline. |
 | **Multi-Branch Facility Hierarchy** | <span style="color:green">Completed</span> | Branch management console, multi-location manager assignments, and facility capacities. |
-| **Progressive Web App (PWA)** | <span style="color:green">Completed</span> | Web app manifest (`manifest.json`), service worker shell caching (`sw.js`), and mobile installability. |
+| **Progressive Web App (PWA)** | <span style="color:green">Completed</span> | Web app manifest (`manifest.json`), service worker shell caching (`sw.js`), and mobile installability — customer app only; the staff console is a plain desk-console SPA. |
+| **Standalone Member App** | <span style="color:green">Completed</span> | Member portal split into its own `frontend-customer` bundle — the customer JS bundle no longer ships admin/trainer/superadmin code. |
 
 ---
 
