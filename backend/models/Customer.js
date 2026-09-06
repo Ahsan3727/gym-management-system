@@ -16,6 +16,7 @@ const customerSchema = new mongoose.Schema(
       sms: { type: Boolean, default: false },
       push: { type: Boolean, default: true },
     },
+    trainerNotes: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }

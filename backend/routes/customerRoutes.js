@@ -7,6 +7,8 @@ const WeightLog = require('../models/WeightLog');
 const Streak = require('../models/Streak');
 const Notification = require('../models/Notification');
 const Admin = require('../models/Admin');
+const Session = require('../models/Session');
+const Attendance = require('../models/Attendance');
 const stripeUtil = require('../utils/stripe');
 
 const asyncHandler = require('../utils/asyncHandler');
@@ -333,6 +335,7 @@ router.post(
     }
 
     streak.lastCheckin = today;
+    streak.totalCheckins = (streak.totalCheckins || 0) + 1;
     streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
 
     const milestones = [7, 30, 100, 365];
@@ -343,8 +346,26 @@ router.post(
       }
     });
 
-    await streak.save();
+    await Promise.all([
+      streak.save(),
+      Attendance.create({
+        customer: req.customerId,
+        admin: req.adminId,
+        method: 'qr',
+      }),
+    ]);
+
     res.json(streak);
+  })
+);
+
+// POST /api/customer/checkin alias
+router.post(
+  '/checkin',
+  asyncHandler(async (req, res, next) => {
+    // Re-route to streak/checkin handler
+    req.url = '/streak/checkin';
+    router.handle(req, res, next);
   })
 );
 
@@ -365,6 +386,20 @@ router.get(
     ]);
 
     res.json({ weight, workouts, diet });
+  })
+);
+
+/* -------------------------------- Sessions ---------------------------------- */
+
+// GET /api/customer/sessions
+// List scheduled and past personal training sessions for this customer
+router.get(
+  '/sessions',
+  asyncHandler(async (req, res) => {
+    const sessions = await Session.find({ customer: req.customerId, admin: req.adminId })
+      .populate('trainer', 'name phone specialty')
+      .sort({ scheduledAt: 1 });
+    res.json(sessions);
   })
 );
 

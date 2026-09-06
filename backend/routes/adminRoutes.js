@@ -12,6 +12,7 @@ const Streak = require('../models/Streak');
 const Notification = require('../models/Notification');
 const Trainer = require('../models/Trainer');
 const Branch = require('../models/Branch');
+const Attendance = require('../models/Attendance');
 
 const asyncHandler = require('../utils/asyncHandler');
 const { protect, authorize } = require('../middleware/auth');
@@ -152,6 +153,99 @@ router.put(
     res.json({
       checkinTokenRequired: req.adminDoc.checkinTokenRequired,
       message: 'Check-in settings updated.',
+    });
+  })
+);
+
+/* ------------------------------ Attendance -------------------------------- */
+
+// GET /api/admin/attendance
+// List check-in records for a specified date (defaults to today)
+router.get(
+  '/attendance',
+  asyncHandler(async (req, res) => {
+    const { date, search } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const attendanceRecords = await Attendance.find({
+      admin: req.adminId,
+      checkedInAt: { $gte: startOfDay, $lte: endOfDay },
+    })
+      .populate({
+        path: 'customer',
+        select: 'name phone plan isActive',
+        populate: { path: 'plan', select: 'planName' },
+      })
+      .sort({ checkedInAt: -1 });
+
+    let filtered = attendanceRecords.filter((r) => r.customer);
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      filtered = filtered.filter((r) => r.customer?.name?.toLowerCase().includes(q) || r.customer?.phone?.includes(q));
+    }
+
+    res.json({
+      date: startOfDay.toISOString().split('T')[0],
+      totalToday: filtered.length,
+      attendance: filtered,
+    });
+  })
+);
+
+// POST /api/admin/attendance/manual
+// Front desk staff manually marks a member checked in
+router.post(
+  '/attendance/manual',
+  asyncHandler(async (req, res) => {
+    const { customerId, notes } = req.body;
+    if (!customerId) return res.status(400).json({ message: 'customerId is required.' });
+
+    const customer = await Customer.findOne({ _id: customerId, admin: req.adminId });
+    if (!customer) return res.status(404).json({ message: 'Customer not found.' });
+
+    const record = await Attendance.create({
+      customer: customer._id,
+      admin: req.adminId,
+      method: 'manual',
+      notes: notes ? notes.trim() : 'Manual reception check-in',
+    });
+
+    let streak = await Streak.findOne({ customer: customer._id });
+    if (!streak) streak = new Streak({ customer: customer._id });
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    if (streak.lastCheckin) {
+      const last = new Date(streak.lastCheckin);
+      last.setUTCHours(0, 0, 0, 0);
+      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) streak.currentStreak += 1;
+      else if (diffDays > 1) streak.currentStreak = 1;
+    } else {
+      streak.currentStreak = 1;
+    }
+
+    streak.lastCheckin = today;
+    streak.totalCheckins = (streak.totalCheckins || 0) + 1;
+    streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
+    await streak.save();
+
+    const populated = await Attendance.findById(record._id).populate({
+      path: 'customer',
+      select: 'name phone plan',
+      populate: { path: 'plan', select: 'planName' },
+    });
+
+    res.status(201).json({
+      message: `${customer.name} checked in successfully.`,
+      record: populated,
     });
   })
 );
@@ -377,6 +471,91 @@ router.post(
     }
 
     res.json({ message: `Bulk action '${action}' applied to ${affected} customer(s).`, affected });
+  })
+);
+
+// POST /api/admin/customers/import
+// Bulk import members from CSV data or row objects
+router.post(
+  '/customers/import',
+  asyncHandler(async (req, res) => {
+    let rows = [];
+    if (Array.isArray(req.body.rows)) {
+      rows = req.body.rows;
+    } else if (req.body.csvData && typeof req.body.csvData === 'string') {
+      const lines = req.body.csvData.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      if (lines.length > 0) {
+        const headers = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, ''));
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map((c) => c.trim().replace(/^["']|["']$/g, ''));
+          const rowObj = {};
+          headers.forEach((h, idx) => {
+            rowObj[h] = cols[idx] || '';
+          });
+          rows.push(rowObj);
+        }
+      }
+    }
+
+    if (rows.length === 0) {
+      return res.status(400).json({ message: 'No valid data provided for import.' });
+    }
+
+    const createdList = [];
+    const skippedList = [];
+
+    for (const row of rows) {
+      const name = (row.name || row.fullname || '').trim();
+      const username = (row.username || row.user || '').trim().toLowerCase();
+      const phone = (row.phone || row.mobile || '').trim();
+      const rawPassword = (row.password || '').trim();
+
+      if (!name || !username) {
+        skippedList.push({ name: name || 'Unknown', username, reason: 'Missing name or username' });
+        continue;
+      }
+
+      const existing = await User.findOne({ username, admin: req.adminId });
+      if (existing) {
+        skippedList.push({ name, username, reason: 'Username already taken' });
+        continue;
+      }
+
+      const isAuto = !rawPassword || rawPassword.length < 8;
+      const effectivePassword = isAuto ? crypto.randomBytes(5).toString('base64url') : rawPassword;
+      const passwordHash = await User.hashPassword(effectivePassword);
+
+      const user = await User.create({
+        username,
+        passwordHash,
+        role: 'customer',
+        admin: req.adminId,
+      });
+
+      const customer = await Customer.create({
+        user: user._id,
+        admin: req.adminId,
+        name,
+        phone,
+      });
+
+      await Streak.create({ customer: customer._id });
+
+      createdList.push({
+        _id: customer._id,
+        name,
+        username,
+        password: isAuto ? effectivePassword : 'Provided in CSV',
+      });
+    }
+
+    res.json({
+      message: `Import completed: ${createdList.length} member(s) created, ${skippedList.length} skipped.`,
+      createdCount: createdList.length,
+      skippedCount: skippedList.length,
+      created: createdList,
+      skipped: skippedList,
+    });
   })
 );
 
@@ -610,6 +789,129 @@ router.get(
       { $group: { _id: '$status', total: { $sum: '$amount' }, count: { $sum: 1 } } },
     ]);
     res.json(rows);
+  })
+);
+
+// GET /api/admin/analytics
+// Pre-aggregated statistics for admin dashboard charts & KPI tiles
+router.get(
+  '/analytics',
+  asyncHandler(async (req, res) => {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const [
+      activeCount,
+      inactiveCount,
+      paidFees,
+      unpaidFees,
+      monthlyRevenueRaw,
+      monthlyMembersRaw,
+      planAggRaw,
+    ] = await Promise.all([
+      Customer.countDocuments({ admin: req.adminId, isActive: true }),
+      Customer.countDocuments({ admin: req.adminId, isActive: false }),
+      Fee.aggregate([
+        { $match: { admin: req.adminId, status: 'paid' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      Fee.aggregate([
+        { $match: { admin: req.adminId, status: { $in: ['unpaid', 'overdue'] } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      Fee.aggregate([
+        {
+          $match: {
+            admin: req.adminId,
+            status: 'paid',
+            paidOn: { $gte: sixMonthsAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$paidOn' },
+              month: { $month: '$paidOn' },
+            },
+            revenue: { $sum: '$amount' },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Customer.aggregate([
+        {
+          $match: {
+            admin: req.adminId,
+            created_at: { $gte: sixMonthsAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$created_at' },
+              month: { $month: '$created_at' },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Customer.aggregate([
+        { $match: { admin: req.adminId } },
+        { $group: { _id: '$plan', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const totalRevenue = paidFees[0]?.total || 0;
+    const pendingRevenue = unpaidFees[0]?.total || 0;
+    const totalDue = totalRevenue + pendingRevenue;
+    const feeCollectionRate = totalDue > 0 ? Number((totalRevenue / totalDue).toFixed(2)) : 1;
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const revenueByMonth = [];
+    const memberGrowthByMonth = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const label = `${monthNames[m - 1]} ${y}`;
+
+      const revMatch = monthlyRevenueRaw.find((r) => r._id.year === y && r._id.month === m);
+      revenueByMonth.push({
+        month: label,
+        revenue: revMatch ? revMatch.revenue : 0,
+      });
+
+      const memMatch = monthlyMembersRaw.find((r) => r._id.year === y && r._id.month === m);
+      memberGrowthByMonth.push({
+        month: label,
+        count: memMatch ? memMatch.count : 0,
+      });
+    }
+
+    const plans = await MembershipPlan.find({ admin: req.adminId }).lean();
+    const planMap = new Map(plans.map((p) => [p._id.toString(), p.planName]));
+    const planDistribution = planAggRaw.map((item) => ({
+      name: item._id ? planMap.get(item._id.toString()) || 'Unknown Plan' : 'No Plan',
+      count: item.count,
+    }));
+
+    res.json({
+      revenueByMonth,
+      memberGrowthByMonth,
+      activeVsInactive: {
+        active: activeCount,
+        inactive: inactiveCount,
+      },
+      planDistribution,
+      totalRevenue,
+      pendingRevenue,
+      feeCollectionRate,
+    });
   })
 );
 

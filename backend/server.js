@@ -6,6 +6,9 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 require('dotenv').config();
 
+const { validateEnv } = require('./utils/env');
+validateEnv();
+
 const app = require('./app');
 const connectDB = require('./config/db');
 

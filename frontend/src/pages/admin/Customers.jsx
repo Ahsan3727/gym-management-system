@@ -44,6 +44,38 @@ export default function Customers() {
   const [bulkMessage, setBulkMessage] = useState('');
   const [applyingBulk, setApplyingBulk] = useState(false);
 
+  // ── CSV Import ──────────────────────────────────────────────────────────────
+  const [showImport, setShowImport] = useState(false);
+  const [csvText, setCsvText] = useState('name,username,phone\nAlex Morgan,alex.m,555-0199\nChris Evans,chris.e,555-0188');
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+
+  async function handleImport(e) {
+    e.preventDefault();
+    if (!csvText.trim()) return;
+    setImporting(true);
+    try {
+      const { data } = await api.post('/admin/customers/import', { csvData: csvText });
+      setImportResult(data);
+      await load();
+      showToast(data.message, 'success');
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Import failed.', 'error');
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  function handleFileUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setCsvText(event.target?.result || '');
+    };
+    reader.readAsText(file);
+  }
+
   async function load() {
     const params = {};
     if (status) params.status = status;
@@ -214,10 +246,16 @@ export default function Customers() {
           <h1 className="mb-1 text-2xl font-semibold text-ink">Customers</h1>
           <p className="text-sm text-steel">Add, manage and monitor everyone at your gym.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="btn-primary">
-          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-          Add customer
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => { setShowImport(true); setImportResult(null); }} className="btn-secondary">
+            <svg className="icon !h-4 !w-4"><use href="#i-clipboard" /></svg>
+            Import CSV
+          </button>
+          <button onClick={() => setShowCreate(true)} className="btn-primary">
+            <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+            Add customer
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -563,6 +601,84 @@ export default function Customers() {
                   {progress.diet.length === 0 && <li className="text-steel">No entries yet.</li>}
                 </ul>
               </div>
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {/* ── CSV Import Modal ──────────────────────────────────────────────── */}
+      {showImport && (
+        <Modal
+          title="Bulk Import Members (CSV)"
+          onClose={() => { setShowImport(false); setImportResult(null); }}
+        >
+          {!importResult ? (
+            <form onSubmit={handleImport}>
+              <p className="mb-3 text-xs text-steel">
+                Upload or paste member details in CSV format. Columns: <code className="rounded bg-ink/5 px-1">name,username,phone,password</code>.
+                Password is <strong>optional</strong> (auto-generated if omitted). Email is not required.
+              </p>
+
+              <div className="mb-3">
+                <label className="field-label">Upload .csv file (optional)</label>
+                <input
+                  type="file"
+                  accept=".csv,.txt"
+                  onChange={handleFileUpload}
+                  className="field-input text-xs"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="field-label">CSV Content</label>
+                <textarea
+                  rows={6}
+                  className="field-input font-mono text-xs"
+                  value={csvText}
+                  onChange={(e) => setCsvText(e.target.value)}
+                  placeholder="name,username,phone\nJohn Doe,john.doe,555-0100"
+                  required
+                />
+              </div>
+
+              <button type="submit" disabled={importing || !csvText.trim()} className="btn-primary w-full">
+                {importing ? 'Importing Members…' : 'Start Import'}
+              </button>
+            </form>
+          ) : (
+            <div>
+              <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-chalk-dark">
+                <svg className="icon !h-5 !w-5"><use href="#i-check-circle" /></svg>
+                {importResult.message}
+              </div>
+
+              {importResult.created?.length > 0 && (
+                <div className="mb-4 max-h-48 overflow-y-auto rounded-xl border border-ink/10 bg-ink/5 p-3 text-xs">
+                  <div className="mb-2 font-semibold text-ink">Created Members & Passwords:</div>
+                  {importResult.created.map((c, idx) => (
+                    <div key={idx} className="flex justify-between py-1 border-b border-ink/5 last:border-0">
+                      <span><strong>{c.name}</strong> ({c.username})</span>
+                      <span className="font-mono text-iron select-all">{c.password}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {importResult.skipped?.length > 0 && (
+                <div className="mb-4 rounded-xl border border-ember/20 bg-ember/5 p-3 text-xs text-ember-dark">
+                  <div className="mb-1 font-semibold">Skipped ({importResult.skipped.length}):</div>
+                  {importResult.skipped.map((s, idx) => (
+                    <div key={idx}>{s.name} ({s.username}): {s.reason}</div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                onClick={() => { setShowImport(false); setImportResult(null); }}
+                className="btn-primary w-full"
+              >
+                Done
+              </button>
             </div>
           )}
         </Modal>

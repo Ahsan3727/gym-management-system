@@ -277,4 +277,128 @@ router.put(
   })
 );
 
+/* ----------------------------- Platform analytics ---------------------------- */
+
+router.get(
+  '/analytics',
+  asyncHandler(async (req, res) => {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const [
+      totalGyms,
+      activeGyms,
+      totalCustomers,
+      totalRevenueRaw,
+      monthlyRevenueRaw,
+      gymRegistrationsRaw,
+      gymSummaries,
+    ] = await Promise.all([
+      Admin.countDocuments(),
+      Admin.countDocuments({ isSuspended: false }),
+      Customer.countDocuments(),
+      Fee.aggregate([
+        { $match: { status: 'paid' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      Fee.aggregate([
+        {
+          $match: {
+            status: 'paid',
+            paidOn: { $gte: sixMonthsAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$paidOn' },
+              month: { $month: '$paidOn' },
+            },
+            revenue: { $sum: '$amount' },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Admin.aggregate([
+        {
+          $match: {
+            created_at: { $gte: sixMonthsAgo },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$created_at' },
+              month: { $month: '$created_at' },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Admin.find().select('gymName slug isSuspended created_at').lean(),
+    ]);
+
+    const totalRevenue = totalRevenueRaw[0]?.total || 0;
+
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthlyRevenue = [];
+    const monthlyGymGrowth = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const label = `${monthNames[m - 1]} ${y}`;
+
+      const revMatch = monthlyRevenueRaw.find((r) => r._id.year === y && r._id.month === m);
+      monthlyRevenue.push({
+        month: label,
+        revenue: revMatch ? revMatch.revenue : 0,
+      });
+
+      const gymMatch = gymRegistrationsRaw.find((r) => r._id.year === y && r._id.month === m);
+      monthlyGymGrowth.push({
+        month: label,
+        count: gymMatch ? gymMatch.count : 0,
+      });
+    }
+
+    const topGyms = await Promise.all(
+      gymSummaries.slice(0, 10).map(async (gym) => {
+        const [memberCount, feeAgg] = await Promise.all([
+          Customer.countDocuments({ admin: gym._id }),
+          Fee.aggregate([
+            { $match: { admin: gym._id, status: 'paid' } },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
+          ]),
+        ]);
+        return {
+          _id: gym._id,
+          gymName: gym.gymName,
+          slug: gym.slug,
+          isSuspended: gym.isSuspended,
+          memberCount,
+          revenue: feeAgg[0]?.total || 0,
+        };
+      })
+    );
+
+    topGyms.sort((a, b) => b.revenue - a.revenue);
+
+    res.json({
+      totalGyms,
+      activeGyms,
+      totalCustomers,
+      totalRevenue,
+      monthlyRevenue,
+      monthlyGymGrowth,
+      topGyms,
+    });
+  })
+);
+
 module.exports = router;

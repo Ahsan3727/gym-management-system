@@ -15,8 +15,10 @@ const CustomerWeight = lazy(() => import('./pages/customer/Weight.jsx'));
 const CustomerAnalytics = lazy(() => import('./pages/customer/Analytics.jsx'));
 const CustomerAccount = lazy(() => import('./pages/customer/Account.jsx'));
 const CustomerNotifications = lazy(() => import('./pages/customer/Notifications.jsx'));
+const CustomerCheckin = lazy(() => import('./pages/customer/Checkin.jsx'));
 
 const AdminOverview = lazy(() => import('./pages/admin/AdminOverview.jsx'));
+const AdminAttendance = lazy(() => import('./pages/admin/Attendance.jsx'));
 const AdminCustomers = lazy(() => import('./pages/admin/Customers.jsx'));
 const AdminFees = lazy(() => import('./pages/admin/Fees.jsx'));
 const AdminPlans = lazy(() => import('./pages/admin/Plans.jsx'));
@@ -26,6 +28,7 @@ const AdminBranches = lazy(() => import('./pages/admin/Branches.jsx'));
 
 const TrainerOverview = lazy(() => import('./pages/trainer/TrainerOverview.jsx'));
 const TrainerClients = lazy(() => import('./pages/trainer/TrainerClients.jsx'));
+const TrainerSchedule = lazy(() => import('./pages/trainer/TrainerSchedule.jsx'));
 
 const SuperAdminOverview = lazy(() => import('./pages/superadmin/SuperAdminOverview.jsx'));
 const SuperAdminAdmins = lazy(() => import('./pages/superadmin/Admins.jsx'));
@@ -36,6 +39,7 @@ const SuperAdminAuditLog = lazy(() => import('./pages/superadmin/AuditLog.jsx'))
 // the icon-pill nav rendered by the Phase 1 DashboardShell.
 const customerNav = [
   { to: '/customer', label: 'Overview', end: true, icon: 'home' },
+  { to: '/customer/checkin', label: 'Check-In', icon: 'zap' },
   { to: '/customer/workouts', label: 'Workouts', icon: 'dumbbell' },
   { to: '/customer/diet', label: 'Diet & water', icon: 'drop' },
   { to: '/customer/weight', label: 'Weight & body', icon: 'trend' },
@@ -46,6 +50,7 @@ const customerNav = [
 
 const adminNav = [
   { to: '/admin', label: 'Overview', end: true, icon: 'home' },
+  { to: '/admin/attendance', label: 'Attendance', icon: 'zap' },
   { to: '/admin/customers', label: 'Customers', icon: 'user' },
   { to: '/admin/trainers', label: 'Trainers', icon: 'dumbbell' },
   { to: '/admin/branches', label: 'Locations', icon: 'building' },
@@ -57,6 +62,7 @@ const adminNav = [
 const trainerNav = [
   { to: '/trainer', label: 'Overview', end: true, icon: 'home' },
   { to: '/trainer/clients', label: 'Client Studio', icon: 'runner' },
+  { to: '/trainer/schedule', label: 'Schedule', icon: 'clipboard' },
 ];
 
 const superAdminNav = [
@@ -133,6 +139,7 @@ export default function App() {
           }
         >
           <Route index element={<CustomerOverview />} />
+          <Route path="checkin" element={<CustomerCheckin />} />
           <Route path="workouts" element={<CustomerWorkouts />} />
           <Route path="diet" element={<CustomerDiet />} />
           <Route path="weight" element={<CustomerWeight />} />
@@ -152,6 +159,7 @@ export default function App() {
         >
           <Route index element={<TrainerOverview />} />
           <Route path="clients" element={<TrainerClients />} />
+          <Route path="schedule" element={<TrainerSchedule />} />
         </Route>
 
         {/* Admin Routes */}
@@ -164,6 +172,7 @@ export default function App() {
           }
         >
           <Route index element={<AdminOverview />} />
+          <Route path="attendance" element={<AdminAttendance />} />
           <Route path="customers" element={<AdminCustomers />} />
           <Route path="trainers" element={<AdminTrainers />} />
           <Route path="branches" element={<AdminBranches />} />

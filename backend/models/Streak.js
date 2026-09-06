@@ -6,6 +6,7 @@ const streakSchema = new mongoose.Schema(
     currentStreak: { type: Number, default: 0 },
     longestStreak: { type: Number, default: 0 },
     lastCheckin: { type: Date, default: null },
+    totalCheckins: { type: Number, default: 0 },
     badges: [{ type: String }], // e.g. "7-day-streak", "30-day-streak"
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }

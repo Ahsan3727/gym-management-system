@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios.js';
 import SegmentedControl from '../../components/SegmentedControl.jsx';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 
 export default function TrainerClients() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
   const [clients, setClients] = useState([]);
   const [selectedClientId, setSelectedClientId] = useState(searchParams.get('client') || '');
   const [clientProgress, setClientProgress] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('workout'); // 'workout' | 'diet' | 'history'
+  const [activeTab, setActiveTab] = useState('workout'); // 'workout' | 'diet' | 'history' | 'notes'
+  const [coachNotes, setCoachNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   // Prescribe workout form
   const [workoutForm, setWorkoutForm] = useState({
@@ -56,6 +62,7 @@ export default function TrainerClients() {
     try {
       const { data } = await api.get(`/trainer/clients/${clientId}/progress`);
       setClientProgress(data);
+      setCoachNotes(data?.customer?.trainerNotes || '');
     } catch {
       setError('Could not load client progress.');
     }
@@ -103,6 +110,20 @@ export default function TrainerClients() {
       setError(err.response?.data?.message || 'Could not prescribe nutrition plan.');
     } finally {
       setSavingDiet(false);
+    }
+  }
+
+  async function handleSaveNotes(e) {
+    e.preventDefault();
+    setSavingNotes(true);
+    try {
+      await api.put(`/trainer/clients/${selectedClientId}/notes`, { notes: coachNotes });
+      showToast('Coach notes saved.', 'success');
+      await loadProgress(selectedClientId);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Could not save notes.', 'error');
+    } finally {
+      setSavingNotes(false);
     }
   }
 
@@ -154,20 +175,28 @@ export default function TrainerClients() {
                 Goals: <strong>{currentClient?.goals || 'General Fitness'}</strong> • Phone: {currentClient?.phone || '—'}
               </div>
             </div>
-            <div className="flex gap-6">
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-steel">Attendance Streak</div>
-                <div className="flex items-center gap-1.5 text-base font-semibold text-ember-dark mt-0.5">
-                  <svg className="icon !h-4 !w-4"><use href="#i-flame" /></svg>
-                  {clientProgress?.streak?.currentStreak || 0} Days
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex gap-6">
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-steel">Attendance Streak</div>
+                  <div className="flex items-center gap-1.5 text-base font-semibold text-ember-dark mt-0.5">
+                    <svg className="icon !h-4 !w-4"><use href="#i-flame" /></svg>
+                    {clientProgress?.streak?.currentStreak || 0} Days
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium uppercase tracking-wide text-steel">Workouts Logged</div>
+                  <div className="text-base font-semibold text-ink mt-0.5">
+                    {clientProgress?.workouts?.length || 0}
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="text-xs font-medium uppercase tracking-wide text-steel">Workouts Logged</div>
-                <div className="text-base font-semibold text-ink mt-0.5">
-                  {clientProgress?.workouts?.length || 0}
-                </div>
-              </div>
+              <button
+                onClick={() => navigate(`/trainer/schedule?client=${selectedClientId}`)}
+                className="btn-secondary text-xs"
+              >
+                🗓️ Book Session
+              </button>
             </div>
           </div>
 
@@ -179,6 +208,7 @@ export default function TrainerClients() {
                 { value: 'workout', label: 'Prescribe Workout' },
                 { value: 'diet', label: 'Prescribe Nutrition' },
                 { value: 'history', label: 'Client History' },
+                { value: 'notes', label: 'Coach Notes' },
               ]}
               value={activeTab}
               onChange={setActiveTab}
@@ -358,6 +388,32 @@ export default function TrainerClients() {
                 </ListCard>
               </div>
             </div>
+          )}
+
+          {/* Tab 4: Coach Notes */}
+          {activeTab === 'notes' && (
+            <form onSubmit={handleSaveNotes} className="panel p-6 mb-8">
+              <div className="mb-2 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-ink">Private Coach Notes for {currentClient?.name}</h3>
+                  <p className="text-xs text-steel">
+                    These notes are saved on the client profile and visible to coaching staff to track injuries, form cues, goals, and restrictions.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 mb-4">
+                <textarea
+                  className="field-input font-mono text-sm leading-relaxed"
+                  rows={6}
+                  placeholder="e.g. History of left shoulder impingement (avoid overhead presses without warm-up). Goal: reach 15% body fat by June. Prefers morning workouts..."
+                  value={coachNotes}
+                  onChange={(e) => setCoachNotes(e.target.value)}
+                />
+              </div>
+              <button type="submit" disabled={savingNotes} className="btn-primary">
+                {savingNotes ? 'Saving Notes…' : 'Save Coach Notes'}
+              </button>
+            </form>
           )}
         </div>
       )}
