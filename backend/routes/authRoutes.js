@@ -26,12 +26,44 @@ const REFRESH_COOKIE_OPTIONS = {
 router.post(
   '/login',
   asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, gymSlug } = req.body;
     if (!username || !password) {
       return res.status(400).json({ message: 'Username and password are required.' });
     }
 
-    const user = await User.findOne({ username: username.trim().toLowerCase() });
+    const cleanUsername = username.trim().toLowerCase();
+    let gym = null;
+
+    if (gymSlug) {
+      gym = await Admin.findOne({ slug: gymSlug.trim().toLowerCase() });
+      if (!gym) {
+        return res.status(404).json({ message: 'Gym not found for this install link.' });
+      }
+      if (gym.isSuspended) {
+        return res.status(403).json({ message: 'This gym account has been suspended.' });
+      }
+    }
+
+    let user;
+    if (gym) {
+      // Scoped lookup for this specific gym
+      user = await User.findOne({ username: cleanUsername, admin: gym._id });
+    } else {
+      // Fallback for staff/superadmin login or unspecified gym
+      const candidates = await User.find({ username: cleanUsername });
+      if (candidates.length === 1) {
+        user = candidates[0];
+      } else if (candidates.length > 1) {
+        // Disambiguate by checking password match among candidates
+        for (const candidate of candidates) {
+          if (await candidate.comparePassword(password)) {
+            user = candidate;
+            break;
+          }
+        }
+      }
+    }
+
     if (!user || !user.isActive) {
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
@@ -41,9 +73,14 @@ router.post(
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
 
-    // If this is a gym admin, block login while the gym is suspended.
+    // Check if the gym is suspended (for admin, customer, or trainer)
     if (user.role === 'admin') {
       const adminDoc = await Admin.findOne({ user: user._id });
+      if (adminDoc?.isSuspended) {
+        return res.status(403).json({ message: 'This gym account has been suspended.' });
+      }
+    } else if (user.admin) {
+      const adminDoc = await Admin.findById(user.admin);
       if (adminDoc?.isSuspended) {
         return res.status(403).json({ message: 'This gym account has been suspended.' });
       }
@@ -57,7 +94,7 @@ router.post(
     res.json({
       token,
       refreshToken, // Also return for non-cookie mobile/testing clients
-      user: { id: user._id, username: user.username, role: user.role },
+      user: { id: user._id, username: user.username, role: user.role, admin: user.admin },
     });
   })
 );
@@ -170,7 +207,11 @@ router.put(
     }
     req.user.passwordHash = await User.hashPassword(newPassword);
     await req.user.save();
-    res.json({ message: 'Password updated.' });
+
+    // Revoke all existing refresh tokens for security
+    await RefreshToken.deleteMany({ user: req.user._id });
+
+    res.json({ message: 'Password updated. Existing sessions have been invalidated.' });
   })
 );
 

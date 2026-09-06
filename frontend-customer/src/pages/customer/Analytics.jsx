@@ -31,13 +31,14 @@ export default function Analytics() {
   const [range, setRange] = useState('30d');
   const chart = useChartColors();
 
+  const days = RANGE_DAYS[range];
+
   useEffect(() => {
-    api.get('/customer/analytics')
+    api.get('/customer/analytics', { params: { days } })
       .then((res) => setData(res.data))
       .catch(() => setError('Could not load analytics.'));
-  }, []);
+  }, [days]);
 
-  const days = RANGE_DAYS[range];
   const cutoff = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - days);

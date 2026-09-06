@@ -35,8 +35,10 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function login(username, password) {
-    const { data } = await api.post('/auth/login', { username, password });
+  async function login(username, password, gymSlug) {
+    const payload = { username, password };
+    if (gymSlug) payload.gymSlug = gymSlug;
+    const { data } = await api.post('/auth/login', payload);
     localStorage.setItem('gym_token', data.token);
     if (data.refreshToken) {
       localStorage.setItem('gym_refresh_token', data.refreshToken);

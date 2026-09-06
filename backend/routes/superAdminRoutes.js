@@ -7,6 +7,7 @@ const Customer = require('../models/Customer');
 const Fee = require('../models/Fee');
 const AuditLog = require('../models/AuditLog');
 const Settings = require('../models/Settings');
+const RefreshToken = require('../models/RefreshToken');
 
 const asyncHandler = require('../utils/asyncHandler');
 const { protect, authorize } = require('../middleware/auth');
@@ -70,6 +71,8 @@ router.post(
       workingHours,
       createdBy: req.user._id,
     });
+    user.admin = admin._id;
+    await user.save();
 
     await logAction(req, 'admin.create', 'Admin', admin._id, { gymName, slug });
     // `slug` rides along on the Admin doc already — the super admin UI
@@ -149,6 +152,9 @@ router.put(
     const tempPassword = crypto.randomBytes(6).toString('base64url');
     const passwordHash = await User.hashPassword(tempPassword);
     const adminUser = await User.findByIdAndUpdate(admin.user, { passwordHash }, { new: true });
+
+    // Revoke all existing sessions for this gym admin
+    await RefreshToken.deleteMany({ user: admin.user });
 
     await logAction(req, 'admin.reset_password', 'Admin', admin._id);
 

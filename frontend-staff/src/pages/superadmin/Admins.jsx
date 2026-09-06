@@ -325,11 +325,37 @@ export default function Admins() {
           ) : !installQr ? (
             <div className="py-8 text-center text-sm text-steel">Generating QR code…</div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
-                <img src={installQr.qrDataUrl} alt="Install link QR code" className="h-44 w-44" />
+            <div className="flex flex-col items-center gap-4">
+              {/* Printable Reception Flyer Card */}
+              <div id="reception-flyer" className="w-full rounded-2xl border-2 border-dashed border-ink/20 bg-panel p-6 text-center shadow-sm">
+                <div className="text-xs font-bold uppercase tracking-widest text-ember mb-1">Official Member App</div>
+                <h3 className="font-display text-2xl font-black text-ink mb-1">{installFor.gymName}</h3>
+                <p className="text-xs text-steel mb-4">Scan with your phone camera to install our app</p>
+                <div className="inline-block rounded-2xl bg-white p-3 shadow-md border border-ink/10">
+                  <img src={installQr.qrDataUrl} alt="Install link QR code" className="h-44 w-44 mx-auto" />
+                </div>
+                <div className="mt-4 text-[11px] text-steel">
+                  Workout logging • Attendance check-in • Diet & streaks
+                </div>
               </div>
-              <p className="text-xs text-steel">Scan to open the install link on a phone.</p>
+
+              <div className="flex w-full gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn-primary flex-1 text-xs py-2 flex items-center justify-center gap-2"
+                >
+                  <svg className="icon !h-4 !w-4"><use href="#i-clipboard" /></svg>
+                  Print Reception Flyer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => copyInstallLink(installFor)}
+                  className="btn-secondary text-xs py-2"
+                >
+                  Copy Link
+                </button>
+              </div>
             </div>
           )}
         </Modal>

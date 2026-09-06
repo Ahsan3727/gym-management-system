@@ -13,7 +13,7 @@ const TenantContext = createContext({ tenant: null, setTenant: () => {} });
 
 function readStoredTenant() {
   try {
-    const raw = sessionStorage.getItem(TENANT_STORAGE_KEY);
+    const raw = localStorage.getItem(TENANT_STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -26,11 +26,10 @@ export function TenantProvider({ children }) {
   function setTenant(next) {
     setTenantState(next);
     try {
-      if (next) sessionStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(next));
-      else sessionStorage.removeItem(TENANT_STORAGE_KEY);
+      if (next) localStorage.setItem(TENANT_STORAGE_KEY, JSON.stringify(next));
+      else localStorage.removeItem(TENANT_STORAGE_KEY);
     } catch {
-      // Storage can throw in private-browsing/quota-exceeded edge cases —
-      // branding still works for this page load, it just won't persist.
+      // Storage can throw in private-browsing/quota-exceeded edge cases
     }
   }
 

@@ -355,12 +355,13 @@ router.post(
 router.get(
   '/analytics',
   asyncHandler(async (req, res) => {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const daysNum = Math.min(365, Math.max(1, parseInt(req.query.days || '30', 10)));
+    const cutoffDate = new Date(Date.now() - daysNum * 24 * 60 * 60 * 1000);
 
     const [weight, workouts, diet] = await Promise.all([
-      WeightLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo } }).sort({ date: 1 }).select('weightKg date'),
-      WorkoutLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo }, isRestDay: false }).select('date'),
-      DietLog.find({ customer: req.customerId, date: { $gte: thirtyDaysAgo } }).select('calories date'),
+      WeightLog.find({ customer: req.customerId, date: { $gte: cutoffDate } }).sort({ date: 1 }).select('weightKg date'),
+      WorkoutLog.find({ customer: req.customerId, date: { $gte: cutoffDate }, isRestDay: false }).select('date'),
+      DietLog.find({ customer: req.customerId, date: { $gte: cutoffDate } }).select('calories date'),
     ]);
 
     res.json({ weight, workouts, diet });

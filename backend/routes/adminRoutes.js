@@ -234,8 +234,8 @@ router.post(
       return res.status(400).json({ message: 'Password must be at least 8 characters.' });
     }
 
-    const existing = await User.findOne({ username: username.trim().toLowerCase() });
-    if (existing) return res.status(409).json({ message: 'That username is already taken.' });
+    const existing = await User.findOne({ username: username.trim().toLowerCase(), admin: req.adminId });
+    if (existing) return res.status(409).json({ message: 'That username is already taken in your gym.' });
 
     const recipientEmail = (email || (username.includes('@') ? username : '')).trim().toLowerCase() || null;
     const passwordHash = await User.hashPassword(password);
@@ -244,6 +244,7 @@ router.post(
       email: recipientEmail,
       passwordHash,
       role: 'customer',
+      admin: req.adminId,
     });
 
     const customer = await Customer.create({
@@ -554,8 +555,8 @@ router.post(
       return res.status(400).json({ message: 'Password must be at least 8 characters.' });
     }
 
-    const existing = await User.findOne({ username: username.trim().toLowerCase() });
-    if (existing) return res.status(409).json({ message: 'That username is already taken.' });
+    const existing = await User.findOne({ username: username.trim().toLowerCase(), admin: req.adminId });
+    if (existing) return res.status(409).json({ message: 'That username is already taken in your gym.' });
 
     const passwordHash = await User.hashPassword(password);
     const user = await User.create({
@@ -563,6 +564,7 @@ router.post(
       email: username.includes('@') ? username.trim().toLowerCase() : undefined,
       passwordHash,
       role: 'trainer',
+      admin: req.adminId,
     });
 
     const trainer = await Trainer.create({

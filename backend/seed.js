@@ -9,6 +9,7 @@ const User = require('./models/User');
 const Admin = require('./models/Admin');
 const Trainer = require('./models/Trainer');
 const Customer = require('./models/Customer');
+const Streak = require('./models/Streak');
 
 async function seed() {
   await connectDB();
@@ -45,11 +46,14 @@ async function seed() {
       adminDoc = await Admin.create({
         user: adminUser._id,
         gymName: 'Ironline Performance Center',
+        slug: 'ironline-performance-center',
         contact: '555-0199',
         address: '100 Iron Blvd, Downtown',
         workingHours: 'Mon-Sat 06:00 - 22:00',
         createdBy: superAdminUser._id,
       });
+      adminUser.admin = adminDoc._id;
+      await adminUser.save();
       console.log('[seed] Demo Admin created:');
       console.log('       username: demoadmin / Demo1234!');
       console.log('       gymName: Ironline Performance Center');
@@ -68,6 +72,7 @@ async function seed() {
         email: 'trainer@ironlinegym.test',
         passwordHash: hash,
         role: 'trainer',
+        admin: adminDoc._id,
       });
       trainerDoc = await Trainer.create({
         user: trainerUser._id,
@@ -93,6 +98,7 @@ async function seed() {
         email: 'member@ironlinegym.test',
         passwordHash: hash,
         role: 'customer',
+        admin: adminDoc._id,
       });
       const custDoc = await Customer.create({
         user: customerUser._id,
@@ -101,6 +107,7 @@ async function seed() {
         phone: '555-0123',
         goals: 'Hypertrophy and mobility',
       });
+      await Streak.create({ customer: custDoc._id });
       if (trainerDoc) {
         await Trainer.findByIdAndUpdate(trainerDoc._id, {
           $addToSet: { assignedCustomers: custDoc._id },

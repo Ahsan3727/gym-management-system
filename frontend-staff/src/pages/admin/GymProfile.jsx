@@ -316,7 +316,17 @@ export default function GymProfile() {
                   Copy
                 </button>
               </div>
-              <p className="text-xs text-steel">Print the QR code and display it at reception, or share the link directly.</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5"
+                >
+                  <svg className="icon !h-3.5 !w-3.5"><use href="#i-clipboard" /></svg>
+                  Print Reception Flyer
+                </button>
+              </div>
+              <p className="text-xs text-steel">Display this QR code at your reception desk so members can scan and install your app.</p>
             </div>
           </div>
         )}

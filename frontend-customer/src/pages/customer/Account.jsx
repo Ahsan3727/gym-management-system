@@ -36,18 +36,21 @@ export default function Account() {
     const paymentStatus = searchParams.get('payment') || searchParams.get('simulated_payment');
     const returnFeeId = searchParams.get('fee_id') || searchParams.get('paid_fee');
 
-    if (paymentStatus === 'success' && returnFeeId) {
-      // In simulated mode or returning from Stripe checkout, confirm payment
-      api
-        .post('/webhooks/confirm-simulation', { feeId: returnFeeId })
-        .then(() => {
-          setPaymentNotice('Payment completed successfully! Your membership status is updated.');
-          load();
-        })
-        .catch(() => {})
-        .finally(() => {
-          setSearchParams({});
-        });
+    if (paymentStatus === 'success') {
+      if (searchParams.get('simulated_payment') === 'success' && returnFeeId) {
+        api
+          .post('/webhooks/confirm-simulation', { feeId: returnFeeId })
+          .then(() => {
+            setPaymentNotice('Simulated payment completed! Your membership status is updated.');
+            load();
+          })
+          .catch(() => load())
+          .finally(() => setSearchParams({}));
+      } else {
+        setPaymentNotice('Payment completed successfully! Your membership status is updated.');
+        load();
+        setSearchParams({});
+      }
     } else if (paymentStatus === 'cancelled') {
       setPaymentNotice('Payment was cancelled. You can try again at any time.');
       setSearchParams({});

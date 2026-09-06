@@ -84,7 +84,11 @@ router.post(
         return res.status(400).send(`Webhook Error: ${err.message}`);
       }
     } else {
-      // In development or when webhook secret is unconfigured
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET is required in production.');
+        return res.status(500).send('Webhook signing secret not configured.');
+      }
+      // In local development without webhook secret
       try {
         event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       } catch {
@@ -107,12 +111,16 @@ router.post(
 
 /**
  * POST /api/webhooks/confirm-simulation
- * Simulation confirmation endpoint for local dev testing without live Stripe webhooks.
+ * Simulation confirmation endpoint strictly for local development testing without live Stripe webhooks.
  */
 router.post(
   '/confirm-simulation',
   express.json(),
   asyncHandler(async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ message: 'Payment simulation is disabled in production.' });
+    }
+
     const { feeId } = req.body;
     if (!feeId) {
       return res.status(400).json({ message: 'feeId is required' });
