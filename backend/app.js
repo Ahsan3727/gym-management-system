@@ -13,6 +13,7 @@ const superAdminRoutes = require('./routes/superAdminRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const trainerRoutes = require('./routes/trainerRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const publicRoutes = require('./routes/publicRoutes');
 
 const app = express();
 
@@ -62,6 +63,13 @@ app.use('/api/auth/login', loginLimiter);
 const superAdminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
 app.use('/api/superadmin', superAdminLimiter);
 
+// /api/public is unauthenticated by design (install-time branding lookups
+// happen before anyone logs in) and slugs are shareable, guessable-by-design
+// links — not a vulnerability, but worth a light limiter since it's the one
+// open door in this API.
+const publicLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false });
+app.use('/api/public', publicLimiter);
+
 // Friendly response for anyone (or any uptime monitor) hitting the bare
 // domain directly — the real app only ever calls routes under /api/...
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Ironline API is running. See /api/health.' }));
@@ -74,6 +82,7 @@ app.use('/api/customer', customerRoutes);
 app.use('/api/trainer', trainerRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/public', publicRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,8 +1,14 @@
 const CACHE_NAME = 'ironline-v1';
+// NOTE: '/manifest.json' intentionally removed from pre-cache. Since the
+// per-gym branded PWA feature (IMPLEMENTATION_PLAN.md Phase 5), the
+// manifest link is swapped at runtime to /api/public/manifest/:slug for
+// tenant visits — it's no longer a single static file, and pre-caching the
+// static one here would risk serving a stale or wrong-tenant manifest.
+// (The fetch handler below already excludes everything under /api/,
+// including /api/public/manifest/ and /api/public/branding/, from caching.)
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json',
 ];
 
 // Install: pre-cache critical shell assets

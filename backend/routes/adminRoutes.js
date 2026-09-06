@@ -18,6 +18,7 @@ const { protect, authorize } = require('../middleware/auth');
 const { attachAdminTenant } = require('../middleware/tenant');
 const { sendEmail } = require('../utils/mailer');
 const { welcomeEmail } = require('../utils/emailTemplates');
+const { buildInstallQr } = require('../utils/installQr');
 const qrcode = require('qrcode');
 const PDFDocument = require('pdfkit');
 
@@ -38,14 +39,29 @@ router.get(
 router.put(
   '/profile',
   asyncHandler(async (req, res) => {
-    const { gymName, gymLogoUrl, address, contact, workingHours } = req.body;
+    // NOTE: `slug` is intentionally not accepted here — it's immutable
+    // after creation (see models/Admin.js and superAdminRoutes.js).
+    const { gymName, gymLogoUrl, address, contact, workingHours, themeColor } = req.body;
     if (gymName !== undefined) req.adminDoc.gymName = gymName;
     if (gymLogoUrl !== undefined) req.adminDoc.gymLogoUrl = gymLogoUrl;
     if (address !== undefined) req.adminDoc.address = address;
     if (contact !== undefined) req.adminDoc.contact = contact;
     if (workingHours !== undefined) req.adminDoc.workingHours = workingHours;
+    if (themeColor !== undefined) req.adminDoc.themeColor = themeColor;
     await req.adminDoc.save();
     res.json(req.adminDoc);
+  })
+);
+
+// Lets a gym owner pull up their own shareable install link + QR to print
+// or display in-club (frontend/src/pages/admin/GymProfile.jsx).
+router.get(
+  '/install-qr',
+  asyncHandler(async (req, res) => {
+    if (!req.adminDoc.slug) {
+      return res.status(409).json({ message: 'No install slug yet — ask a super admin to run the slug backfill migration.' });
+    }
+    res.json(await buildInstallQr(req, req.adminDoc.slug));
   })
 );
 

@@ -3,6 +3,12 @@ import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
+import { useToast } from '../../components/Toast.jsx';
+
+function installUrlFor(admin) {
+  if (!admin?.slug) return null;
+  return `${window.location.origin}/g/${admin.slug}`;
+}
 
 const emptyForm = { username: '', password: '', gymName: '', address: '', contact: '', workingHours: '' };
 
@@ -27,6 +33,12 @@ export default function Admins() {
   // no longer returns one in the response (it logs server-side instead).
   const [resetMessage, setResetMessage] = useState('');
 
+  // Per-gym branded install link (IMPLEMENTATION_PLAN.md Phase 7)
+  const [installFor, setInstallFor] = useState(null);
+  const [installQr, setInstallQr] = useState(null);
+  const [installError, setInstallError] = useState('');
+  const { showToast } = useToast();
+
   async function load() {
     const { data } = await api.get('/superadmin/admins');
     setAdmins(data);
@@ -41,14 +53,40 @@ export default function Admins() {
     setCreating(true);
     setCreateError('');
     try {
-      await api.post('/superadmin/admins', form);
+      const { data: created } = await api.post('/superadmin/admins', form);
       setShowCreate(false);
       setForm(emptyForm);
       await load();
+      // Surface the install link right away — this is the whole point of
+      // creating the gym account in the first place.
+      openInstallLink(created);
     } catch (err) {
       setCreateError(err.response?.data?.message || 'Could not create gym account.');
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function openInstallLink(admin) {
+    setInstallFor(admin);
+    setInstallQr(null);
+    setInstallError('');
+    try {
+      const { data } = await api.get(`/superadmin/admins/${admin._id}/install-qr`);
+      setInstallQr(data);
+    } catch (err) {
+      setInstallError(err.response?.data?.message || 'Could not generate the install QR code.');
+    }
+  }
+
+  async function copyInstallLink(admin) {
+    const url = installUrlFor(admin);
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Install link copied.', { type: 'success' });
+    } catch {
+      showToast('Could not copy — long-press the link to copy it manually.', { type: 'error' });
     }
   }
 
@@ -154,6 +192,8 @@ export default function Admins() {
             }
             trailing={
               <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                <button onClick={() => openInstallLink(admin)} className="text-xs font-medium text-iron hover:underline">Install link</button>
+                <button onClick={() => copyInstallLink(admin)} className="text-xs font-medium text-steel hover:text-ink">Copy link</button>
                 <button onClick={() => openSummary(admin)} className="text-xs font-medium text-iron hover:underline">Summary</button>
                 <button onClick={() => setEditing({ ...admin })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
                 <button onClick={() => toggleSuspend(admin)} className="text-xs font-medium text-steel hover:text-ink">
@@ -259,6 +299,37 @@ export default function Admins() {
                 <div className="text-xs uppercase tracking-wide text-steel">Overdue fees</div>
                 <div className={`stat-number mt-1 text-lg ${summary.overdueFees ? 'text-ember-dark' : ''}`}>{summary.overdueFees}</div>
               </div>
+            </div>
+          )}
+        </Modal>
+      )}
+
+      {installFor && (
+        <Modal title={`Install link — ${installFor.gymName}`} onClose={() => setInstallFor(null)}>
+          <p className="mb-4 text-xs text-steel">
+            Share this with {installFor.gymName} to install their own branded app — name, icon and accent color, via
+            "Add to Home Screen". No app store, no install file.
+          </p>
+          <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+            <code className="flex-1 truncate text-xs text-ink">{installUrlFor(installFor)}</code>
+            <button
+              type="button"
+              onClick={() => copyInstallLink(installFor)}
+              className="shrink-0 text-xs font-medium text-iron hover:underline"
+            >
+              Copy
+            </button>
+          </div>
+          {installError ? (
+            <div className="py-4 text-center text-sm text-ember-dark">{installError}</div>
+          ) : !installQr ? (
+            <div className="py-8 text-center text-sm text-steel">Generating QR code…</div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
+                <img src={installQr.qrDataUrl} alt="Install link QR code" className="h-44 w-44" />
+              </div>
+              <p className="text-xs text-steel">Scan to open the install link on a phone.</p>
             </div>
           )}
         </Modal>

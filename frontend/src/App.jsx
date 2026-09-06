@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy, useEffect } from 'react';
+import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import DashboardShell from './components/DashboardShell.jsx';
@@ -78,6 +78,24 @@ function RoleHome() {
   return <Navigate to={home || '/login'} replace />;
 }
 
+// Landing spot for a gym's install link (/g/:slug) and its start_url once
+// installed. src/main.jsx has *already* resolved and applied this gym's
+// branding (manifest, apple-touch-icon, theme-color, title) before React
+// ever rendered, and persisted it to sessionStorage/TenantContext — this
+// route's only remaining job is to strip the /g/:slug prefix so the rest
+// of the routing tree (which doesn't expect it) sees a normal path.
+function TenantGateway() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/', { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
+
+  return null;
+}
+
 function PageFallback() {
   return (
     <div className="flex h-64 min-h-[300px] items-center justify-center">
@@ -97,6 +115,12 @@ export default function App() {
         <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<RoleHome />} />
+
+        {/* Per-gym install links (Option A branded PWA). Must come before
+            the catch-all below so /g/:slug isn't swallowed into a redirect
+            to "/" before TenantGateway gets a chance to run. */}
+        <Route path="/g/:slug" element={<TenantGateway />} />
+        <Route path="/g/:slug/*" element={<TenantGateway />} />
 
         {/* Member Routes */}
         <Route

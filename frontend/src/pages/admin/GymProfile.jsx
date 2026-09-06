@@ -29,6 +29,10 @@ export default function GymProfile() {
   const [sending, setSending] = useState(false);
   const [announceMessage, setAnnounceMessage] = useState('');
 
+  // Branded install link (IMPLEMENTATION_PLAN.md Phase 7)
+  const [installData, setInstallData] = useState(null);
+  const [installError, setInstallError] = useState('');
+
   useEffect(() => {
     api
       .get('/admin/profile')
@@ -39,7 +43,22 @@ export default function GymProfile() {
       .get('/admin/checkin-qr')
       .then((res) => setQrData(res.data))
       .catch(() => {});
+
+    api
+      .get('/admin/install-qr')
+      .then((res) => setInstallData(res.data))
+      .catch((err) => setInstallError(err.response?.data?.message || 'Could not load your install link.'));
   }, []);
+
+  async function copyInstallLink() {
+    if (!installData?.installUrl) return;
+    try {
+      await navigator.clipboard.writeText(installData.installUrl);
+      setMessage('Install link copied.');
+    } catch {
+      setError('Could not copy — long-press the link to copy it manually.');
+    }
+  }
 
   async function handleLogoUpload(e) {
     const file = e.target.files?.[0];
@@ -75,6 +94,7 @@ export default function GymProfile() {
         address: profile.address,
         contact: profile.contact,
         workingHours: profile.workingHours,
+        themeColor: profile.themeColor,
       });
       setProfile(data);
       setMessage('Saved.');
@@ -212,6 +232,24 @@ export default function GymProfile() {
             placeholder="https://…"
           />
         </div>
+        <div>
+          <label className="field-label">Accent color</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={profile.themeColor || '#e11d48'}
+              onChange={(e) => setProfile({ ...profile, themeColor: e.target.value })}
+              className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-ink/15 bg-transparent p-0.5"
+            />
+            <input
+              className="field-input"
+              value={profile.themeColor || ''}
+              onChange={(e) => setProfile({ ...profile, themeColor: e.target.value })}
+              placeholder="#e11d48"
+            />
+          </div>
+          <p className="mt-1 text-xs text-steel">Used for your installed app's status bar and icon background.</p>
+        </div>
         <div className="md:col-span-2">
           <label className="field-label">Address</label>
           <input
@@ -245,6 +283,44 @@ export default function GymProfile() {
           </button>
         </div>
       </form>
+
+      {/* Branded install link */}
+      <div className="panel mb-8 p-6">
+        <div className="mb-4 flex items-start gap-3">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+            <svg className="icon !h-[18px] !w-[18px]"><use href="#i-shield" /></svg>
+          </span>
+          <div>
+            <h2 className="text-base font-semibold text-ink">Install as an app</h2>
+            <p className="text-xs text-steel">
+              Share this link with your members — opening it on their phone lets them install{' '}
+              {profile.gymName || 'your gym'} as an app with your own name, icon and color, right from their browser.
+              No app store needed.
+            </p>
+          </div>
+        </div>
+
+        {installError ? (
+          <div className="text-sm text-ember-dark">{installError}</div>
+        ) : !installData ? (
+          <div className="text-sm text-steel">Loading your install link…</div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-ink/10 bg-ink/[0.02] p-6">
+            <div className="rounded-2xl bg-panel p-3 shadow-soft border border-ink/10">
+              <img src={installData.qrDataUrl} alt="Install link QR code" className="h-40 w-40" />
+            </div>
+            <div className="flex-1 space-y-3 text-center sm:text-left">
+              <div className="flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+                <code className="flex-1 truncate text-xs text-ink">{installData.installUrl}</code>
+                <button type="button" onClick={copyInstallLink} className="shrink-0 text-xs font-medium text-iron hover:underline">
+                  Copy
+                </button>
+              </div>
+              <p className="text-xs text-steel">Print the QR code and display it at reception, or share the link directly.</p>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* QR Code Reception Check-In */}
       <div className="panel mb-8 p-6">

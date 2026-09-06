@@ -9,6 +9,7 @@
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "seed": "npm run seed --prefix backend",
+    "backfill-slugs": "node scripts/backfill-slugs.js",
     "start": "npm run start --prefix backend"
   },
   "dependencies": {
