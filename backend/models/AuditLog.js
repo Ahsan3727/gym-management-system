@@ -1,40 +1,27 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const cookieParser = require('cookie-parser');
-const rateLimit = require('express-rate-limit');
-const compression = require('compression');
+const mongoose = require('mongoose');
 
-const { notFound, errorHandler } = require('./middleware/errorHandler');
+const auditLogSchema = new mongoose.Schema(
+  {
+    actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    actorRole: { type: String, required: true },
+    action: { type: String, required: true }, // e.g. "admin.suspend", "fee.mark_paid"
+    targetType: { type: String, default: '' },
+    targetId: { type: mongoose.Schema.Types.ObjectId, default: null },
+    metadata: { type: mongoose.Schema.Types.Mixed, default: {} },
+  },
+  { timestamps: { createdAt: 'created_at', updatedAt: false } }
+);
 
-const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const customerRoutes = require('./routes/customerRoutes');
-const superAdminRoutes = require('./routes/superAdminRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
-const trainerRoutes = require('./routes/trainerRoutes');
-const webhookRoutes = require('./routes/webhookRoutes');
-const publicRoutes = require('./routes/publicRoutes');
+// PERF FIX: the super-admin audit log view always queries
+// `.sort({ created_at: -1 }).limit(200)` with no other filter. Without an
+// index on created_at, Mongo has to scan and sort the WHOLE collection in
+// memory on every single page load, and that only gets worse as the log
+// grows — exactly the kind of query that feels fine in testing and then
+// gets slow in production. Descending because that matches the query's
+// sort order.
+auditLogSchema.index({ created_at: -1 });
 
-const app = express();
-
-// Vercel (and most PaaS hosts) sit behind a reverse proxy. Without this,
-// express-rate-limit can't correctly read the client IP from
-// X-Forwarded-For and throws on every request.
-app.set('trust proxy', 1);
-
-// BUG #4 FIX: CLIENT_ORIGIN must be set — never fall back to wildcard '*'
-// in production. If it's missing we refuse to start rather than silently
-// opening the API to every origin.
-const allowedOrigins = process.env.CLIENT_ORIGIN
-  ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
-  : ['http://localhost:5173'];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, uptime monitors, same-domain requests)
-      if (!origin) return callback(null, true);
+module.exports = mongoose.model('AuditLog', auditLogSchema);      if (!origin) return callback(null, true);
       if (
         allowedOrigins.includes(origin) ||
         (process.env.VERCEL && origin.endsWith('.vercel.app'))
