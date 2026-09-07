@@ -3,6 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -47,6 +48,15 @@ app.use(
 );
 
 app.use(cookieParser());
+
+// PERF FIX: gzip/brotli-compress every JSON response. This was missing
+// entirely — every API response (the full customers list, fee history,
+// audit logs, etc.) was going out uncompressed. Response bodies text-heavy
+// like JSON typically shrink 70-80% with compression, which directly
+// cuts page load time on slower connections. Safe to place before the
+// webhook route: this only compresses OUTGOING responses, it has no
+// effect on the raw request body Stripe's signature check needs.
+app.use(compression());
 
 // Webhooks must be mounted before global express.json() to preserve raw body for Stripe signature verification
 app.use('/api/webhooks', webhookRoutes);
