@@ -1,4 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* PERF FIX: the Google Fonts stylesheet used to be pulled in here via
+   `@import url(...)`. CSS @import is render-blocking AND serial: the
+   browser has to download this file, parse it, discover the @import,
+   THEN start downloading the Google Fonts CSS, THEN discover the actual
+   font file URLs inside THAT and start downloading those — three
+   round trips stacked one after another before text can render in its
+   real typeface. Vite also can't inline/bundle an external http(s) URL
+   import, so this exact chain still happens in production.
+   Moved to index.html as <link rel="preconnect"> + <link rel="stylesheet">
+   tags, which the browser discovers immediately while parsing the HTML
+   (in parallel with everything else), cutting out the wasted round trip. */
 
 @tailwind base;
 @tailwind components;
