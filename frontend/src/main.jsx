@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import { TenantProvider, TENANT_STORAGE_KEY } from './context/TenantContext.jsx';
@@ -21,7 +22,19 @@ const TENANT_PATH_RE = /^\/g\/([a-z0-9-]+)/;
 // moment Android/Chrome decide what to show in the install prompt.
 async function resolveTenantBranding(slug) {
   try {
-    const res = await fetch(`${API_BASE}/public/branding/${slug}`);
+    // FIX (blank-page bug): this fetch runs BEFORE React ever renders (see
+    // bootstrap() below), so anyone visiting a /g/:slug install link was
+    // stuck on a totally blank white page for as long as this request
+    // took — and if it never resolved (flaky wifi, a slow cold-started
+    // backend, a dropped connection), the app never rendered AT ALL. There
+    // was no timeout, so "slow" and "never" looked the same to the user.
+    // A hard 4s timeout means a slow/broken branding lookup degrades to
+    // default Ironline branding instead of an indefinite blank screen —
+    // the rest of the app still loads normally either way.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch(`${API_BASE}/public/branding/${slug}`, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!res.ok) return null;
     const branding = await res.json();
     if (!branding?.gymName) return null;
@@ -103,17 +116,24 @@ async function bootstrap() {
 
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-      <ThemeProvider>
-        <BrowserRouter>
-          <TenantProvider>
-            <AuthProvider>
-              <ToastProvider>
-                <App />
-              </ToastProvider>
-            </AuthProvider>
-          </TenantProvider>
-        </BrowserRouter>
-      </ThemeProvider>
+      {/* FIX (blank-page bug): this is the ONE place that wraps the whole
+          app, so any render error anywhere — a bad API shape, a null the
+          component didn't expect, anything — shows a "Something went
+          wrong" screen with a Reload button instead of unmounting to a
+          blank white page. See components/ErrorBoundary.jsx. */}
+      <ErrorBoundary>
+        <ThemeProvider>
+          <BrowserRouter>
+            <TenantProvider>
+              <AuthProvider>
+                <ToastProvider>
+                  <App />
+                </ToastProvider>
+              </AuthProvider>
+            </TenantProvider>
+          </BrowserRouter>
+        </ThemeProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 
