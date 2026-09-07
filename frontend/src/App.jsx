@@ -1,39 +1,44 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate, useParams, useNavigate } from 'react-router-dom';
 
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import DashboardShell from './components/DashboardShell.jsx';
 import IconSprite from './components/IconSprite.jsx';
 import { useAuth } from './context/AuthContext.jsx';
+import { lazyWithReload } from './utils/lazyWithReload.js';
 
-const Login = lazy(() => import('./pages/Login.jsx'));
+// FIX: swapped plain React.lazy() for lazyWithReload() everywhere below.
+// See utils/lazyWithReload.js for why — in short, it stops a stale/failed
+// route chunk (common right after a new deploy) from leaving the page
+// permanently blank.
+const Login = lazyWithReload(() => import('./pages/Login.jsx'), 'Login');
 
-const CustomerOverview = lazy(() => import('./pages/customer/CustomerOverview.jsx'));
-const CustomerWorkouts = lazy(() => import('./pages/customer/Workouts.jsx'));
-const CustomerDiet = lazy(() => import('./pages/customer/Diet.jsx'));
-const CustomerWeight = lazy(() => import('./pages/customer/Weight.jsx'));
-const CustomerAnalytics = lazy(() => import('./pages/customer/Analytics.jsx'));
-const CustomerAccount = lazy(() => import('./pages/customer/Account.jsx'));
-const CustomerNotifications = lazy(() => import('./pages/customer/Notifications.jsx'));
-const CustomerCheckin = lazy(() => import('./pages/customer/Checkin.jsx'));
+const CustomerOverview = lazyWithReload(() => import('./pages/customer/CustomerOverview.jsx'), 'CustomerOverview');
+const CustomerWorkouts = lazyWithReload(() => import('./pages/customer/Workouts.jsx'), 'CustomerWorkouts');
+const CustomerDiet = lazyWithReload(() => import('./pages/customer/Diet.jsx'), 'CustomerDiet');
+const CustomerWeight = lazyWithReload(() => import('./pages/customer/Weight.jsx'), 'CustomerWeight');
+const CustomerAnalytics = lazyWithReload(() => import('./pages/customer/Analytics.jsx'), 'CustomerAnalytics');
+const CustomerAccount = lazyWithReload(() => import('./pages/customer/Account.jsx'), 'CustomerAccount');
+const CustomerNotifications = lazyWithReload(() => import('./pages/customer/Notifications.jsx'), 'CustomerNotifications');
+const CustomerCheckin = lazyWithReload(() => import('./pages/customer/Checkin.jsx'), 'CustomerCheckin');
 
-const AdminOverview = lazy(() => import('./pages/admin/AdminOverview.jsx'));
-const AdminAttendance = lazy(() => import('./pages/admin/Attendance.jsx'));
-const AdminCustomers = lazy(() => import('./pages/admin/Customers.jsx'));
-const AdminFees = lazy(() => import('./pages/admin/Fees.jsx'));
-const AdminPlans = lazy(() => import('./pages/admin/Plans.jsx'));
-const AdminGymProfile = lazy(() => import('./pages/admin/GymProfile.jsx'));
-const AdminTrainers = lazy(() => import('./pages/admin/Trainers.jsx'));
-const AdminBranches = lazy(() => import('./pages/admin/Branches.jsx'));
+const AdminOverview = lazyWithReload(() => import('./pages/admin/AdminOverview.jsx'), 'AdminOverview');
+const AdminAttendance = lazyWithReload(() => import('./pages/admin/Attendance.jsx'), 'AdminAttendance');
+const AdminCustomers = lazyWithReload(() => import('./pages/admin/Customers.jsx'), 'AdminCustomers');
+const AdminFees = lazyWithReload(() => import('./pages/admin/Fees.jsx'), 'AdminFees');
+const AdminPlans = lazyWithReload(() => import('./pages/admin/Plans.jsx'), 'AdminPlans');
+const AdminGymProfile = lazyWithReload(() => import('./pages/admin/GymProfile.jsx'), 'AdminGymProfile');
+const AdminTrainers = lazyWithReload(() => import('./pages/admin/Trainers.jsx'), 'AdminTrainers');
+const AdminBranches = lazyWithReload(() => import('./pages/admin/Branches.jsx'), 'AdminBranches');
 
-const TrainerOverview = lazy(() => import('./pages/trainer/TrainerOverview.jsx'));
-const TrainerClients = lazy(() => import('./pages/trainer/TrainerClients.jsx'));
-const TrainerSchedule = lazy(() => import('./pages/trainer/TrainerSchedule.jsx'));
+const TrainerOverview = lazyWithReload(() => import('./pages/trainer/TrainerOverview.jsx'), 'TrainerOverview');
+const TrainerClients = lazyWithReload(() => import('./pages/trainer/TrainerClients.jsx'), 'TrainerClients');
+const TrainerSchedule = lazyWithReload(() => import('./pages/trainer/TrainerSchedule.jsx'), 'TrainerSchedule');
 
-const SuperAdminOverview = lazy(() => import('./pages/superadmin/SuperAdminOverview.jsx'));
-const SuperAdminAdmins = lazy(() => import('./pages/superadmin/Admins.jsx'));
-const SuperAdminSettings = lazy(() => import('./pages/superadmin/Settings.jsx'));
-const SuperAdminAuditLog = lazy(() => import('./pages/superadmin/AuditLog.jsx'));
+const SuperAdminOverview = lazyWithReload(() => import('./pages/superadmin/SuperAdminOverview.jsx'), 'SuperAdminOverview');
+const SuperAdminAdmins = lazyWithReload(() => import('./pages/superadmin/Admins.jsx'), 'SuperAdminAdmins');
+const SuperAdminSettings = lazyWithReload(() => import('./pages/superadmin/Settings.jsx'), 'SuperAdminSettings');
+const SuperAdminAuditLog = lazyWithReload(() => import('./pages/superadmin/AuditLog.jsx'), 'SuperAdminAuditLog');
 
 // `icon` refers to an IconSprite id (components/IconSprite.jsx) and drives
 // the icon-pill nav rendered by the Phase 1 DashboardShell.
