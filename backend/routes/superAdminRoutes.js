@@ -198,7 +198,8 @@ router.put(
       emailSent = !!mailResult.success;
     }
 
-    console.log(`[reset-password] Temp password for gym "${admin.gymName}": ${tempPassword} (Email sent: ${emailSent})`);
+    const maskedPw = tempPassword.slice(0, 3) + '***' + tempPassword.slice(-2);
+    console.log(`[reset-password] Temp password set for gym "${admin.gymName}" (masked: ${maskedPw}). Email sent: ${emailSent}. Check email or ask the super admin.`);
 
     res.json({
       message: emailSent
@@ -382,25 +383,32 @@ router.get(
       });
     }
 
-    const topGyms = await Promise.all(
-      gymSummaries.slice(0, 10).map(async (gym) => {
-        const [memberCount, feeAgg] = await Promise.all([
-          Customer.countDocuments({ admin: gym._id }),
-          Fee.aggregate([
-            { $match: { admin: gym._id, status: 'paid' } },
-            { $group: { _id: null, total: { $sum: '$amount' } } },
-          ]),
-        ]);
-        return {
-          _id: gym._id,
-          gymName: gym.gymName,
-          slug: gym.slug,
-          isSuspended: gym.isSuspended,
-          memberCount,
-          revenue: feeAgg[0]?.total || 0,
-        };
-      })
-    );
+    // PERF FIX (N+1 query): replaced 2-queries-per-gym with two single
+    // aggregation pipelines that cover all top gyms in one DB round-trip each.
+    const top10Ids = gymSummaries.slice(0, 10).map((g) => g._id);
+
+    const [memberCounts, revenueCounts] = await Promise.all([
+      Customer.aggregate([
+        { $match: { admin: { $in: top10Ids } } },
+        { $group: { _id: '$admin', count: { $sum: 1 } } },
+      ]),
+      Fee.aggregate([
+        { $match: { admin: { $in: top10Ids }, status: 'paid' } },
+        { $group: { _id: '$admin', total: { $sum: '$amount' } } },
+      ]),
+    ]);
+
+    const memberMap = Object.fromEntries(memberCounts.map((r) => [r._id.toString(), r.count]));
+    const revenueMap = Object.fromEntries(revenueCounts.map((r) => [r._id.toString(), r.total]));
+
+    const topGyms = gymSummaries.slice(0, 10).map((gym) => ({
+      _id: gym._id,
+      gymName: gym.gymName,
+      slug: gym.slug,
+      isSuspended: gym.isSuspended,
+      memberCount: memberMap[gym._id.toString()] || 0,
+      revenue: revenueMap[gym._id.toString()] || 0,
+    }));
 
     topGyms.sort((a, b) => b.revenue - a.revenue);
 

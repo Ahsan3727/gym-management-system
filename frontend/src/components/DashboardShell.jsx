@@ -119,7 +119,7 @@ export default function DashboardShell({ navItems, accent = 'ember', roleLabel, 
             className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-ink/15 text-steel transition-colors hover:border-ember/40 hover:text-ember-dark"
           >
             <svg className="icon !h-4 !w-4">
-              <use href="#i-arrow-r" />
+              <use href="#i-logout" />
             </svg>
           </button>
         </div>

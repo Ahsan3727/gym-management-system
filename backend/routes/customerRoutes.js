@@ -281,93 +281,89 @@ router.get(
 );
 
 // One check-in per day. Extends the streak if yesterday's check-in exists,
+// Extracted into a named handler so both /streak/checkin and the /checkin
+// alias call the same function directly — no fragile req.url mutation needed.
+async function handleCheckin(req, res) {
+  // If gym requires physical QR token, validate token and expiry
+  const admin = await Admin.findById(req.adminId);
+  if (admin?.checkinTokenRequired) {
+    let token = req.body?.qrToken?.trim();
+    if (token && token.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(token);
+        token = parsed.token;
+      } catch {
+        // ignore json parse error, use raw string
+      }
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        message: 'QR check-in verification is required by your gym. Please scan the QR code at reception.',
+      });
+    }
+
+    const isExpired = !admin.checkinTokenExpiry || new Date() > new Date(admin.checkinTokenExpiry);
+    if (token !== admin.checkinToken || isExpired) {
+      return res.status(400).json({
+        message: 'Invalid or expired QR check-in token. Please scan the latest code at reception.',
+      });
+    }
+  }
+
+  let streak = await Streak.findOne({ customer: req.customerId });
+  if (!streak) streak = new Streak({ customer: req.customerId });
+
+  // Use UTC methods so "today" is consistent regardless of the server's local
+  // timezone. setHours(0,0,0,0) uses local time which can cause double check-ins
+  // or missed streaks near midnight UTC.
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  if (streak.lastCheckin) {
+    const last = new Date(streak.lastCheckin);
+    last.setUTCHours(0, 0, 0, 0);
+    const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return res.json(streak); // already checked in today
+    }
+    streak.currentStreak = diffDays === 1 ? streak.currentStreak + 1 : 1;
+  } else {
+    streak.currentStreak = 1;
+  }
+
+  streak.lastCheckin = today;
+  streak.totalCheckins = (streak.totalCheckins || 0) + 1;
+  streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
+
+  const milestones = [7, 30, 100, 365];
+  milestones.forEach((m) => {
+    const badge = `${m}-day-streak`;
+    if (streak.currentStreak >= m && !streak.badges.includes(badge)) {
+      streak.badges.push(badge);
+    }
+  });
+
+  await Promise.all([
+    streak.save(),
+    Attendance.create({
+      customer: req.customerId,
+      admin: req.adminId,
+      method: 'qr',
+    }),
+  ]);
+
+  res.json(streak);
+}
+
+// One check-in per day. Extends the streak if yesterday's check-in exists,
 // resets to 1 if there was a gap, no-ops if already checked in today.
-router.post(
-  '/streak/checkin',
-  asyncHandler(async (req, res) => {
-    // If gym requires physical QR token, validate token and expiry
-    const admin = await Admin.findById(req.adminId);
-    if (admin?.checkinTokenRequired) {
-      let token = req.body?.qrToken?.trim();
-      if (token && token.startsWith('{')) {
-        try {
-          const parsed = JSON.parse(token);
-          token = parsed.token;
-        } catch {
-          // ignore json parse error, use raw string
-        }
-      }
+router.post('/streak/checkin', asyncHandler(handleCheckin));
 
-      if (!token) {
-        return res.status(400).json({
-          message: 'QR check-in verification is required by your gym. Please scan the QR code at reception.',
-        });
-      }
+// POST /api/customer/checkin — alias pointing at the same handler directly
+router.post('/checkin', asyncHandler(handleCheckin));
 
-      const isExpired = !admin.checkinTokenExpiry || new Date() > new Date(admin.checkinTokenExpiry);
-      if (token !== admin.checkinToken || isExpired) {
-        return res.status(400).json({
-          message: 'Invalid or expired QR check-in token. Please scan the latest code at reception.',
-        });
-      }
-    }
-
-    let streak = await Streak.findOne({ customer: req.customerId });
-    if (!streak) streak = new Streak({ customer: req.customerId });
-
-    // BUG #16 FIX: Use UTC methods so "today" is consistent regardless of the
-    // server's local timezone. Previously setHours(0,0,0,0) used local time
-    // which could cause double check-ins or missed streaks near midnight UTC.
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    if (streak.lastCheckin) {
-      const last = new Date(streak.lastCheckin);
-      last.setUTCHours(0, 0, 0, 0);
-      const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) {
-        return res.json(streak); // already checked in today
-      }
-      streak.currentStreak = diffDays === 1 ? streak.currentStreak + 1 : 1;
-    } else {
-      streak.currentStreak = 1;
-    }
-
-    streak.lastCheckin = today;
-    streak.totalCheckins = (streak.totalCheckins || 0) + 1;
-    streak.longestStreak = Math.max(streak.longestStreak, streak.currentStreak);
-
-    const milestones = [7, 30, 100, 365];
-    milestones.forEach((m) => {
-      const badge = `${m}-day-streak`;
-      if (streak.currentStreak >= m && !streak.badges.includes(badge)) {
-        streak.badges.push(badge);
-      }
-    });
-
-    await Promise.all([
-      streak.save(),
-      Attendance.create({
-        customer: req.customerId,
-        admin: req.adminId,
-        method: 'qr',
-      }),
-    ]);
-
-    res.json(streak);
-  })
-);
-
-// POST /api/customer/checkin alias
-router.post(
-  '/checkin',
-  asyncHandler(async (req, res, next) => {
-    // Re-route to streak/checkin handler
-    req.url = '/streak/checkin';
-    router.handle(req, res, next);
-  })
-);
 
 /* -------------------------------- Analytics --------------------------------- */
 

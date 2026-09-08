@@ -80,7 +80,7 @@ export default function CustomerOverview() {
         </div>
         {profile?.gym?.gymLogoUrl && (
           <img
-            src={profile.gymLogoUrl || profile.gym.gymLogoUrl}
+            src={profile.gym.gymLogoUrl}
             alt="Gym Logo"
             className="h-12 w-12 rounded-2xl object-cover border border-ink/10"
           />

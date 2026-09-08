@@ -48,6 +48,7 @@ router.post(
     }
 
     let user;
+    let passwordAlreadyVerified = false;
     if (gym) {
       // Scoped lookup for this specific gym
       user = await User.findOne({ username: cleanUsername, admin: gym._id });
@@ -57,10 +58,12 @@ router.post(
       if (candidates.length === 1) {
         user = candidates[0];
       } else if (candidates.length > 1) {
-        // Disambiguate by checking password match among candidates
+        // Disambiguate by checking password match among candidates.
+        // Mark passwordAlreadyVerified so we don't bcrypt-compare again below.
         for (const candidate of candidates) {
           if (await candidate.comparePassword(password)) {
             user = candidate;
+            passwordAlreadyVerified = true;
             break;
           }
         }
@@ -71,9 +74,12 @@ router.post(
       return res.status(401).json({ message: 'Invalid username or password.' });
     }
 
-    const match = await user.comparePassword(password);
-    if (!match) {
-      return res.status(401).json({ message: 'Invalid username or password.' });
+    // Skip second bcrypt compare if disambiguation already confirmed the password
+    if (!passwordAlreadyVerified) {
+      const match = await user.comparePassword(password);
+      if (!match) {
+        return res.status(401).json({ message: 'Invalid username or password.' });
+      }
     }
 
     // Check if the gym is suspended (for admin, customer, or trainer)

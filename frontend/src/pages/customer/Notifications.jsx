@@ -89,7 +89,7 @@ export default function Notifications() {
             title="Refresh"
             aria-label="Refresh notifications"
           >
-            <svg className="icon !h-4 !w-4"><use href="#i-arrow-r" /></svg>
+          <svg className="icon !h-4 !w-4"><use href="#i-rotate" /></svg>
           </button>
         </div>
       </div>

@@ -22,17 +22,23 @@ export default function Fees() {
   async function load() {
     const params = {};
     if (status) params.status = status;
-    // BUG #7 FIX: Also fetch all fees (no status filter) to compute correct totals
-    const [feesRes, customersRes, allFeesRes] = await Promise.all([
+
+    // Only fetch an unfiltered list when a status filter is active
+    // (to compute correct totals). When no filter is set, feesRes already
+    // contains all fees so we reuse it, saving a redundant API call.
+    const requests = [
       api.get('/admin/fees', { params }),
       api.get('/admin/customers'),
-      api.get('/admin/fees'), // unfiltered — for totals cards
-    ]);
+    ];
+    if (status) requests.push(api.get('/admin/fees')); // unfiltered totals
+
+    const [feesRes, customersRes, allFeesRes] = await Promise.all(requests);
     setFees(feesRes.data);
     setCustomers(customersRes.data);
 
-    // Compute totals from the unfiltered list
-    const totals = allFeesRes.data.reduce((acc, f) => {
+    // Compute totals from unfiltered list (or from feesRes when no filter)
+    const sourceForTotals = status ? (allFeesRes?.data || []) : feesRes.data;
+    const totals = sourceForTotals.reduce((acc, f) => {
       acc[f.status] = (acc[f.status] || 0) + f.amount;
       return acc;
     }, {});
@@ -184,6 +190,11 @@ export default function Fees() {
                 {fee.status !== 'overdue' && fee.status !== 'paid' && (
                   <button onClick={() => setFeeStatus(fee, 'overdue')} className="text-xs font-medium text-ember-dark hover:underline">
                     Mark overdue
+                  </button>
+                )}
+                {fee.status === 'overdue' && (
+                  <button onClick={() => setFeeStatus(fee, 'unpaid')} className="text-xs font-medium text-steel hover:underline">
+                    Revert to unpaid
                   </button>
                 )}
                 {fee.status === 'paid' && (

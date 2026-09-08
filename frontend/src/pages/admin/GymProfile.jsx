@@ -29,9 +29,10 @@ export default function GymProfile() {
   const [sending, setSending] = useState(false);
   const [announceMessage, setAnnounceMessage] = useState('');
 
-  // Branded install link (IMPLEMENTATION_PLAN.md Phase 7)
+  // Branded install link
   const [installData, setInstallData] = useState(null);
   const [installError, setInstallError] = useState('');
+  const [copyMessage, setCopyMessage] = useState(''); // separate from profile save message
 
   useEffect(() => {
     api
@@ -54,9 +55,10 @@ export default function GymProfile() {
     if (!installData?.installUrl) return;
     try {
       await navigator.clipboard.writeText(installData.installUrl);
-      setMessage('Install link copied.');
+      setCopyMessage('Install link copied!');
+      setTimeout(() => setCopyMessage(''), 3000);
     } catch {
-      setError('Could not copy — long-press the link to copy it manually.');
+      setCopyMessage('Could not copy — long-press the link to copy it manually.');
     }
   }
 
@@ -316,6 +318,9 @@ export default function GymProfile() {
                   Copy
                 </button>
               </div>
+              {copyMessage && (
+                <p className="text-xs font-medium text-chalk-dark">{copyMessage}</p>
+              )}
               <p className="text-xs text-steel">Display this QR code at your reception counter so members can install your app.</p>
               <button
                 type="button"

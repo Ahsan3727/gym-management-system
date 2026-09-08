@@ -50,6 +50,10 @@ export default function IconSprite() {
 
         {/* Added in Phase 3 — replaces DashboardShell's ad-hoc mobile-header hamburger SVG (§7) */}
         <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></symbol>
+        {/* Logout door-exit icon for the sidebar account card */}
+        <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" /><path d="M11 12h10M17 8l4 4-4 4" /></symbol>
+        {/* Circular refresh/reload icon for Notifications refresh button */}
+        <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 1.5 4.7" /><path d="M4 16.5V12H8.5" /></symbol>
       </defs>
     </svg>
   );

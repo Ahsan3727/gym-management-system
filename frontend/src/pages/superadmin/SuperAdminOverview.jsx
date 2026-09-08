@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
 import ListCard from '../../components/ListCard.jsx';
@@ -144,9 +145,9 @@ export default function SuperAdminOverview() {
             <h3 className="font-semibold text-ink">Top Performing Gym Facilities</h3>
             <p className="text-xs text-steel">Ranked by settled revenue and member count</p>
           </div>
-          <a href="/superadmin/admins" className="text-xs font-medium text-iron hover:underline">
+          <Link to="/superadmin/admins" className="text-xs font-medium text-iron hover:underline">
             View all gyms & staff QR →
-          </a>
+          </Link>
         </div>
 
         <div className="overflow-x-auto">
@@ -203,9 +204,9 @@ export default function SuperAdminOverview() {
             </p>
           </div>
         </div>
-        <a href="/superadmin/admins" className="btn-secondary text-xs shrink-0">
+        <Link to="/superadmin/admins" className="btn-secondary text-xs shrink-0">
           Manage Gyms & Staff QR
-        </a>
+        </Link>
       </div>
     </div>
   );

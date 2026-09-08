@@ -344,7 +344,7 @@ export default function Admins() {
               <div className="panel px-4 py-3">
                 <div className="text-xs uppercase tracking-wide text-steel">Revenue collected</div>
                 {/* BUG #14 FIX: Format amount properly */}
-                <div className="stat-number mt-1 text-lg">Rs. {summary.revenueCollected.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="stat-number mt-1 text-lg">Rs. {(summary.revenueCollected || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
               <div className="panel px-4 py-3 col-span-2">
                 <div className="text-xs uppercase tracking-wide text-steel">Overdue fees</div>

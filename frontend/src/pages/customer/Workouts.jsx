@@ -9,6 +9,7 @@ export default function Workouts() {
   const [logs, setLogs] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   async function load() {
@@ -17,7 +18,9 @@ export default function Workouts() {
   }
 
   useEffect(() => {
-    load().catch(() => setError('Could not load your workout log.'));
+    load()
+      .catch(() => setError('Could not load your workout log.'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function handleSubmit(e) {
@@ -43,8 +46,13 @@ export default function Workouts() {
   }
 
   async function handleDelete(id) {
-    await api.delete(`/customer/workouts/${id}`);
-    setLogs((prev) => prev.filter((l) => l._id !== id));
+    if (!window.confirm('Delete this workout entry? This cannot be undone.')) return;
+    try {
+      await api.delete(`/customer/workouts/${id}`);
+      setLogs((prev) => prev.filter((l) => l._id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not delete entry. Please try again.');
+    }
   }
 
   return (
@@ -102,7 +110,12 @@ export default function Workouts() {
       </form>
 
       <ListCard>
-        {logs.map((log) => (
+        {loading ? (
+          <div className="px-4 py-8 text-center text-sm text-steel">Loading workouts…</div>
+        ) : logs.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-steel">No workouts logged yet.</div>
+        ) : (
+          logs.map((log) => (
           <ListRow
             key={log._id}
             icon={log.isRestDay ? 'moon' : 'dumbbell'}
@@ -120,8 +133,8 @@ export default function Workouts() {
               </button>
             }
           />
-        ))}
-        {logs.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No workouts logged yet.</div>}
+          ))
+        )}
       </ListCard>
     </div>
   );

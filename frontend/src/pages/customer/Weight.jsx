@@ -155,8 +155,13 @@ export default function Weight() {
   }
 
   async function handleDelete(id) {
-    await api.delete(`/customer/weight/${id}`);
-    setLogs((prev) => prev.filter((l) => l._id !== id));
+    if (!window.confirm('Delete this weight entry? This cannot be undone.')) return;
+    try {
+      await api.delete(`/customer/weight/${id}`);
+      setLogs((prev) => prev.filter((l) => l._id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not delete entry. Please try again.');
+    }
   }
 
   return (

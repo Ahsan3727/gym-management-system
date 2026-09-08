@@ -4,6 +4,18 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+const helmet = require('helmet');
+
+// ── Startup environment validation ─────────────────────────────────────────
+// Fail fast with a clear message rather than silently starting with broken
+// auth, missing Stripe keys, etc. that only blow up on the first real request.
+const REQUIRED_ENV = ['JWT_SECRET', 'MONGO_URI'];
+const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
+if (missing.length > 0) {
+  console.error(`[startup] Missing required environment variables: ${missing.join(', ')}`);
+  console.error('[startup] Server cannot start safely. Set these in your .env file.');
+  process.exit(1);
+}
 
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -29,6 +41,12 @@ app.set('trust proxy', 1);
 const allowedOrigins = process.env.CLIENT_ORIGIN
   ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173'];
+
+// Security headers: must be applied before CORS and routes.
+// Sets X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, etc.
+// contentSecurityPolicy is disabled here because the frontend is served
+// separately (Vite dev server / Vercel) — it manages its own CSP.
+app.use(helmet({ contentSecurityPolicy: false }));
 
 app.use(
   cors({
@@ -68,6 +86,10 @@ app.use(morgan('dev'));
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false });
 app.use('/api/auth/login', loginLimiter);
 
+// Change-password is also sensitive — limit to 10 attempts per 15 min.
+const changePasswordLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+app.use('/api/auth/change-password', changePasswordLimiter);
+
 // Super Admin actions carry platform-wide power - rate-limit generously but
 // firmly, on top of the audit logging done inside the route handlers.
 const superAdminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true, legacyHeaders: false });
@@ -84,7 +106,12 @@ app.use('/api/public', publicLimiter);
 // domain directly — the real app only ever calls routes under /api/...
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Ironline API is running. See /api/health.' }));
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
+app.get('/api/health', async (req, res) => {
+  const mongoose = require('mongoose');
+  const dbState = mongoose.connection.readyState;
+  const dbStatus = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' }[dbState] || 'unknown';
+  res.json({ status: 'ok', time: new Date().toISOString(), db: dbStatus });
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);

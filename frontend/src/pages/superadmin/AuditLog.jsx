@@ -5,9 +5,13 @@ import Timeline from '../../components/Timeline.jsx';
 export default function AuditLog() {
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/superadmin/audit-log').then((res) => setLogs(res.data)).catch(() => setError('Could not load the audit log.'));
+    api.get('/superadmin/audit-log')
+      .then((res) => setLogs(res.data))
+      .catch(() => setError('Could not load the audit log.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const items = logs.map((log) => ({
@@ -30,7 +34,9 @@ export default function AuditLog() {
       {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
 
       <div className="panel p-6">
-        {items.length > 0 ? (
+        {loading ? (
+          <div className="py-8 text-center text-sm text-steel">Loading audit log…</div>
+        ) : items.length > 0 ? (
           <Timeline accent="iron" items={items} />
         ) : (
           <div className="py-8 text-center text-sm text-steel">No actions logged yet.</div>
