@@ -4,7 +4,7 @@ import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
 import Modal from '../../components/Modal.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { useToast } from '../../components/Toast.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 
 export default function CustomerOverview() {
   const { user } = useAuth();

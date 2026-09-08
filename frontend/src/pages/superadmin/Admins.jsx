@@ -3,7 +3,7 @@ import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
-import { useToast } from '../../components/Toast.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 
 function installUrlFor(admin) {
   if (!admin?.slug) return null;
