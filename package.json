@@ -1,6 +1,6 @@
 {
   "name": "gym-management-system",
-  "version": "1.0.0", 
+  "version": "1.0.0",
   "description": "Multi-tenant Gym Management System - Unified Deployment",
   "private": true,
   "main": "api/index.js",
@@ -35,4 +35,5 @@
   "engines": {
     "node": ">=18.x"
   }
+}  }
 }}
