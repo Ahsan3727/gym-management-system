@@ -31,6 +31,7 @@ const {
   updatePlanSchema,
   createFeeSchema,
   updateFeeSchema,
+  bulkMemberBillingSchema,
   announcementSchema,
   createBranchSchema,
   updateBranchSchema,
@@ -58,13 +59,24 @@ router.put(
   asyncHandler(async (req, res) => {
     // NOTE: `slug` is intentionally not accepted here — it's immutable
     // after creation (see models/Admin.js and superAdminRoutes.js).
-    const { gymName, gymLogoUrl, address, contact, workingHours, themeColor } = req.body;
+    const {
+      gymName,
+      gymLogoUrl,
+      address,
+      contact,
+      workingHours,
+      themeColor,
+      defaultMemberMonthlyFee,
+      defaultFeeDueDay,
+    } = req.body;
     if (gymName !== undefined) req.adminDoc.gymName = gymName;
     if (gymLogoUrl !== undefined) req.adminDoc.gymLogoUrl = gymLogoUrl;
     if (address !== undefined) req.adminDoc.address = address;
     if (contact !== undefined) req.adminDoc.contact = contact;
     if (workingHours !== undefined) req.adminDoc.workingHours = workingHours;
     if (themeColor !== undefined) req.adminDoc.themeColor = themeColor;
+    if (defaultMemberMonthlyFee !== undefined) req.adminDoc.defaultMemberMonthlyFee = Number(defaultMemberMonthlyFee) || 3000;
+    if (defaultFeeDueDay !== undefined) req.adminDoc.defaultFeeDueDay = Number(defaultFeeDueDay) || 10;
     await req.adminDoc.save();
     res.json(req.adminDoc);
   })
@@ -317,32 +329,81 @@ router.get(
   asyncHandler(async (req, res) => {
     const { status, search } = req.query;
     const query = { admin: req.adminId };
-    // BUG #8 FIX: Use 'inactive' (not 'expired') to be consistent with the UI label
     if (status === 'active') query.isActive = true;
     if (status === 'inactive') query.isActive = false;
     if (search) query.name = { $regex: search, $options: 'i' };
 
-    // PERF FIX: .lean() — read-only listing endpoint, same reasoning as
-    // the super-admin list endpoints. `.filter()` below only reads
-    // `c._id`, which works identically on the plain objects .lean() returns.
-    let customers = await Customer.find(query).populate('plan').sort({ created_at: -1 }).lean();
+    let customers = await Customer.find(query)
+      .populate('user', 'username email isActive created_at')
+      .populate('plan')
+      .sort({ created_at: -1 })
+      .lean();
+
+    // Attach latest fee and computed feeStatus in a single DB query
+    const customerIds = customers.map((c) => c._id);
+    const fees = await Fee.find({ admin: req.adminId, customer: { $in: customerIds } })
+      .sort({ dueDate: -1, created_at: -1 })
+      .lean();
+
+    const latestFeeMap = {};
+    for (const f of fees) {
+      const cid = f.customer.toString();
+      if (!latestFeeMap[cid]) {
+        latestFeeMap[cid] = f;
+      }
+    }
+
+    const now = new Date();
+    customers = customers.map((c) => {
+      const cid = c._id.toString();
+      const latestFee = latestFeeMap[cid] || null;
+      let feeStatus = 'none';
+
+      if (latestFee) {
+        if (latestFee.status === 'paid') {
+          const expDate = c.membershipExpiresAt ? new Date(c.membershipExpiresAt) : new Date(latestFee.dueDate);
+          const daysLeft = Math.ceil((expDate - now) / (1000 * 60 * 60 * 24));
+          if (daysLeft < 0) {
+            feeStatus = 'overdue';
+          } else if (daysLeft <= 5) {
+            feeStatus = 'due_soon';
+          } else {
+            feeStatus = 'paid';
+          }
+        } else if (latestFee.status === 'overdue') {
+          feeStatus = 'overdue';
+        } else if (latestFee.status === 'unpaid') {
+          if (new Date(latestFee.dueDate) < now) {
+            feeStatus = 'overdue';
+          } else {
+            feeStatus = 'unpaid';
+          }
+        } else {
+          feeStatus = latestFee.status;
+        }
+      }
+
+      return {
+        ...c,
+        latestFee,
+        feeStatus,
+      };
+    });
 
     if (status === 'overdue') {
-      const overdueCustomerIds = await Fee.find({ admin: req.adminId, status: 'overdue' }).distinct('customer');
-      const overdueSet = new Set(overdueCustomerIds.map(String));
-      customers = customers.filter((c) => overdueSet.has(String(c._id)));
+      customers = customers.filter((c) => c.feeStatus === 'overdue');
     }
 
     res.json(customers);
   })
 );
 
-// Create a customer: makes a User (role=customer) + linked Customer doc in one step.
+// Create a customer: makes a User (role=customer) + Customer + Streak + optional initial Fee in one step.
 router.post(
   '/customers',
   validate(createCustomerSchema),
   asyncHandler(async (req, res) => {
-    const { username, password, name, phone, email, planId } = req.body;
+    const { username, password, name, phone, email, planId, monthlyFee, admissionFee, initialFee } = req.body;
     if (!username || !name) {
       return res.status(400).json({ message: 'Username and name are required.' });
     }
@@ -366,14 +427,52 @@ router.post(
       admin: req.adminId,
     });
 
+    const standardMonthlyFee = monthlyFee != null ? Number(monthlyFee) : (req.adminDoc?.defaultMemberMonthlyFee || 3000);
+    const joiningFee = admissionFee != null ? Number(admissionFee) : 0;
+
     const customer = await Customer.create({
       user: user._id,
       admin: req.adminId,
       name: name.trim(),
       phone: phone || '',
       plan: planId || null,
+      monthlyFee: standardMonthlyFee,
+      admissionFee: joiningFee,
     });
     await Streak.create({ customer: customer._id });
+
+    // Atomic initial fee creation if requested
+    let createdFee = null;
+    if (initialFee && initialFee.collectNow !== false) {
+      const isPaid = initialFee.status === 'paid';
+      const receiptNo = isPaid ? await Fee.generateReceiptNumber(req.adminId) : '';
+      const due = initialFee.dueDate ? new Date(initialFee.dueDate) : new Date(Date.now() + 30 * 86400000);
+      const totalAmount = Number(initialFee.amount) || standardMonthlyFee;
+      const initialAdm = Number(initialFee.admissionFee) || joiningFee;
+      const initialDisc = Number(initialFee.discount) || 0;
+
+      createdFee = await Fee.create({
+        customer: customer._id,
+        admin: req.adminId,
+        title: initialFee.title || 'Initial Monthly Subscription',
+        feeType: 'subscription',
+        billingMonth: initialFee.billingMonth || new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+        amount: totalAmount + initialAdm - initialDisc,
+        admissionFee: initialAdm,
+        discount: initialDisc,
+        dueDate: due,
+        status: isPaid ? 'paid' : 'unpaid',
+        paymentMethod: isPaid ? initialFee.paymentMethod || 'cash' : null,
+        paidOn: isPaid ? new Date() : null,
+        receiptNumber: receiptNo,
+        notes: initialFee.notes || '',
+      });
+
+      if (isPaid) {
+        customer.membershipExpiresAt = new Date(Date.now() + 30 * 86400000);
+        await customer.save();
+      }
+    }
 
     if (recipientEmail) {
       sendEmail({
@@ -386,6 +485,7 @@ router.post(
     const resData = customer.toObject();
     resData.user = { _id: user._id, username: user.username, email: user.email };
     resData.generatedPassword = isAutoPassword ? effectivePassword : null;
+    resData.initialFee = createdFee;
 
     res.status(201).json(resData);
   })
@@ -406,10 +506,12 @@ router.put(
   asyncHandler(async (req, res) => {
     const customer = await Customer.findOne({ _id: req.params.id, admin: req.adminId });
     if (!customer) return res.status(404).json({ message: 'Customer not found.' });
-    const { name, phone, planId, isActive } = req.body;
+    const { name, phone, planId, monthlyFee, admissionFee, isActive } = req.body;
     if (name !== undefined) customer.name = name;
     if (phone !== undefined) customer.phone = phone;
     if (planId !== undefined) customer.plan = planId || null;
+    if (monthlyFee !== undefined) customer.monthlyFee = Number(monthlyFee);
+    if (admissionFee !== undefined) customer.admissionFee = Number(admissionFee);
     if (isActive !== undefined) customer.isActive = isActive;
     await customer.save();
     res.json(customer);
@@ -615,15 +717,240 @@ router.put(
 
 /* ---------------------------------- Fees ----------------------------------- */
 
-// GET /api/admin/fees?status=unpaid
+// GET /api/admin/fees?status=unpaid&customerId=...&billingMonth=...
 router.get(
   '/fees',
   asyncHandler(async (req, res) => {
-    const { status } = req.query;
+    const { status, customerId, billingMonth, search } = req.query;
     const query = { admin: req.adminId };
-    if (status) query.status = status;
-    const fees = await Fee.find(query).populate('customer', 'name phone').sort({ dueDate: 1 });
+    if (status && status !== 'all') query.status = status;
+    if (customerId) query.customer = customerId;
+    if (billingMonth) query.billingMonth = billingMonth;
+
+    let fees = await Fee.find(query)
+      .populate({
+        path: 'customer',
+        select: 'name phone monthlyFee membershipExpiresAt',
+        populate: { path: 'user', select: 'username email' },
+      })
+      .sort({ dueDate: -1, created_at: -1 })
+      .lean();
+
+    if (search) {
+      const q = search.toLowerCase();
+      fees = fees.filter(
+        (f) =>
+          f.customer?.name?.toLowerCase().includes(q) ||
+          f.customer?.phone?.includes(q) ||
+          f.receiptNumber?.toLowerCase().includes(q) ||
+          f.invoiceNumber?.toLowerCase().includes(q) ||
+          f.title?.toLowerCase().includes(q)
+      );
+    }
+
     res.json(fees);
+  })
+);
+
+// GET /api/admin/fees/stats — summary metrics for the gym dashboard
+router.get(
+  '/fees/stats',
+  asyncHandler(async (req, res) => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [allFees, activeMemberCount] = await Promise.all([
+      Fee.find({ admin: req.adminId }).lean(),
+      Customer.countDocuments({ admin: req.adminId, isActive: true }),
+    ]);
+
+    let totalPaidThisMonth = 0;
+    let totalUnpaidAmount = 0;
+    let overdueCount = 0;
+    let paidCount = 0;
+
+    for (const f of allFees) {
+      if (f.status === 'paid') {
+        paidCount++;
+        if (f.paidOn && new Date(f.paidOn) >= startOfMonth) {
+          totalPaidThisMonth += f.amount;
+        }
+      } else if (f.status === 'unpaid' || f.status === 'overdue') {
+        totalUnpaidAmount += f.amount;
+        if (f.status === 'overdue' || new Date(f.dueDate) < now) {
+          overdueCount++;
+        }
+      }
+    }
+
+    res.json({
+      totalPaidThisMonth,
+      totalUnpaidAmount,
+      overdueCount,
+      paidCount,
+      activeMemberCount,
+      totalFeesCount: allFees.length,
+    });
+  })
+);
+
+// POST /api/admin/fees — manual fee creation for a member
+router.post(
+  '/fees',
+  validate(createFeeSchema),
+  asyncHandler(async (req, res) => {
+    const {
+      customerId,
+      title,
+      feeType = 'subscription',
+      billingMonth,
+      amount,
+      admissionFee = 0,
+      discount = 0,
+      dueDate,
+      status = 'unpaid',
+      paymentMethod,
+      notes = '',
+      isRecurring = false,
+    } = req.body;
+
+    const customer = await Customer.findOne({ _id: customerId, admin: req.adminId });
+    if (!customer) return res.status(404).json({ message: 'Customer not found.' });
+
+    const isPaid = status === 'paid';
+    const invoiceNo = await Fee.generateReceiptNumber(req.adminId);
+    const finalMonth = billingMonth || new Date(dueDate).toLocaleString('en-US', { month: 'short', year: 'numeric' });
+
+    const fee = await Fee.create({
+      customer: customer._id,
+      admin: req.adminId,
+      invoiceNumber: invoiceNo,
+      title: title || (feeType === 'subscription' ? `Monthly Subscription — ${finalMonth}` : 'Gym Fee'),
+      feeType,
+      billingMonth: finalMonth,
+      amount: Number(amount) + Number(admissionFee) - Number(discount),
+      admissionFee: Number(admissionFee),
+      discount: Number(discount),
+      dueDate: new Date(dueDate),
+      status: isPaid ? 'paid' : 'unpaid',
+      paymentMethod: isPaid ? paymentMethod || 'cash' : null,
+      paidOn: isPaid ? new Date() : null,
+      receiptNumber: isPaid ? invoiceNo : '',
+      notes,
+      isRecurring: !!isRecurring,
+    });
+
+    if (isPaid) {
+      customer.membershipExpiresAt = new Date(Date.now() + 30 * 86400000);
+      await customer.save();
+    }
+
+    const populated = await Fee.findById(fee._id).populate('customer', 'name phone');
+    res.status(201).json(populated);
+  })
+);
+
+// POST /api/admin/fees/bulk — batch generate monthly invoices for all active members
+router.post(
+  '/fees/bulk',
+  validate(bulkMemberBillingSchema),
+  asyncHandler(async (req, res) => {
+    const { billingMonth, dueDate, title, defaultAmount } = req.body;
+
+    const activeCustomers = await Customer.find({ admin: req.adminId, isActive: true });
+    let createdCount = 0;
+    let skippedCount = 0;
+
+    for (const cust of activeCustomers) {
+      // Check if already invoiced for this month & feeType='subscription'
+      const existing = await Fee.findOne({
+        admin: req.adminId,
+        customer: cust._id,
+        billingMonth,
+        feeType: 'subscription',
+      });
+
+      if (existing) {
+        skippedCount++;
+        continue;
+      }
+
+      const feeAmount =
+        cust.monthlyFee != null
+          ? cust.monthlyFee
+          : defaultAmount != null
+          ? defaultAmount
+          : req.adminDoc.defaultMemberMonthlyFee || 3000;
+
+      const invoiceNo = await Fee.generateReceiptNumber(req.adminId);
+      await Fee.create({
+        customer: cust._id,
+        admin: req.adminId,
+        invoiceNumber: invoiceNo,
+        title: title || `Monthly Subscription — ${billingMonth}`,
+        feeType: 'subscription',
+        billingMonth,
+        amount: feeAmount,
+        dueDate: new Date(dueDate),
+        status: 'unpaid',
+      });
+
+      createdCount++;
+    }
+
+    res.json({
+      message: `Bulk monthly invoicing complete: ${createdCount} created, ${skippedCount} skipped (already invoiced).`,
+      createdCount,
+      skippedCount,
+    });
+  })
+);
+
+// PUT /api/admin/fees/:id — update or mark fee as paid
+router.put(
+  '/fees/:id',
+  validate(updateFeeSchema),
+  asyncHandler(async (req, res) => {
+    const fee = await Fee.findOne({ _id: req.params.id, admin: req.adminId });
+    if (!fee) return res.status(404).json({ message: 'Fee record not found.' });
+
+    const { status, amount, dueDate, paymentMethod, notes } = req.body;
+    if (amount !== undefined) fee.amount = amount;
+    if (dueDate !== undefined) fee.dueDate = new Date(dueDate);
+    if (paymentMethod !== undefined) fee.paymentMethod = paymentMethod;
+    if (notes !== undefined) fee.notes = notes;
+
+    if (status !== undefined) {
+      fee.status = status;
+      if (status === 'paid') {
+        fee.paidOn = new Date();
+        fee.paymentMethod = paymentMethod || fee.paymentMethod || 'cash';
+        if (!fee.receiptNumber) {
+          fee.receiptNumber = await Fee.generateReceiptNumber(req.adminId);
+        }
+
+        // Update customer membership expiration
+        const customer = await Customer.findById(fee.customer).populate('user', 'email username');
+        if (customer) {
+          customer.membershipExpiresAt = new Date(Date.now() + 30 * 86400000);
+          await customer.save();
+
+          if (customer.user?.email) {
+            sendEmail({
+              to: customer.user.email,
+              subject: `Payment Receipt — ${req.adminDoc?.gymName || 'Ironline Gym'}`,
+              html: paymentReceiptEmail(customer.name, fee.amount, fee.receiptNumber, req.adminDoc?.gymName),
+            }).catch((err) => console.error('[mailer] Receipt email failed:', err.message));
+          }
+        }
+      } else {
+        fee.paidOn = null;
+      }
+    }
+
+    await fee.save();
+    const updated = await Fee.findById(fee._id).populate('customer', 'name phone');
+    res.json(updated);
   })
 );
 
@@ -717,62 +1044,6 @@ router.get(
 
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     res.send(csvContent);
-  })
-);
-
-router.post(
-  '/fees',
-  validate(createFeeSchema),
-  asyncHandler(async (req, res) => {
-    const { customerId, amount, dueDate, isRecurring } = req.body;
-    if (!customerId || amount === undefined || !dueDate) {
-      return res.status(400).json({ message: 'customerId, amount and dueDate are required.' });
-    }
-    const customer = await Customer.findOne({ _id: customerId, admin: req.adminId });
-    if (!customer) return res.status(404).json({ message: 'Customer not found.' });
-
-    const fee = await Fee.create({
-      customer: customer._id,
-      admin: req.adminId,
-      amount,
-      dueDate,
-      isRecurring: !!isRecurring,
-    });
-    res.status(201).json(fee);
-  })
-);
-
-router.put(
-  '/fees/:id',
-  validate(updateFeeSchema),
-  asyncHandler(async (req, res) => {
-    const fee = await Fee.findOne({ _id: req.params.id, admin: req.adminId });
-    if (!fee) return res.status(404).json({ message: 'Fee record not found.' });
-
-    const { status, amount, dueDate } = req.body;
-    if (amount !== undefined) fee.amount = amount;
-    if (dueDate !== undefined) fee.dueDate = dueDate;
-    if (status !== undefined) {
-      fee.status = status;
-      if (status === 'paid') {
-        fee.paidOn = new Date();
-        fee.receiptNumber = fee.receiptNumber || `RCPT-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-
-        // Fire payment receipt email if customer has an email address
-        const customer = await Customer.findById(fee.customer).populate('user', 'email username');
-        if (customer?.user?.email) {
-          sendEmail({
-            to: customer.user.email,
-            subject: `Payment Receipt — ${req.adminDoc?.gymName || 'Ironline Gym'}`,
-            html: paymentReceiptEmail(customer.name, fee.amount, fee.receiptNumber, req.adminDoc?.gymName),
-          }).catch((err) => console.error('[mailer] Receipt email failed:', err.message));
-        }
-      } else {
-        fee.paidOn = null;
-      }
-    }
-    await fee.save();
-    res.json(fee);
   })
 );
 

@@ -6,19 +6,35 @@ const { z } = require('zod');
 /* ----------------------------- Customers ---------------------------------- */
 
 const createCustomerSchema = z.object({
-  username: z.string().min(1, 'Username is required').max(40).trim().toLowerCase(),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
-  name:     z.string().min(1, 'Name is required').max(80).trim(),
-  phone:    z.string().max(30).trim().optional().default(''),
-  email:    z.string().email('Invalid email format').trim().optional().or(z.literal('')),
-  planId:   z.string().length(24, 'Invalid plan ID').optional().nullable(),
+  username:   z.string().min(1, 'Username is required').max(40).trim().toLowerCase(),
+  password:   z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
+  name:       z.string().min(1, 'Name is required').max(80).trim(),
+  phone:      z.string().max(30).trim().optional().default(''),
+  email:      z.string().email('Invalid email format').trim().optional().or(z.literal('')),
+  planId:     z.string().length(24, 'Invalid plan ID').optional().nullable(),
+  monthlyFee: z.number().min(0).optional(),
+  admissionFee: z.number().min(0).optional().default(0),
+  initialFee: z.object({
+    collectNow:    z.boolean().default(true),
+    title:         z.string().max(100).optional(),
+    billingMonth:  z.string().max(50).optional(),
+    amount:        z.number().min(0),
+    admissionFee:  z.number().min(0).optional().default(0),
+    discount:      z.number().min(0).optional().default(0),
+    dueDate:       z.string().or(z.date()).optional(),
+    status:        z.enum(['paid', 'unpaid']).default('paid'),
+    paymentMethod: z.enum(['cash', 'jazzcash', 'easypaisa', 'bank_transfer', 'card', 'other']).optional().default('cash'),
+    notes:         z.string().max(500).optional().default(''),
+  }).optional(),
 });
 
 const updateCustomerSchema = z.object({
-  name:     z.string().min(1).max(80).trim().optional(),
-  phone:    z.string().max(30).trim().optional(),
-  planId:   z.string().length(24).nullable().optional(),
-  isActive: z.boolean().optional(),
+  name:       z.string().min(1).max(80).trim().optional(),
+  phone:      z.string().max(30).trim().optional(),
+  planId:     z.string().length(24).nullable().optional(),
+  monthlyFee: z.number().min(0).optional(),
+  admissionFee: z.number().min(0).optional(),
+  isActive:   z.boolean().optional(),
 });
 
 // Admin resets a customer's password. newPassword is optional — if omitted, a
@@ -71,16 +87,33 @@ const updatePlanSchema = z.object({
 /* ----------------------------- Fees --------------------------------------- */
 
 const createFeeSchema = z.object({
-  customerId:  z.string().length(24, 'Invalid customer ID'),
-  amount:      z.number({ invalid_type_error: 'Amount must be a number' }).positive('Amount must be positive'),
-  dueDate:     z.string().min(1, 'Due date is required'),
-  isRecurring: z.boolean().optional().default(false),
+  customerId:   z.string().length(24, 'Invalid customer ID'),
+  title:        z.string().max(100).optional(),
+  feeType:      z.enum(['subscription', 'admission', 'personal_training', 'locker', 'custom']).optional().default('subscription'),
+  billingMonth: z.string().max(50).optional(),
+  amount:       z.number({ invalid_type_error: 'Amount must be a number' }).min(0, 'Amount cannot be negative'),
+  admissionFee: z.number().min(0).optional().default(0),
+  discount:     z.number().min(0).optional().default(0),
+  dueDate:      z.string().min(1, 'Due date is required'),
+  status:       z.enum(['unpaid', 'paid', 'overdue', 'waived']).optional().default('unpaid'),
+  paymentMethod: z.enum(['cash', 'jazzcash', 'easypaisa', 'bank_transfer', 'card', 'other']).optional(),
+  notes:        z.string().max(500).optional().default(''),
+  isRecurring:  z.boolean().optional().default(false),
 });
 
 const updateFeeSchema = z.object({
-  status:  z.enum(['unpaid', 'paid', 'overdue']).optional(),
-  amount:  z.number().positive().optional(),
-  dueDate: z.string().optional(),
+  status:        z.enum(['unpaid', 'paid', 'overdue', 'waived']).optional(),
+  amount:        z.number().min(0).optional(),
+  dueDate:       z.string().optional(),
+  paymentMethod: z.enum(['cash', 'jazzcash', 'easypaisa', 'bank_transfer', 'card', 'other']).optional(),
+  notes:         z.string().max(500).optional(),
+});
+
+const bulkMemberBillingSchema = z.object({
+  billingMonth:  z.string().min(1, 'Billing month is required').max(50).trim(),
+  dueDate:       z.string().min(1, 'Due date is required'),
+  title:         z.string().max(100).optional(),
+  defaultAmount: z.number().min(0).optional(),
 });
 
 /* ----------------------------- Announcements ------------------------------ */
@@ -132,6 +165,7 @@ module.exports = {
   updatePlanSchema,
   createFeeSchema,
   updateFeeSchema,
+  bulkMemberBillingSchema,
   announcementSchema,
   createBranchSchema,
   updateBranchSchema,

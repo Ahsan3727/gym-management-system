@@ -61,8 +61,7 @@ const adminNav = [
   { to: '/admin/customers', label: 'Customers', icon: 'user' },
   { to: '/admin/trainers', label: 'Trainers', icon: 'dumbbell' },
   { to: '/admin/branches', label: 'Locations', icon: 'building' },
-  { to: '/admin/fees', label: 'Fees', icon: 'card' },
-  { to: '/admin/plans', label: 'Plans & pricing', icon: 'tag' },
+  { to: '/admin/fees', label: 'Member fees', icon: 'card' },
   { to: '/admin/billing', label: 'Platform dues', icon: 'card' },
   { to: '/admin/profile', label: 'Gym profile', icon: 'shield' },
 ];
@@ -186,7 +185,6 @@ export default function App() {
           <Route path="trainers" element={<AdminTrainers />} />
           <Route path="branches" element={<AdminBranches />} />
           <Route path="fees" element={<AdminFees />} />
-          <Route path="plans" element={<AdminPlans />} />
           <Route path="billing" element={<AdminPlatformBilling />} />
           <Route path="profile" element={<AdminGymProfile />} />
         </Route>

@@ -17,6 +17,9 @@ const customerSchema = new mongoose.Schema(
       push: { type: Boolean, default: true },
     },
     trainerNotes: { type: String, default: '' },
+    monthlyFee: { type: Number, default: 3000, min: 0 },
+    admissionFee: { type: Number, default: 0, min: 0 },
+    membershipExpiresAt: { type: Date, default: null, index: true },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }

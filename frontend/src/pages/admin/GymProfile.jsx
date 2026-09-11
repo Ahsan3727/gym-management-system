@@ -97,6 +97,8 @@ export default function GymProfile() {
         contact: profile.contact,
         workingHours: profile.workingHours,
         themeColor: profile.themeColor,
+        defaultMemberMonthlyFee: profile.defaultMemberMonthlyFee !== undefined ? Number(profile.defaultMemberMonthlyFee) : 3000,
+        defaultFeeDueDay: profile.defaultFeeDueDay !== undefined ? Number(profile.defaultFeeDueDay) : 10,
       });
       setProfile(data);
       setMessage('Saved.');
@@ -277,6 +279,42 @@ export default function GymProfile() {
             placeholder="Mon–Sat 6am–10pm"
           />
         </div>
+        {/* Member Billing Defaults */}
+        <div className="md:col-span-2 pt-4 border-t border-ink/10">
+          <h3 className="text-sm font-semibold text-ink">Member Billing Defaults</h3>
+          <p className="text-xs text-steel mb-4">
+            Default monthly subscription amount and fee due day applied when onboarding new members or batch generating monthly dues.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="field-label">Standard Monthly Fee (Rs.)</label>
+              <input
+                type="number"
+                min="0"
+                step="100"
+                className="field-input"
+                value={profile.defaultMemberMonthlyFee ?? 3000}
+                onChange={(e) => setProfile({ ...profile, defaultMemberMonthlyFee: e.target.value })}
+                required
+              />
+              <p className="mt-1 text-xs text-steel">Auto-filled whenever you register a new member.</p>
+            </div>
+            <div>
+              <label className="field-label">Monthly Due Day (Day of Month: 1–28)</label>
+              <input
+                type="number"
+                min="1"
+                max="28"
+                className="field-input"
+                value={profile.defaultFeeDueDay ?? 10}
+                onChange={(e) => setProfile({ ...profile, defaultFeeDueDay: e.target.value })}
+                required
+              />
+              <p className="mt-1 text-xs text-steel">e.g. 10 means member dues are due on the 10th of every month.</p>
+            </div>
+          </div>
+        </div>
+
         <div className="md:col-span-2">
           {message && <div className="mb-3 text-sm text-chalk-dark">{message}</div>}
           {error && <div className="mb-3 text-sm text-ember-dark">{error}</div>}
