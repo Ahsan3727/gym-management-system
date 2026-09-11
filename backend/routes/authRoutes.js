@@ -84,7 +84,7 @@ router.post(
 
     let gymName = null;
     let gymLogoUrl = null;
-    let gymSlug = null;
+    let resolvedGymSlug = null;
 
     // Check if the gym is suspended (for admin, customer, or trainer)
     if (user.role === 'admin') {
@@ -94,7 +94,7 @@ router.post(
       }
       gymName = adminDoc?.gymName || null;
       gymLogoUrl = adminDoc?.gymLogoUrl || null;
-      gymSlug = adminDoc?.slug || null;
+      resolvedGymSlug = adminDoc?.slug || null;
     } else if (user.admin) {
       const adminDoc = await Admin.findById(user.admin);
       if (adminDoc?.isSuspended) {
@@ -102,7 +102,7 @@ router.post(
       }
       gymName = adminDoc?.gymName || null;
       gymLogoUrl = adminDoc?.gymLogoUrl || null;
-      gymSlug = adminDoc?.slug || null;
+      resolvedGymSlug = adminDoc?.slug || null;
     }
 
     const token = generateToken(user);
@@ -120,7 +120,7 @@ router.post(
         admin: user.admin,
         gymName,
         gymLogoUrl,
-        gymSlug,
+        gymSlug: resolvedGymSlug,
       },
     });
   })
