@@ -7,6 +7,14 @@ const settingsSchema = new mongoose.Schema(
     termsUrl: { type: String, default: '' },
     platformBillingEnabled: { type: Boolean, default: false },
     platformBillingNote: { type: String, default: '' },
+    defaultMonthlyFee: { type: Number, default: 5000, min: 0 },
+    gracePeriodDays: { type: Number, default: 14, min: 0 },
+    bankName: { type: String, default: '' },
+    accountTitle: { type: String, default: '' },
+    accountNumber: { type: String, default: '' },
+    iban: { type: String, default: '' },
+    jazzcashNumber: { type: String, default: '' },
+    easypaisaNumber: { type: String, default: '' },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );

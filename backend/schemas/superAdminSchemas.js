@@ -17,7 +17,8 @@ const updateAdminSchema = z.object({
   address:      z.string().max(200).trim().optional(),
   contact:      z.string().max(100).trim().optional(),
   workingHours: z.string().max(100).trim().optional(),
-  themeColor:   z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+  themeColor:       z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+  customMonthlyFee: z.number().min(0).nullable().optional(),
 });
 
 const updateSettingsSchema = z.object({
@@ -25,6 +26,14 @@ const updateSettingsSchema = z.object({
   termsUrl:               z.string().url('Invalid URL').optional().or(z.literal('')),
   platformBillingEnabled: z.boolean().optional(),
   platformBillingNote:    z.string().max(500).optional(),
+  defaultMonthlyFee:      z.number().min(0).optional(),
+  gracePeriodDays:        z.number().min(0).max(365).optional(),
+  bankName:               z.string().max(100).optional().default(''),
+  accountTitle:           z.string().max(100).optional().default(''),
+  accountNumber:          z.string().max(50).optional().default(''),
+  iban:                   z.string().max(50).optional().default(''),
+  jazzcashNumber:         z.string().max(50).optional().default(''),
+  easypaisaNumber:        z.string().max(50).optional().default(''),
 });
 
 const suspendAdminSchema = z.object({

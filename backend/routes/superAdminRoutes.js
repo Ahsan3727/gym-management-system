@@ -282,11 +282,32 @@ router.put(
   validate(updateSettingsSchema),
   asyncHandler(async (req, res) => {
     const settings = await Settings.getSingleton();
-    const { currency, termsUrl, platformBillingEnabled, platformBillingNote } = req.body;
+    const {
+      currency,
+      termsUrl,
+      platformBillingEnabled,
+      platformBillingNote,
+      defaultMonthlyFee,
+      gracePeriodDays,
+      bankName,
+      accountTitle,
+      accountNumber,
+      iban,
+      jazzcashNumber,
+      easypaisaNumber,
+    } = req.body;
     if (currency !== undefined) settings.currency = currency;
     if (termsUrl !== undefined) settings.termsUrl = termsUrl;
     if (platformBillingEnabled !== undefined) settings.platformBillingEnabled = platformBillingEnabled;
     if (platformBillingNote !== undefined) settings.platformBillingNote = platformBillingNote;
+    if (defaultMonthlyFee !== undefined) settings.defaultMonthlyFee = defaultMonthlyFee;
+    if (gracePeriodDays !== undefined) settings.gracePeriodDays = gracePeriodDays;
+    if (bankName !== undefined) settings.bankName = bankName;
+    if (accountTitle !== undefined) settings.accountTitle = accountTitle;
+    if (accountNumber !== undefined) settings.accountNumber = accountNumber;
+    if (iban !== undefined) settings.iban = iban;
+    if (jazzcashNumber !== undefined) settings.jazzcashNumber = jazzcashNumber;
+    if (easypaisaNumber !== undefined) settings.easypaisaNumber = easypaisaNumber;
     await settings.save();
     await logAction(req, 'settings.update', 'Settings', settings._id);
     res.json(settings);

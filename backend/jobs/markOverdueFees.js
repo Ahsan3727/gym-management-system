@@ -69,11 +69,40 @@ async function markOverdueFees() {
           console.error(`[overdue-cron] Failed to email overdue notice to ${recipientEmail}:`, mailErr.message);
         }
       }
+  }
+
+  // Also scan unpaid GymBillingFee (platform fees for gym owners)
+  const GymBillingFee = require('../models/GymBillingFee');
+  const overdueGymFees = await GymBillingFee.find({
+    status: 'unpaid',
+    dueDate: { $lt: now },
+  }).populate({
+    path: 'admin',
+    populate: { path: 'user', select: 'username email' },
+  });
+
+  for (const gFee of overdueGymFees) {
+    gFee.status = 'overdue';
+    await gFee.save();
+    updatedCount++;
+
+    const gUser = gFee.admin?.user;
+    if (gUser?._id) {
+      try {
+        await Notification.create({
+          user: gUser._id,
+          type: 'platform_fee_due',
+          message: `Your platform subscription fee (${gFee.invoiceNumber}) of Rs. ${gFee.amount.toLocaleString()} was due on ${gFee.dueDate.toISOString().split('T')[0]} and is now overdue. Please clear this to maintain full service.`,
+        });
+        notificationCount++;
+      } catch (err) {
+        console.error(`[overdue-cron] Failed to notify gym user ${gUser._id}:`, err.message);
+      }
     }
   }
 
   const result = {
-    scanned: overdueFees.length,
+    scanned: overdueFees.length + overdueGymFees.length,
     updated: updatedCount,
     notified: notificationCount,
     emailsSent: emailCount,

@@ -37,8 +37,10 @@ const TrainerSchedule = lazyWithReload(() => import('./pages/trainer/TrainerSche
 
 const SuperAdminOverview = lazyWithReload(() => import('./pages/superadmin/SuperAdminOverview.jsx'), 'SuperAdminOverview');
 const SuperAdminAdmins = lazyWithReload(() => import('./pages/superadmin/Admins.jsx'), 'SuperAdminAdmins');
+const SuperAdminBilling = lazyWithReload(() => import('./pages/superadmin/SuperAdminBilling.jsx'), 'SuperAdminBilling');
 const SuperAdminSettings = lazyWithReload(() => import('./pages/superadmin/Settings.jsx'), 'SuperAdminSettings');
 const SuperAdminAuditLog = lazyWithReload(() => import('./pages/superadmin/AuditLog.jsx'), 'SuperAdminAuditLog');
+const AdminPlatformBilling = lazyWithReload(() => import('./pages/admin/AdminPlatformBilling.jsx'), 'AdminPlatformBilling');
 
 // `icon` refers to an IconSprite id (components/IconSprite.jsx) and drives
 // the icon-pill nav rendered by the Phase 1 DashboardShell.
@@ -61,6 +63,7 @@ const adminNav = [
   { to: '/admin/branches', label: 'Locations', icon: 'building' },
   { to: '/admin/fees', label: 'Fees', icon: 'card' },
   { to: '/admin/plans', label: 'Plans & pricing', icon: 'tag' },
+  { to: '/admin/billing', label: 'Platform dues', icon: 'card' },
   { to: '/admin/profile', label: 'Gym profile', icon: 'shield' },
 ];
 
@@ -73,6 +76,7 @@ const trainerNav = [
 const superAdminNav = [
   { to: '/superadmin', label: 'Overview', end: true, icon: 'home' },
   { to: '/superadmin/admins', label: 'Gym accounts', icon: 'briefcase' },
+  { to: '/superadmin/billing', label: 'Platform billing', icon: 'card' },
   { to: '/superadmin/audit-log', label: 'Audit log', icon: 'clipboard' },
   { to: '/superadmin/settings', label: 'Platform settings', icon: 'sliders' },
 ];
@@ -183,6 +187,7 @@ export default function App() {
           <Route path="branches" element={<AdminBranches />} />
           <Route path="fees" element={<AdminFees />} />
           <Route path="plans" element={<AdminPlans />} />
+          <Route path="billing" element={<AdminPlatformBilling />} />
           <Route path="profile" element={<AdminGymProfile />} />
         </Route>
 
@@ -197,6 +202,7 @@ export default function App() {
         >
           <Route index element={<SuperAdminOverview />} />
           <Route path="admins" element={<SuperAdminAdmins />} />
+          <Route path="billing" element={<SuperAdminBilling />} />
           <Route path="audit-log" element={<SuperAdminAuditLog />} />
           <Route path="settings" element={<SuperAdminSettings />} />
         </Route>

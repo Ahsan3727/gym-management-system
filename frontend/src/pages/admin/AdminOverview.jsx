@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -7,6 +8,7 @@ export default function AdminOverview() {
   const { showToast } = useToast();
   const [profile, setProfile] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [billingSummary, setBillingSummary] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -18,10 +20,12 @@ export default function AdminOverview() {
     Promise.all([
       api.get('/admin/profile'),
       api.get('/admin/analytics'),
+      api.get('/admin/platform-fees/summary').catch(() => ({ data: null })),
     ])
-      .then(([p, a]) => {
+      .then(([p, a, b]) => {
         setProfile(p.data);
         setAnalytics(a.data);
+        setBillingSummary(b.data);
       })
       .catch(() => setError('Could not load your dashboard analytics.'))
       .finally(() => setLoading(false));
@@ -61,6 +65,44 @@ export default function AdminOverview() {
           <p className="mt-1 text-sm text-steel">Real-time performance analytics, revenue collection, and member growth.</p>
         </div>
       </div>
+
+      {/* Platform Subscription Alert Banner */}
+      {billingSummary && billingSummary.totalOutstanding > 0 && (
+        <div
+          className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl p-4 border ${
+            billingSummary.isSeverelyOverdue
+              ? 'bg-ember/10 border-ember/30 text-ember-dark'
+              : billingSummary.overdueCount > 0
+              ? 'bg-ember/5 border-ember/20 text-ember-dark'
+              : 'bg-iron/5 border-iron/20 text-iron'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <svg className="icon !h-5 !w-5 shrink-0"><use href="#i-card" /></svg>
+            <div>
+              <div className="text-sm font-bold">
+                {billingSummary.isSeverelyOverdue
+                  ? '⚠️ Critical: Platform Subscription Severely Overdue'
+                  : billingSummary.overdueCount > 0
+                  ? '⚠️ Platform Subscription Overdue'
+                  : 'Platform Subscription Dues Pending'}
+              </div>
+              <div className="text-xs text-steel mt-0.5">
+                Outstanding balance: <strong className="text-ink">Rs. {billingSummary.totalOutstanding.toLocaleString()}</strong>.
+                {billingSummary.isSeverelyOverdue
+                  ? ' Your account is past the grace period. Please clear this to maintain full service.'
+                  : ' Please review payment details and submit your reference.'}
+              </div>
+            </div>
+          </div>
+          <Link
+            to="/admin/billing"
+            className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-paper hover:bg-ink/90 transition-colors"
+          >
+            View & Pay Dues →
+          </Link>
+        </div>
+      )}
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

@@ -27,6 +27,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const trainerRoutes = require('./routes/trainerRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const gymBillingRoutes = require('./routes/gymBillingRoutes');
 
 const app = express();
 
@@ -120,6 +121,7 @@ app.use('/api/trainer', trainerRoutes);
 app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api', gymBillingRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

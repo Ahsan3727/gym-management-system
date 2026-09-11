@@ -33,6 +33,7 @@ const adminSchema = new mongoose.Schema(
     checkinToken: { type: String, default: '' },
     checkinTokenExpiry: { type: Date, default: null },
     checkinTokenRequired: { type: Boolean, default: false },
+    customMonthlyFee: { type: Number, default: null, min: 0 },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );
