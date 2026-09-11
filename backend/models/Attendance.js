@@ -21,7 +21,7 @@ const attendanceSchema = new mongoose.Schema(
     },
     method: {
       type: String,
-      enum: ['qr', 'manual', 'pin'],
+      enum: ['qr', 'qr_offline_sync', 'manual', 'pin'],
       default: 'qr',
     },
     notes: {

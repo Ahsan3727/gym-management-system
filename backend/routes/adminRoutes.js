@@ -99,22 +99,27 @@ router.get(
 router.get(
   '/checkin-qr',
   asyncHandler(async (req, res) => {
-    const isTokenValid = Boolean(
+    let isTokenValid = Boolean(
       req.adminDoc.checkinToken &&
       req.adminDoc.checkinTokenExpiry &&
       new Date(req.adminDoc.checkinTokenExpiry) > new Date()
     );
 
-    let qrDataUrl = null;
-    if (isTokenValid) {
-      const payload = JSON.stringify({
-        gymId: req.adminDoc._id.toString(),
-        gymName: req.adminDoc.gymName,
-        token: req.adminDoc.checkinToken,
-        expiresAt: req.adminDoc.checkinTokenExpiry,
-      });
-      qrDataUrl = await qrcode.toDataURL(payload, { width: 320, margin: 2 });
+    // Auto-generate fresh token for the new day if token is missing or expired upon date change
+    if (!isTokenValid) {
+      const token = crypto.randomBytes(16).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setHours(23, 59, 59, 999);
+
+      req.adminDoc.checkinToken = token;
+      req.adminDoc.checkinTokenExpiry = expiresAt;
+      await req.adminDoc.save();
+      isTokenValid = true;
     }
+
+    const origin = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
+    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${req.adminDoc.checkinToken}`;
+    const qrDataUrl = await qrcode.toDataURL(checkinUrl, { width: 320, margin: 2 });
 
     res.json({
       checkinTokenRequired: !!req.adminDoc.checkinTokenRequired,
@@ -122,6 +127,7 @@ router.get(
       checkinTokenExpiry: req.adminDoc.checkinTokenExpiry,
       isTokenValid,
       qrDataUrl,
+      checkinUrl,
     });
   })
 );
@@ -130,26 +136,23 @@ router.post(
   '/checkin-qr',
   asyncHandler(async (req, res) => {
     const token = crypto.randomBytes(16).toString('hex');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24-hour expiration
+    const expiresAt = new Date();
+    expiresAt.setHours(23, 59, 59, 999); // Expires at midnight date change
 
     req.adminDoc.checkinToken = token;
     req.adminDoc.checkinTokenExpiry = expiresAt;
     await req.adminDoc.save();
 
-    const payload = JSON.stringify({
-      gymId: req.adminDoc._id.toString(),
-      gymName: req.adminDoc.gymName,
-      token,
-      expiresAt,
-    });
-
-    const qrDataUrl = await qrcode.toDataURL(payload, { width: 320, margin: 2 });
+    const origin = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
+    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${token}`;
+    const qrDataUrl = await qrcode.toDataURL(checkinUrl, { width: 320, margin: 2 });
 
     res.json({
-      message: 'New QR check-in token generated.',
+      message: 'New QR check-in token generated for today.',
       token,
       expiresAt,
       qrDataUrl,
+      checkinUrl,
       checkinTokenRequired: req.adminDoc.checkinTokenRequired,
     });
   })
@@ -238,8 +241,22 @@ router.post(
       const last = new Date(streak.lastCheckin);
       last.setUTCHours(0, 0, 0, 0);
       const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
-      if (diffDays === 1) streak.currentStreak += 1;
-      else if (diffDays > 1) streak.currentStreak = 1;
+      if (diffDays === 1) {
+        streak.currentStreak += 1;
+      } else if (diffDays === 2) {
+        const daysSinceLastRest = streak.lastRestDayUsed
+          ? Math.round((today - new Date(streak.lastRestDayUsed)) / (1000 * 60 * 60 * 24))
+          : 999;
+        if (daysSinceLastRest >= 7) {
+          streak.currentStreak += 1;
+          streak.lastRestDayUsed = today;
+          streak.restDaysUsed = (streak.restDaysUsed || 0) + 1;
+        } else {
+          streak.currentStreak = 1;
+        }
+      } else if (diffDays > 2) {
+        streak.currentStreak = 1;
+      }
     } else {
       streak.currentStreak = 1;
     }

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTenant } from '../context/TenantContext.jsx';
@@ -51,7 +51,9 @@ export default function Login() {
     try {
       const slugToPass = isMemberMode ? tenant.slug : undefined;
       const user = await login(username.trim(), password, slugToPass);
-      const dest = location.state?.from || roleHome[user.role] || '/';
+      const searchParams = new URLSearchParams(location.search);
+      const redirectParam = searchParams.get('redirect');
+      const dest = redirectParam || location.state?.from || roleHome[user.role] || '/';
       navigate(dest, { replace: true });
     } catch (err) {
       if (!err.response) {

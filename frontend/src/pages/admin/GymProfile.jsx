@@ -424,15 +424,23 @@ export default function GymProfile() {
               <img src={qrData.qrDataUrl} alt="Check-in QR Code" className="h-44 w-44" />
             </div>
             <div className="flex-1 space-y-2 text-center sm:text-left">
-              <span className="chip border-chalk/25 bg-chalk/10 text-chalk-dark">Active Reception QR</span>
+              <span className="chip border-chalk/25 bg-chalk/10 text-chalk-dark">Active Today's QR</span>
               <p className="text-xs text-steel">
                 Valid until:{' '}
                 <strong className="text-ink">
                   {qrData.checkinTokenExpiry
-                    ? new Date(qrData.checkinTokenExpiry).toLocaleString()
-                    : '24 hours'}
+                    ? new Date(qrData.checkinTokenExpiry).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (Midnight Date Rollover)'
+                    : 'Midnight'}
                 </strong>
               </p>
+              {qrData.checkinUrl && (
+                <p className="text-xs text-steel truncate max-w-md">
+                  Direct URL:{' '}
+                  <code className="rounded bg-ink/5 px-2 py-0.5 font-mono text-ink text-[11px] select-all">
+                    {qrData.checkinUrl}
+                  </code>
+                </p>
+              )}
               <p className="text-xs text-steel">
                 Passcode token:{' '}
                 <code className="rounded bg-ink/5 px-2 py-1 font-mono text-ink text-xs select-all">
@@ -445,7 +453,7 @@ export default function GymProfile() {
                   onClick={() => {
                     const win = window.open('');
                     win.document.write(
-                      `<html><head><title>Reception QR - ${profile.gymName}</title><style>body{text-align:center;font-family:sans-serif;padding:40px;}h1{margin-bottom:8px;}p{color:#666;font-size:18px;}img{width:320px;height:320px;margin:20px 0;}</style></head><body><h1>${profile.gymName}</h1><p>Scan to check in</p><img src="${qrData.qrDataUrl}"/><p style="font-family:monospace;font-size:14px;">Token: ${qrData.checkinToken}</p><script>window.print();</script></body></html>`
+                      `<html><head><title>Reception Check-In - ${profile.gymName}</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:40px;color:#111;max-width:500px;margin:0 auto;}h2{font-size:12px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:28px;margin-top:0;margin-bottom:6px;font-weight:800;}.badge{display:inline-block;padding:4px 12px;border-radius:20px;background:#fef2f2;color:#b91c1c;font-size:12px;font-weight:700;margin-bottom:16px;}.card{padding:20px;border:2px solid #e4e4e7;border-radius:20px;margin:12px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:260px;height:260px;}.token{font-family:monospace;font-size:15px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;font-weight:700;}.instructions{text-align:left;font-size:13px;line-height:1.6;color:#52525b;margin-top:20px;padding:0 12px;}.instructions ol{padding-left:20px;}.footer{margin-top:24px;font-size:11px;color:#a1a1aa;border-top:1px solid #f4f4f5;padding-top:12px;}</style></head><body><h2>Official Gym Attendance</h2><h1>${profile.gymName}</h1><div class="badge">Valid for Today · Refreshes at Midnight</div><div class="card"><img src="${qrData.qrDataUrl}"/><br/><span class="token">Token: ${qrData.checkinToken}</span></div><div class="instructions"><strong>How to Check In:</strong><ol><li>Open your phone's camera and point it at the QR code.</li><li>Tap the link banner that pops up to check in automatically.</li><li>Or open the member app and tap <strong>"📷 Scan Desk QR"</strong>.</li></ol></div><div class="footer">Computer generated QR sign · 1 weekly rest day allowed without streak loss</div><script>window.print();</script></body></html>`
                     );
                     win.document.close();
                   }}

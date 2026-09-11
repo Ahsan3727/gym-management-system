@@ -284,16 +284,45 @@ router.get(
 // Extracted into a named handler so both /streak/checkin and the /checkin
 // alias call the same function directly — no fragile req.url mutation needed.
 async function handleCheckin(req, res) {
+  const { qrToken, offlineScannedAt } = req.body || {};
+
+  // Validate offline sync timestamp if provided
+  let scanDate = null;
+  if (offlineScannedAt) {
+    scanDate = new Date(offlineScannedAt);
+    if (isNaN(scanDate.getTime()) || scanDate > new Date()) {
+      return res.status(400).json({ message: 'Invalid offline check-in timestamp.' });
+    }
+    const ageHours = (Date.now() - scanDate.getTime()) / (1000 * 60 * 60);
+    if (ageHours > 36) {
+      return res.status(400).json({ message: 'Offline check-in has expired (must be synced within 24–36 hours).' });
+    }
+  }
+
   // If gym requires physical QR token, validate token and expiry
   const admin = await Admin.findById(req.adminId);
   if (admin?.checkinTokenRequired) {
-    let token = req.body?.qrToken?.trim();
+    let token = (qrToken || '').trim();
+
+    // Extract token if user pasted full URL (e.g. https://domain.com/customer/checkin?token=XYZ)
+    if (token.includes('token=')) {
+      try {
+        const u = new URL(token, 'http://localhost');
+        token = u.searchParams.get('token') || token;
+      } catch {
+        // fallback regex extract
+        const match = token.match(/token=([a-zA-Z0-9_-]+)/);
+        if (match) token = match[1];
+      }
+    }
+
+    // Extract token if raw JSON string
     if (token && token.startsWith('{')) {
       try {
         const parsed = JSON.parse(token);
-        token = parsed.token;
+        token = parsed.token || token;
       } catch {
-        // ignore json parse error, use raw string
+        // ignore json parse error
       }
     }
 
@@ -304,7 +333,7 @@ async function handleCheckin(req, res) {
     }
 
     const isExpired = !admin.checkinTokenExpiry || new Date() > new Date(admin.checkinTokenExpiry);
-    if (token !== admin.checkinToken || isExpired) {
+    if (token !== admin.checkinToken || (isExpired && !offlineScannedAt)) {
       return res.status(400).json({
         message: 'Invalid or expired QR check-in token. Please scan the latest code at reception.',
       });
@@ -314,11 +343,11 @@ async function handleCheckin(req, res) {
   let streak = await Streak.findOne({ customer: req.customerId });
   if (!streak) streak = new Streak({ customer: req.customerId });
 
-  // Use UTC methods so "today" is consistent regardless of the server's local
-  // timezone. setHours(0,0,0,0) uses local time which can cause double check-ins
-  // or missed streaks near midnight UTC.
-  const today = new Date();
+  const effectiveDate = scanDate || new Date();
+  const today = new Date(effectiveDate);
   today.setUTCHours(0, 0, 0, 0);
+
+  let restDayApplied = false;
 
   if (streak.lastCheckin) {
     const last = new Date(streak.lastCheckin);
@@ -328,7 +357,31 @@ async function handleCheckin(req, res) {
     if (diffDays === 0) {
       return res.json(streak); // already checked in today
     }
-    streak.currentStreak = diffDays === 1 ? streak.currentStreak + 1 : 1;
+
+    if (diffDays === 1) {
+      // Consecutive day: standard streak increment
+      streak.currentStreak += 1;
+    } else if (diffDays === 2) {
+      // 1 day was missed (e.g. Sunday rest day).
+      // Check if 1-day-per-week rest day allowance is available (not used in last 7 days):
+      const daysSinceLastRest = streak.lastRestDayUsed
+        ? Math.round((today - new Date(streak.lastRestDayUsed)) / (1000 * 60 * 60 * 24))
+        : 999;
+
+      if (daysSinceLastRest >= 7) {
+        // 1 rest day per week allowed! Streak is preserved and continues!
+        streak.currentStreak += 1;
+        streak.lastRestDayUsed = today;
+        streak.restDaysUsed = (streak.restDaysUsed || 0) + 1;
+        restDayApplied = true;
+      } else {
+        // Already took a rest day within this 7-day window -> streak resets
+        streak.currentStreak = 1;
+      }
+    } else {
+      // 2 or more consecutive missed days -> streak resets
+      streak.currentStreak = 1;
+    }
   } else {
     streak.currentStreak = 1;
   }
@@ -345,16 +398,22 @@ async function handleCheckin(req, res) {
     }
   });
 
+  const attendanceMethod = offlineScannedAt ? 'qr_offline_sync' : 'qr';
+
   await Promise.all([
     streak.save(),
     Attendance.create({
       customer: req.customerId,
       admin: req.adminId,
-      method: 'qr',
+      checkedInAt: effectiveDate,
+      method: attendanceMethod,
+      notes: restDayApplied ? 'Weekly rest day protected streak' : '',
     }),
   ]);
 
-  res.json(streak);
+  const responseData = streak.toObject();
+  responseData.restDayApplied = restDayApplied;
+  res.json(responseData);
 }
 
 // One check-in per day. Extends the streak if yesterday's check-in exists,

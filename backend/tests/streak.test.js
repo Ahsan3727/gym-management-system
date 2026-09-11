@@ -21,11 +21,33 @@ function computeStreakUpdate(streak, nowDate = new Date()) {
     if (diffDays === 0) {
       return { alreadyCheckedIn: true, currentStreak: streak.currentStreak };
     }
-    const newStreak = diffDays === 1 ? streak.currentStreak + 1 : 1;
-    return { alreadyCheckedIn: false, currentStreak: newStreak };
+
+    if (diffDays === 1) {
+      return { alreadyCheckedIn: false, currentStreak: streak.currentStreak + 1, restDayApplied: false };
+    }
+
+    if (diffDays === 2) {
+      // 1 day skipped: check 1-day-per-week rest day allowance
+      const daysSinceLastRest = streak.lastRestDayUsed
+        ? Math.round((today - new Date(streak.lastRestDayUsed)) / (1000 * 60 * 60 * 24))
+        : 999;
+
+      if (daysSinceLastRest >= 7) {
+        return {
+          alreadyCheckedIn: false,
+          currentStreak: streak.currentStreak + 1,
+          restDayApplied: true,
+          lastRestDayUsed: today,
+        };
+      }
+      return { alreadyCheckedIn: false, currentStreak: 1, restDayApplied: false };
+    }
+
+    // 2 or more days skipped
+    return { alreadyCheckedIn: false, currentStreak: 1, restDayApplied: false };
   }
 
-  return { alreadyCheckedIn: false, currentStreak: 1 };
+  return { alreadyCheckedIn: false, currentStreak: 1, restDayApplied: false };
 }
 
 function computeBadges(currentStreak, existingBadges = []) {
@@ -60,6 +82,7 @@ describe("Streak Logic", () => {
       const result = computeStreakUpdate({ currentStreak: 7, lastCheckin: yesterday });
       assert.equal(result.currentStreak, 8);
       assert.equal(result.alreadyCheckedIn, false);
+      assert.equal(result.restDayApplied, false);
     });
 
     it("does not increment on same-day duplicate checkin", () => {
@@ -69,10 +92,37 @@ describe("Streak Logic", () => {
       assert.equal(result.alreadyCheckedIn, true);
     });
 
-    it("resets streak to 1 when 2 days skipped", () => {
+    it("preserves streak (+1) when 1 day skipped and weekly rest day is available", () => {
       const twoDaysAgo = new Date();
       twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      const result = computeStreakUpdate({ currentStreak: 30, lastCheckin: twoDaysAgo });
+      const result = computeStreakUpdate({
+        currentStreak: 10,
+        lastCheckin: twoDaysAgo,
+        lastRestDayUsed: null, // never used before
+      });
+      assert.equal(result.currentStreak, 11);
+      assert.equal(result.restDayApplied, true);
+    });
+
+    it("resets streak to 1 on 1 day skipped if rest day was ALREADY used within 7 days", () => {
+      const twoDaysAgo = new Date();
+      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+      const result = computeStreakUpdate({
+        currentStreak: 10,
+        lastCheckin: twoDaysAgo,
+        lastRestDayUsed: threeDaysAgo, // used 3 days ago (< 7 days)
+      });
+      assert.equal(result.currentStreak, 1);
+      assert.equal(result.restDayApplied, false);
+    });
+
+    it("resets streak to 1 when 2 or more days are skipped (e.g. 3 days ago)", () => {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      const result = computeStreakUpdate({ currentStreak: 30, lastCheckin: threeDaysAgo });
       assert.equal(result.currentStreak, 1);
       assert.equal(result.alreadyCheckedIn, false);
     });

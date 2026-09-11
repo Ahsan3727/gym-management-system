@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 // BUG #1 FIX: Use an explicit map instead of role.replace('_', '') which was
@@ -14,6 +14,7 @@ const roleHome = {
 
 export default function ProtectedRoute({ role, children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -22,7 +23,10 @@ export default function ProtectedRoute({ role, children }) {
       </div>
     );
   }
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) {
+    const fullPath = location.pathname + location.search;
+    return <Navigate to={`/login?redirect=${encodeURIComponent(fullPath)}`} state={{ from: fullPath }} replace />;
+  }
   if (role && user.role !== role) {
     return <Navigate to={roleHome[user.role] || '/login'} replace />;
   }
