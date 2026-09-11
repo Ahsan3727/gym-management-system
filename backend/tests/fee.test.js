@@ -27,7 +27,9 @@ function applyStatusFilter(fees, status) {
 }
 
 function fmtAmount(amount) {
-  return amount.toFixed(2);
+  // toFixed(2) has a well-known JS float imprecision bug where 1.005 → '1.00'.
+  // Using exponential notation rounding for mathematically correct results.
+  return Number(Math.round(+(amount + 'e+2')) + 'e-2').toFixed(2);
 }
 
 // --- Tests -------------------------------------------------------------------

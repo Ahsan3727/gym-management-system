@@ -6,7 +6,7 @@ const { z } = require('zod');
 /* ----------------------------- Customers ---------------------------------- */
 
 const createCustomerSchema = z.object({
-  username: z.string().min(1, 'Username is required').max(40).trim(),
+  username: z.string().min(1, 'Username is required').max(40).trim().toLowerCase(),
   password: z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
   name:     z.string().min(1, 'Name is required').max(80).trim(),
   phone:    z.string().max(30).trim().optional().default(''),
@@ -35,7 +35,7 @@ const resetCustomerPasswordSchema = z.object({
 /* ----------------------------- Trainers ----------------------------------- */
 
 const createTrainerSchema = z.object({
-  username:         z.string().min(1, 'Username is required').max(40).trim(),
+  username:         z.string().min(1, 'Username is required').max(40).trim().toLowerCase(),
   password:         z.string().min(8, 'Password must be at least 8 characters').optional().or(z.literal('')),
   name:             z.string().min(1, 'Name is required').max(80).trim(),
   phone:            z.string().max(30).trim().optional().default(''),

@@ -48,7 +48,7 @@ async function markOverdueFees() {
         await Notification.create({
           user: user._id,
           type: 'fee_due',
-          message: `Your membership fee of $${fee.amount.toFixed(2)} was due on ${fee.dueDate.toISOString().split('T')[0]} and is now overdue. Please clear this with gym administration.`,
+          message: `Your membership fee of Rs. ${fee.amount.toLocaleString()} was due on ${fee.dueDate.toISOString().split('T')[0]} and is now overdue. Please clear this with gym administration.`,
         });
         notificationCount++;
       } catch (notifyErr) {
