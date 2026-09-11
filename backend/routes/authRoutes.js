@@ -82,17 +82,27 @@ router.post(
       }
     }
 
+    let gymName = null;
+    let gymLogoUrl = null;
+    let gymSlug = null;
+
     // Check if the gym is suspended (for admin, customer, or trainer)
     if (user.role === 'admin') {
       const adminDoc = await Admin.findOne({ user: user._id });
       if (adminDoc?.isSuspended) {
         return res.status(403).json({ message: 'This gym account has been suspended.' });
       }
+      gymName = adminDoc?.gymName || null;
+      gymLogoUrl = adminDoc?.gymLogoUrl || null;
+      gymSlug = adminDoc?.slug || null;
     } else if (user.admin) {
       const adminDoc = await Admin.findById(user.admin);
       if (adminDoc?.isSuspended) {
         return res.status(403).json({ message: 'This gym account has been suspended.' });
       }
+      gymName = adminDoc?.gymName || null;
+      gymLogoUrl = adminDoc?.gymLogoUrl || null;
+      gymSlug = adminDoc?.slug || null;
     }
 
     const token = generateToken(user);
@@ -103,7 +113,15 @@ router.post(
     res.json({
       token,
       refreshToken, // Also return for non-cookie mobile/testing clients
-      user: { id: user._id, username: user.username, role: user.role, admin: user.admin },
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+        admin: user.admin,
+        gymName,
+        gymLogoUrl,
+        gymSlug,
+      },
     });
   })
 );
@@ -184,15 +202,35 @@ router.get(
 
     if (req.user.role === 'admin') {
       const adminDoc = await Admin.findOne({ user: req.user._id });
-      return res.json({ ...base, profile: adminDoc });
+      return res.json({
+        ...base,
+        profile: adminDoc,
+        gymName: adminDoc?.gymName || null,
+        gymLogoUrl: adminDoc?.gymLogoUrl || null,
+        gymSlug: adminDoc?.slug || null,
+      });
     }
     if (req.user.role === 'customer') {
       const customerDoc = await Customer.findOne({ user: req.user._id }).populate('plan');
-      return res.json({ ...base, profile: customerDoc });
+      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin) : null;
+      return res.json({
+        ...base,
+        profile: customerDoc,
+        gymName: adminDoc?.gymName || null,
+        gymLogoUrl: adminDoc?.gymLogoUrl || null,
+        gymSlug: adminDoc?.slug || null,
+      });
     }
     if (req.user.role === 'trainer') {
       const trainerDoc = await Trainer.findOne({ user: req.user._id }).populate('assignedCustomers', 'name phone');
-      return res.json({ ...base, profile: trainerDoc });
+      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin) : null;
+      return res.json({
+        ...base,
+        profile: trainerDoc,
+        gymName: adminDoc?.gymName || null,
+        gymLogoUrl: adminDoc?.gymLogoUrl || null,
+        gymSlug: adminDoc?.slug || null,
+      });
     }
     res.json(base); // super_admin has no extra profile document
   })

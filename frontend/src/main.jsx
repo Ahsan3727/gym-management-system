@@ -93,11 +93,16 @@ function applyStaffBranding() {
 
 async function bootstrap() {
   const pathname = window.location.pathname;
+  const searchParams = new URLSearchParams(window.location.search);
+  const gymParam = searchParams.get('gym');
   const match = pathname.match(TENANT_PATH_RE);
 
   if (match) {
     // Fresh visit to a gym's install link — resolve and apply branding before the first render.
     await resolveTenantBranding(match[1]);
+  } else if (gymParam) {
+    // Visit via QR code or link with ?gym=slug parameter
+    await resolveTenantBranding(gymParam);
   } else if (pathname.startsWith('/staff')) {
     // Staff portal entry — apply Staff PWA manifest & title
     applyStaffBranding();

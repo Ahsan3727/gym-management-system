@@ -118,7 +118,8 @@ router.get(
     }
 
     const origin = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
-    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${req.adminDoc.checkinToken}`;
+    const gymSlugParam = req.adminDoc.slug ? `&gym=${req.adminDoc.slug}` : '';
+    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${req.adminDoc.checkinToken}${gymSlugParam}`;
     const qrDataUrl = await qrcode.toDataURL(checkinUrl, { width: 320, margin: 2 });
 
     res.json({
@@ -144,7 +145,8 @@ router.post(
     await req.adminDoc.save();
 
     const origin = process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`;
-    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${token}`;
+    const gymSlugParam = req.adminDoc.slug ? `&gym=${req.adminDoc.slug}` : '';
+    const checkinUrl = `${origin.replace(/\/$/, '')}/customer/checkin?token=${token}${gymSlugParam}`;
     const qrDataUrl = await qrcode.toDataURL(checkinUrl, { width: 320, margin: 2 });
 
     res.json({

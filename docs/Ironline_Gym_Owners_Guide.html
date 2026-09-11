@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ironline — Gym Owner's Complete Operating Guide & Feature Manual</title>
+  <!-- Google Fonts: Outfit (Display) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-main: #0a0b0e;
+      --bg-surface: #12141a;
+      --bg-card: #181b24;
+      --bg-card-hover: #1f2330;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(255, 78, 31, 0.3);
+      --text-main: #f4f5f8;
+      --text-muted: #9da0ae;
+      --text-dim: #65697a;
+      --brand-primary: #ff4e1f;
+      --brand-gradient: linear-gradient(135deg, #ff4e1f 0%, #ff7e40 100%);
+      --accent-green: #00d26a;
+      --accent-blue: #2f80ed;
+      --accent-gold: #f2c94c;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-glow: 0 0 40px rgba(255, 78, 31, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Container & Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 290px;
+      background-color: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--brand-gradient);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(255, 78, 31, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .nav-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-menu a:hover {
+      color: var(--text-main);
+      background-color: rgba(255, 255, 255, 0.05);
+      transform: translateX(3px);
+    }
+
+    .print-btn {
+      margin-top: auto;
+      background: var(--brand-gradient);
+      border: none;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(255, 78, 31, 0.3);
+      transition: opacity 0.2s ease, transform 0.1s ease;
+    }
+
+    .print-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Main Content Area */
+    .content-area {
+      flex: 1;
+      padding: 48px 56px;
+      max-width: 1060px;
+    }
+
+    /* Hero Header */
+    .hero-section {
+      padding: 48px 44px;
+      background: linear-gradient(180deg, #181b24 0%, #12141a 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 48px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(255, 78, 31, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: rgba(255, 78, 31, 0.12);
+      border: 1px solid rgba(255, 78, 31, 0.3);
+      border-radius: 30px;
+      color: #ff6e47;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-size: 40px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .hero-title span {
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 720px;
+      line-height: 1.65;
+    }
+
+    /* Metric Grid */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+    }
+
+    .metric-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .metric-lbl {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    /* Section Styles */
+    .section-block {
+      margin-bottom: 56px;
+      scroll-margin-top: 32px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-num {
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      color: var(--brand-primary);
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-size: 26px;
+    }
+
+    /* Feature Cards */
+    .card-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .feature-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+      background-color: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .card-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .badge-orange { background: rgba(255, 78, 31, 0.15); color: #ff6e47; }
+    .badge-green { background: rgba(0, 210, 106, 0.15); color: #00d26a; }
+    .badge-blue { background: rgba(47, 128, 237, 0.15); color: #569aff; }
+    .badge-gold { background: rgba(242, 201, 76, 0.15); color: #f2c94c; }
+
+    .card-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feature-list li {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      color: var(--accent-green);
+      font-weight: 800;
+    }
+
+    /* Callout Alert */
+    .callout {
+      background: rgba(255, 78, 31, 0.05);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin: 24px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .callout-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .callout-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .callout-body {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Table Styles */
+    .table-wrapper {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    td {
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Workflow Steps */
+    .step-chain {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .step-item {
+      display: flex;
+      gap: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      align-items: center;
+    }
+
+    .step-bubble {
+      width: 38px;
+      height: 38px;
+      background: var(--brand-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      color: white;
+      font-size: 15px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255, 78, 31, 0.35);
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .step-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Front Desk Cheatsheet */
+    .cheatsheet {
+      background: #11141c;
+      border: 1px solid #2a3042;
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-top: 36px;
+    }
+
+    .cheatsheet-title {
+      font-size: 22px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Print-specific stylesheet */
+    @media print {
+      body {
+        background-color: white !important;
+        color: #111 !important;
+      }
+      .sidebar, .print-btn {
+        display: none !important;
+      }
+      .content-area {
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .hero-section, .feature-card, .table-wrapper, .cheatsheet, .step-item {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        color: #111 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+      }
+      h1, h2, h3, h4, .card-title, .step-title {
+        color: #000 !important;
+      }
+      .hero-desc, .card-desc, .feature-list li, .metric-lbl, td, th {
+        color: #333 !important;
+      }
+      .section-block {
+        page-break-inside: avoid;
+      }
+      .hero-title span {
+        -webkit-text-fill-color: #ff4e1f !important;
+        color: #ff4e1f !important;
+      }
+    }
+
+    @media (max-width: 960px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 20px;
+      }
+      .content-area {
+        padding: 24px 20px;
+      }
+      .card-grid-2, .card-grid-3, .metric-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="brand-logo">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-name">Ironline</div>
+        <div style="font-size: 11px; color: var(--text-dim); font-weight: 600;">Gym Operating System</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">Operating Guide</div>
+      <ul class="nav-menu">
+        <li><a href="#quickstart">🚀 5-Minute Quickstart</a></li>
+        <li><a href="#branding">🎨 Gym Branding & PWA</a></li>
+        <li><a href="#checkin">📱 Smart QR Check-In</a></li>
+        <li><a href="#offline">📡 Offline Auto-Sync</a></li>
+        <li><a href="#members">👥 Member Management</a></li>
+        <li><a href="#billing">💳 Monthly Fees (PKR)</a></li>
+        <li><a href="#streaks">🔥 Streaks & Rest Days</a></li>
+        <li><a href="#workouts">🏋️ Workouts & Diets</a></li>
+        <li><a href="#trainers">👔 Trainers & Staff</a></li>
+        <li><a href="#analytics">📊 Peak Hours Heatmap</a></li>
+        <li><a href="#cheatsheet">📋 Front Desk Cheatsheet</a></li>
+      </ul>
+    </div>
+
+    <button class="print-btn" onclick="window.print()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-8 0v4h8v-4H8z"/>
+      </svg>
+      Print / Save as PDF
+    </button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content-area">
+
+    <!-- Hero Header -->
+    <header class="hero-section">
+      <div class="hero-tag">Official Owner Documentation</div>
+      <h1 class="hero-title">
+        The Complete Operating Manual for <span>Gym Owners</span>
+      </h1>
+      <p class="hero-desc">
+        Ironline is your gym's complete digital headquarters. Automate monthly fee collections, eliminate reception queues with 0-click QR scans, protect member streaks with weekly rest days, and deliver a white-labeled mobile app directly to your lifters' smartphones.
+      </p>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-val">0 Clicks</div>
+          <div class="metric-lbl">Instant Camera Check-In</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">100%</div>
+          <div class="metric-lbl">Offline-First Resilience</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">PKR</div>
+          <div class="metric-lbl">Localized Fee Tracking</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val">1 Rest/Wk</div>
+          <div class="metric-lbl">Built-in Streak Protection</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: Quickstart -->
+    <section id="quickstart" class="section-block">
+      <div class="section-header">
+        <div class="section-num">01</div>
+        <h2 class="section-title">5-Minute Quick-Start Guide</h2>
+      </div>
+
+      <p style="color: var(--text-muted); margin-bottom: 18px;">
+        Get your gym operations digitized in four simple steps without installing hardware or purchasing specialized scanner guns:
+      </p>
+
+      <div class="step-chain">
+        <div class="step-item">
+          <div class="step-bubble">1</div>
+          <div class="step-content">
+            <div class="step-title">Configure Your Gym Profile</div>
+            <div class="step-sub">Navigate to <strong>Gym Profile</strong> in the sidebar. Upload your gym emblem/logo, address, phone number, and operating hours.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-bubble">2</div>
+          <div class="step-content">
+            <div class="step-title">Print Your Reception Desk QR Sign</div>
+            <div class="step-sub">Click <strong>"Print Reception Sign"</strong>. Place this crisp sign on your counter. Tokens automatically roll over at midnight.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-bubble">3</div>
+          <div class="step-content">
+            <div class="step-title">Register Your Members</div>
+            <div class="step-sub">Go to <strong>Customers</strong> -> Click <strong>"+ Add Customer"</strong>. Set their name, username, phone, and monthly membership fee.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-bubble">4</div>
+          <div class="step-content">
+            <div class="step-title">Distribute Your Branded App</div>
+            <div class="step-sub">Have members scan your desk QR sign. Their phone prompts them to install your branded app directly on their home screen.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: White-Label Branding -->
+    <section id="branding" class="section-block">
+      <div class="section-header">
+        <div class="section-num">02</div>
+        <h2 class="section-title">White-Label Branding & Mobile App</h2>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Custom Identity</span>
+          <h3 class="card-title">Gym Name & Logo at the Top</h3>
+          <p class="card-desc">
+            Your gym's official name and logo are prominently featured at the top of every screen on both desktop sidebar and mobile sticky headers. Members see <strong>YOUR GYM</strong>, not a generic software tool.
+          </p>
+          <ul class="feature-list">
+            <li>Dynamic Gym Emblem and Uppercase Name</li>
+            <li>Role-specific indicators (Member, Trainer, Owner)</li>
+            <li>Clean responsive truncation on mobile devices</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-green">PWA Technology</span>
+          <h3 class="card-title">Dedicated Install Link (/g/your-gym)</h3>
+          <p class="card-desc">
+            Members don't have to search through App Store or Google Play. Your dedicated URL slug (e.g. <code>/g/titan-fitness</code>) allows one-tap home screen installation on iOS & Android.
+          </p>
+          <ul class="feature-list">
+            <li>Custom app icon on member home screens</li>
+            <li>Runs full-screen like a native app</li>
+            <li>Zero App Store update delays or download fees</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Smart QR Check-In & Offline -->
+    <section id="checkin" class="section-block">
+      <div class="section-header">
+        <div class="section-num">03</div>
+        <h2 class="section-title">Smart Reception Check-In & Offline Resilience</h2>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Zero-Click Scan</span>
+          <h3 class="card-title">Native Phone Camera</h3>
+          <p class="card-desc">
+            Members scan your front desk QR code using their standard iPhone Camera or Android Google Lens. If logged in, the app instantly records check-in with <strong>zero clicks</strong>.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-green">100% Offline</span>
+          <h3 class="card-title">Basement Dead-Zone Safe</h3>
+          <p class="card-desc">
+            No internet? No problem. The check-in queues in the member's phone storage with an accurate timestamp and syncs automatically the moment WiFi or mobile data connects.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-blue">Daily Rollover</span>
+          <h3 class="card-title">Midnight Date Expiry</h3>
+          <p class="card-desc">
+            Tokens expire at <strong>23:59:59 (midnight)</strong> each day, eliminating rolling 24h timer confusion and ensuring check-ins match gym calendar days.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-icon">💡</div>
+        <div>
+          <div class="callout-title">Backup Passcode on Printable Desk Sign</div>
+          <div class="callout-body">
+            If a member's phone camera is scratched or unavailable, your printed desk sign includes today's 6-character daily backup code. Members or receptionists can enter this code for instant manual validation.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Monthly Fee & Revenue Management -->
+    <section id="billing" class="section-block">
+      <div class="section-header">
+        <div class="section-num">04</div>
+        <h2 class="section-title">Monthly Fee & Revenue Management (PKR)</h2>
+      </div>
+
+      <p style="color: var(--text-muted); margin-bottom: 20px;">
+        Designed specifically for cash, bank transfer, and mobile wallet payments common in private gyms:
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Fee Status</th>
+              <th>Meaning</th>
+              <th>System Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="card-badge badge-green">🟢 Paid</span></td>
+              <td>Monthly membership fee is fully settled.</td>
+              <td>Membership valid through renewal date. Full gym access granted.</td>
+            </tr>
+            <tr>
+              <td><span class="card-badge badge-gold">🟡 Due Soon</span></td>
+              <td>Fee expires within the next 5 days.</td>
+              <td>Soft reminder displayed on member's dashboard to pay dues.</td>
+            </tr>
+            <tr>
+              <td><span class="card-badge badge-orange">🔴 Overdue</span></td>
+              <td>Due date has passed without payment recorded.</td>
+              <td>Flagged on front desk attendance log and customer list for collection.</td>
+            </tr>
+            <tr>
+              <td><span class="card-badge" style="background: rgba(255,255,255,0.1); color: #ccc;">⚪ Unpaid</span></td>
+              <td>New invoice generated for upcoming cycle.</td>
+              <td>Awaiting receipt of cash, card, or bank transfer confirmation.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="feature-card">
+          <span class="card-badge badge-blue">Time Saver</span>
+          <h3 class="card-title">1-Click Bulk Monthly Invoicing</h3>
+          <p class="card-desc">
+            At the beginning of each billing month, click <strong>"Bulk Generate Invoices"</strong> under Fees. The system automatically creates invoices for all active members based on their individual monthly rate.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Multi-Channel</span>
+          <h3 class="card-title">Flexible Payment Methods</h3>
+          <p class="card-desc">
+            Record payments via Cash, Bank Transfer, POS Card Swipe, or Mobile Wallets (JazzCash, EasyPaisa, Raast). Attach reference numbers and issue clean, printable receipts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Streaks & Retention Engine -->
+    <section id="streaks" class="section-block">
+      <div class="section-header">
+        <div class="section-num">05</div>
+        <h2 class="section-title">Member Retention & Gamification Engine</h2>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Habit Building</span>
+          <h3 class="card-title">Daily Streaks & Milestone Badges</h3>
+          <p class="card-desc">
+            Every consecutive gym visit increments the member's streak. Members unlock milestone badges celebrating their commitment:
+          </p>
+          <ul class="feature-list">
+            <li>🥉 <strong>7-Day Bronze Warrior</strong> — First week completed</li>
+            <li>🥈 <strong>30-Day Silver Dedicated</strong> — One solid month</li>
+            <li>🥇 <strong>100-Day Gold Elite</strong> — True lifestyle change</li>
+            <li>💎 <strong>365-Day Iron Legend</strong> — Full year of dedication</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-green">Lifter Friendly</span>
+          <h3 class="card-title">1-Day-Per-Week Rest Day Protection</h3>
+          <p class="card-desc">
+            Real athletes need recovery. If a member misses 1 day (e.g. Sunday rest), their streak is safely preserved and continues!
+          </p>
+          <ul class="feature-list">
+            <li>Protects 1 missed day every 7-day period</li>
+            <li>Displays celebratory shield banner upon return</li>
+            <li>Prevents demotivation from losing a 30-day streak over a single rest day</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Workouts, Diets & Progress -->
+    <section id="workouts" class="section-block">
+      <div class="section-header">
+        <div class="section-num">06</div>
+        <h2 class="section-title">Workouts, Diets & Transformation Tracking</h2>
+      </div>
+
+      <div class="card-grid-3">
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Floor Routines</span>
+          <h3 class="card-title">Workout Builder</h3>
+          <p class="card-desc">
+            Create gym routines (Push-Pull-Legs, Upper/Lower) with exercise sets, target reps, and rest timers. Assign directly to members.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-green">Nutrition</span>
+          <h3 class="card-title">Diet & Meal Plans</h3>
+          <p class="card-desc">
+            Build meal schedules (Breakfast, Lunch, Pre/Post-workout) with target macros and calorie counts accessible in the member app.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-blue">Results</span>
+          <h3 class="card-title">Weight & Body Metrics</h3>
+          <p class="card-desc">
+            Track member weigh-ins, body fat percentage, and transformation graphs. Proves your gym delivers tangible results.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Trainers & Delegation -->
+    <section id="trainers" class="section-block">
+      <div class="section-header">
+        <div class="section-num">07</div>
+        <h2 class="section-title">Personal Trainers & Staff Delegation</h2>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="feature-card">
+          <span class="card-badge badge-blue">Coach Logins</span>
+          <h3 class="card-title">Dedicated Trainer Portal</h3>
+          <p class="card-desc">
+            Create logins for your trainers. When a trainer signs in, they only see their assigned clients, allowing them to manage workout programs and track meal adherence independently.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Owner Control</span>
+          <h3 class="card-title">Full Administrative Oversight</h3>
+          <p class="card-desc">
+            You maintain total visibility. Reassign clients between trainers, inspect trainer session loads, and review training schedules with one click.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Analytics & Heatmap -->
+    <section id="analytics" class="section-block">
+      <div class="section-header">
+        <div class="section-num">08</div>
+        <h2 class="section-title">Peak Hours Heatmap & Business Analytics</h2>
+      </div>
+
+      <div class="card-grid-2">
+        <div class="feature-card">
+          <span class="card-badge badge-orange">Capacity Planning</span>
+          <h3 class="card-title">Peak Attendance Heatmap</h3>
+          <p class="card-desc">
+            Visualize your busiest gym hours (e.g. 6:00 PM – 8:30 PM). Use attendance graphs to schedule floor trainers, manage air conditioning, or optimize equipment availability.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="card-badge badge-green">Retention Analytics</span>
+          <h3 class="card-title">Growth & Churn Trends</h3>
+          <p class="card-desc">
+            Monitor active members vs inactive lifters, track monthly signups, and follow up with members whose attendance has tapered off before they cancel.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 9: Cheatsheet -->
+    <section id="cheatsheet" class="cheatsheet">
+      <h3 class="cheatsheet-title">
+        <span>📋</span> Front-Desk Staff Quick-Reference Cheatsheet
+      </h3>
+      <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">
+        Keep this quick reference guide handy for receptionists and front-desk staff:
+      </p>
+
+      <div class="table-wrapper" style="margin-bottom: 0;">
+        <table>
+          <thead>
+            <tr>
+              <th>Member Situation</th>
+              <th>Recommended Front Desk Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Member forgot phone at home</strong></td>
+              <td>Open <strong>Attendance</strong> tab -> Search member name -> Click <strong>"Check In"</strong>.</td>
+            </tr>
+            <tr>
+              <td><strong>Member's phone has no internet</strong></td>
+              <td>Have them scan the desk QR as usual! The app queues their visit locally and syncs automatically when online.</td>
+            </tr>
+            <tr>
+              <td><strong>Member's phone camera is cracked</strong></td>
+              <td>Member taps <strong>"Enter Passcode"</strong> in app and inputs today's 6-character code printed on the desk sign.</td>
+            </tr>
+            <tr>
+              <td><strong>Member wants to pay monthly fee</strong></td>
+              <td>Open <strong>Fees</strong> -> Click <strong>"Record Payment"</strong> -> Choose Cash/Bank/Card -> Enter PKR amount -> Save.</td>
+            </tr>
+            <tr>
+              <td><strong>Member forgot their password</strong></td>
+              <td>Open <strong>Customers</strong> -> Search member -> Click <strong>"Reset Password"</strong> to provide temporary login.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; color: var(--text-dim); font-size: 13px;">
+      <div>© Ironline Gym Management Platform · All Rights Reserved</div>
+      <div>Designed for Modern Fitness Centers</div>
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

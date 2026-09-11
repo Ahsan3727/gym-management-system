@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTenant } from '../context/TenantContext.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
 /**
@@ -15,7 +16,12 @@ import ThemeToggle from './ThemeToggle.jsx';
  */
 export default function DashboardShell({ navItems, accent = 'ember', roleLabel, brandSub }) {
   const { user, logout } = useAuth();
+  const { tenant } = useTenant();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isSuperAdmin = user?.role === 'super_admin';
+  const gymName = isSuperAdmin ? 'IRONLINE' : (user?.gymName || tenant?.gymName || 'IRONLINE');
+  const gymLogo = isSuperAdmin ? null : (user?.gymLogoUrl || tenant?.gymLogoUrl || null);
 
   // Phase 4 QA: the drawer had no Escape-to-close and didn't lock
   // background scroll, so the page behind it kept scrolling while it was
@@ -45,14 +51,20 @@ export default function DashboardShell({ navItems, accent = 'ember', roleLabel, 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-panel">
       {/* Logo header */}
-      <div className="flex items-center gap-3 px-6 py-6">
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${accentBg} shadow-soft`}>
-          <svg className="icon !h-5 !w-5 text-white">
-            <use href="#i-zap" />
-          </svg>
-        </div>
+      <div className="flex items-center gap-3 px-6 py-6 border-b border-ink/5">
+        {gymLogo ? (
+          <img src={gymLogo} alt={gymName} className="h-10 w-10 shrink-0 rounded-2xl object-cover border border-ink/10 shadow-soft" />
+        ) : (
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${accentBg} shadow-soft`}>
+            <svg className="icon !h-5 !w-5 text-white">
+              <use href={isSuperAdmin ? '#i-shield' : '#i-zap'} />
+            </svg>
+          </div>
+        )}
         <div className="min-w-0 flex-1">
-          <div className="font-display text-base font-extrabold tracking-[-0.02em] text-ink">IRONLINE</div>
+          <div className="font-display text-base font-extrabold tracking-[-0.02em] text-ink uppercase truncate">
+            {gymName}
+          </div>
           <div className={`truncate text-[11px] font-bold uppercase tracking-wide ${accentText}`}>{roleLabel}</div>
           {brandSub && <div className="mt-0.5 truncate text-xs text-steel">{brandSub}</div>}
         </div>
@@ -131,14 +143,20 @@ export default function DashboardShell({ navItems, accent = 'ember', roleLabel, 
     <div className="min-h-screen bg-bone md:flex">
       {/* Mobile Top Header */}
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-ink/10 bg-panel px-4 py-3 md:hidden">
-        <div className="flex items-center gap-2.5">
-          <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${accentBg}`}>
-            <svg className="icon !h-4 !w-4 text-white">
-              <use href="#i-zap" />
-            </svg>
-          </div>
-          <span className="font-display text-base tracking-wide text-ink">IRONLINE</span>
-          <span className={`text-[11px] font-bold uppercase tracking-wide ${accentText}`}>· {roleLabel}</span>
+        <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
+          {gymLogo ? (
+            <img src={gymLogo} alt={gymName} className="h-8 w-8 shrink-0 rounded-xl object-cover border border-ink/10 shadow-sm" />
+          ) : (
+            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${accentBg}`}>
+              <svg className="icon !h-4 !w-4 text-white">
+                <use href={isSuperAdmin ? '#i-shield' : '#i-zap'} />
+              </svg>
+            </div>
+          )}
+          <span className="font-display text-base font-bold tracking-wide text-ink truncate uppercase">
+            {gymName}
+          </span>
+          <span className={`shrink-0 text-[11px] font-bold uppercase tracking-wide ${accentText}`}>· {roleLabel}</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}

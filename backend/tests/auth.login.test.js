@@ -149,3 +149,53 @@ describe("Email Resolution Logic", () => {
     assert.equal(email, "user@example.com");
   });
 });
+
+describe("Gym Branding in Auth Payload", () => {
+  function formatUserResponse(user, adminDoc) {
+    let gymName = null;
+    let gymLogoUrl = null;
+    let gymSlug = null;
+
+    if (user.role === "admin" || user.admin) {
+      gymName = adminDoc?.gymName || null;
+      gymLogoUrl = adminDoc?.gymLogoUrl || null;
+      gymSlug = adminDoc?.slug || null;
+    }
+
+    return {
+      id: user._id,
+      username: user.username,
+      role: user.role,
+      admin: user.admin,
+      gymName,
+      gymLogoUrl,
+      gymSlug,
+    };
+  }
+
+  it("attaches gym branding for a customer belonging to a gym", () => {
+    const user = { _id: "u123", username: "member1", role: "customer", admin: "admin456" };
+    const adminDoc = { _id: "admin456", gymName: "Titan Fitness", gymLogoUrl: "https://example.com/logo.png", slug: "titan-fitness" };
+    const res = formatUserResponse(user, adminDoc);
+    assert.equal(res.gymName, "Titan Fitness");
+    assert.equal(res.gymLogoUrl, "https://example.com/logo.png");
+    assert.equal(res.gymSlug, "titan-fitness");
+  });
+
+  it("attaches gym branding for a gym admin", () => {
+    const user = { _id: "admin_u1", username: "gymowner", role: "admin" };
+    const adminDoc = { _id: "admin_u1", gymName: "Ironline Gym", gymLogoUrl: null, slug: "ironline-gym" };
+    const res = formatUserResponse(user, adminDoc);
+    assert.equal(res.gymName, "Ironline Gym");
+    assert.equal(res.gymLogoUrl, null);
+    assert.equal(res.gymSlug, "ironline-gym");
+  });
+
+  it("leaves gym branding null for super_admin", () => {
+    const user = { _id: "sa1", username: "superadmin", role: "super_admin" };
+    const res = formatUserResponse(user, null);
+    assert.equal(res.gymName, null);
+    assert.equal(res.gymLogoUrl, null);
+    assert.equal(res.gymSlug, null);
+  });
+});

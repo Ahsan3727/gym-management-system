@@ -12,7 +12,7 @@ const roleHome = {
 
 export default function Login() {
   const { login } = useAuth();
-  const { tenant, clearTenant } = useTenant();
+  const { tenant, setTenant, clearTenant } = useTenant();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,6 +24,21 @@ export default function Login() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isIos, setIsIos] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const gymSlug = params.get('gym');
+    if (gymSlug && tenant?.slug !== gymSlug) {
+      fetch(`/api/public/branding/${gymSlug}`)
+        .then((r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (data?.gymName) {
+            setTenant({ slug: gymSlug, ...data });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [location.search, tenant]);
 
   useEffect(() => {
     const standalone =
