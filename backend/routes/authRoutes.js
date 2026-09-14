@@ -50,10 +50,12 @@ router.post(
     let user;
     let passwordAlreadyVerified = false;
     if (gym) {
-      // Scoped lookup for this specific gym
+      // First check if this user is a member/staff of this specific gym
       user = await User.findOne({ username: cleanUsername, admin: gym._id });
-    } else {
-      // Fallback for staff/superadmin login or unspecified gym
+    }
+
+    if (!user) {
+      // Universal fallback for gym owners, trainers, superadmin, or unspecified gym
       const candidates = await User.find({ username: cleanUsername });
       if (candidates.length === 1) {
         user = candidates[0];

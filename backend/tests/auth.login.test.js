@@ -199,3 +199,39 @@ describe("Gym Branding in Auth Payload", () => {
     assert.equal(res.gymSlug, null);
   });
 });
+
+describe("Universal Login Fallback Logic", () => {
+  function resolveUserWithFallback(gym, gymMembers, allCandidates) {
+    let user = null;
+    if (gym) {
+      user = gymMembers.find((m) => m.username === "testuser" && m.admin === gym._id) || null;
+    }
+    if (!user) {
+      user = allCandidates.find((c) => c.username === "testuser") || null;
+    }
+    return user;
+  }
+
+  it("finds member directly when gym matches", () => {
+    const gym = { _id: "g1" };
+    const member = { username: "testuser", role: "customer", admin: "g1" };
+    const user = resolveUserWithFallback(gym, [member], [member]);
+    assert.equal(user.role, "customer");
+    assert.equal(user.admin, "g1");
+  });
+
+  it("falls back to super_admin even if gym is specified", () => {
+    const gym = { _id: "g1" };
+    const superAdmin = { username: "testuser", role: "super_admin" };
+    const user = resolveUserWithFallback(gym, [], [superAdmin]);
+    assert.equal(user.role, "super_admin");
+  });
+
+  it("falls back to gym owner (admin) even if visiting another gym link", () => {
+    const gym = { _id: "g1" };
+    const owner = { username: "testuser", role: "admin", admin: "g2" };
+    const user = resolveUserWithFallback(gym, [], [owner]);
+    assert.equal(user.role, "admin");
+  });
+});
+

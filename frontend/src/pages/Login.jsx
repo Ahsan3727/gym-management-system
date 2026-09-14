@@ -106,9 +106,9 @@ export default function Login() {
         <div className="relative">
           <span className="chip mb-6 border-white/15 bg-white/5 text-[#9a9ba5]">
             <svg className="icon !h-3.5 !w-3.5">
-              <use href={isMemberMode ? '#i-dumbbell' : '#i-shield'} />
+              <use href="#i-shield" />
             </svg>
-            {isMemberMode ? 'Member App' : 'Multi-Gym Platform'}
+            {isMemberMode ? `${tenant.gymName} Portal` : 'Gym Management Platform'}
           </span>
 
           <h1 className="font-display text-5xl font-extrabold leading-[1.05] tracking-[-0.02em] text-[#f6f6f8]">
@@ -130,7 +130,7 @@ export default function Login() {
           <p className="mt-6 max-w-sm text-[#9a9ba5]">
             {isMemberMode
               ? `Log workouts, track nutrition, monitor streaks and manage dues directly with ${tenant.gymName}.`
-              : "Members, Trainers, Admins and SuperAdmins all sign in here. You'll be routed to your dashboard automatically."}
+              : "Members, Trainers, Gym Owners, and SuperAdmins all sign in here. You'll be routed to your dashboard automatically."}
           </p>
         </div>
 
@@ -175,16 +175,16 @@ export default function Login() {
             ) : (
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember shadow-soft text-white">
                 <svg className="icon !h-6 !w-6">
-                  <use href={isMemberMode ? '#i-dumbbell' : '#i-zap'} />
+                  <use href="#i-zap" />
                 </svg>
               </div>
             )}
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-ember">
-                {isMemberMode ? 'Member Portal' : 'Gym Platform'}
+                {isMemberMode ? gymName : 'Ironline'}
               </div>
               <h2 className="font-display text-xl font-bold tracking-tight text-ink">
-                {isMemberMode ? gymName : 'Ironline'}
+                Sign In
               </h2>
             </div>
           </div>
@@ -213,9 +213,7 @@ export default function Login() {
           )}
 
           <p className="mb-6 text-sm text-steel">
-            {isMemberMode
-              ? `Sign in with your ${gymName} member credentials.`
-              : "Sign in with your username and password. You'll be routed to your dashboard automatically."}
+            Enter your username and password to access your dashboard.
           </p>
 
           {error && (
@@ -237,7 +235,7 @@ export default function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
-                placeholder={isMemberMode ? 'e.g. ahsan' : 'your username'}
+                placeholder="your username"
                 required
               />
             </div>
@@ -262,27 +260,8 @@ export default function Login() {
           </div>
 
           <button type="submit" id="login-submit" disabled={submitting} className="btn-primary w-full">
-            {submitting ? 'Signing in...' : `Sign in to ${isMemberMode ? gymName : 'Ironline'}`}
+            {submitting ? 'Signing in...' : 'Sign In'}
           </button>
-
-          <div className="mt-6 pt-4 border-t border-ink/10 text-center text-xs text-steel space-y-2">
-            {isMemberMode ? (
-              <div>
-                Not at {gymName}?{' '}
-                <button type="button"
-                  onClick={() => { clearTenant(); navigate('/login', { replace: true }); }}
-                  className="font-medium text-ember hover:underline">
-                  Switch gym or sign in as staff
-                </button>
-              </div>
-            ) : (
-              <div className="leading-relaxed text-ink/60">
-                Member of a specific gym? Open your gym's install link
-                (e.g. <code className="rounded bg-ink/10 px-1 py-0.5 text-[10px]">/g/your-gym</code>)
-                for a branded login.
-              </div>
-            )}
-          </div>
         </form>
       </div>
     </div>

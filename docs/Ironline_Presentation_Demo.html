@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ironline — Complete Gym Management & Branded Member Mobile App</title>
+  
+  <!-- Google Fonts: Outfit (Display) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #08090d;
+      --bg-surface: #0f1118;
+      --bg-card: #141722;
+      --bg-card-hover: #1b1f2e;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(255, 78, 31, 0.35);
+      --text-main: #f5f6f9;
+      --text-muted: #9aa0b4;
+      --text-dim: #606678;
+      --brand-primary: #ff4e1f;
+      --brand-gradient: linear-gradient(135deg, #ff4e1f 0%, #ff7b38 100%);
+      --accent-green: #00d26a;
+      --accent-blue: #3284ff;
+      --accent-gold: #f2c94c;
+      --accent-purple: #9b51e0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-xl: 32px;
+      --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.45);
+      --shadow-glow: 0 0 50px rgba(255, 78, 31, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(8, 9, 13, 0.88);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 74px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: var(--brand-gradient);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 900;
+      font-size: 22px;
+      box-shadow: 0 4px 16px rgba(255, 78, 31, 0.45);
+    }
+
+    .brand-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text-main);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .brand-text span {
+      color: var(--brand-primary);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14.5px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-secondary {
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-primary {
+      padding: 10px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--brand-gradient);
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px rgba(255, 78, 31, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(255, 78, 31, 0.45);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px;
+      position: relative;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 780px;
+      height: 440px;
+      background: radial-gradient(circle, rgba(255, 78, 31, 0.18) 0%, rgba(8, 9, 13, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(255, 78, 31, 0.12);
+      border: 1px solid rgba(255, 78, 31, 0.3);
+      border-radius: 40px;
+      color: #ff6e47;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title {
+      font-size: 58px;
+      line-height: 1.12;
+      max-width: 960px;
+      margin: 0 auto 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title span {
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 19px;
+      color: var(--text-muted);
+      max-width: 820px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 54px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-large {
+      padding: 14px 32px;
+      font-size: 16px;
+      border-radius: var(--radius-md);
+    }
+
+    /* 4 Value Pillars */
+    .metric-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 1080px;
+      margin: 0 auto 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      text-align: left;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .pill-icon {
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .pill-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .pill-label {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Section Styles */
+    .preview-section {
+      padding: 70px 0 90px;
+      background: linear-gradient(180deg, var(--bg-main) 0%, var(--bg-surface) 100%);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .section-header-center {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 40px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--brand-primary);
+      margin-bottom: 10px;
+    }
+
+    .section-headline {
+      font-size: 38px;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    /* Tab Switcher */
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 12px 22px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: rgba(255, 78, 31, 0.14);
+      border-color: var(--brand-primary);
+      color: #ff6e47;
+      box-shadow: 0 4px 20px rgba(255, 78, 31, 0.2);
+    }
+
+    .mockup-display {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      min-height: 560px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mock-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .mock-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-green { background: rgba(0, 210, 106, 0.15); color: var(--accent-green); }
+    .badge-orange { background: rgba(255, 78, 31, 0.15); color: #ff6e47; }
+    .badge-gold { background: rgba(242, 201, 76, 0.15); color: var(--accent-gold); }
+    .badge-blue { background: rgba(50, 132, 255, 0.15); color: var(--accent-blue); }
+    .badge-purple { background: rgba(155, 81, 224, 0.15); color: var(--accent-purple); }
+
+    .mock-grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.9fr;
+      gap: 24px;
+    }
+
+    .mock-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 22px;
+    }
+
+    .mock-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Member Profile Card Mockup */
+    .member-profile-card {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .member-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: #252a3a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border: 2px solid rgba(255, 78, 31, 0.4);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .avatar-photo-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: var(--brand-primary);
+      color: white;
+      font-size: 10px;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    .member-info {
+      flex: 1;
+    }
+
+    .member-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .member-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .member-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 14px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .member-meta-grid strong {
+      color: var(--text-main);
+    }
+
+    .action-pill-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .action-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Phone Mockup Frame */
+    .phone-container {
+      display: flex;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .phone-frame {
+      width: 325px;
+      flex-shrink: 0;
+      border: 7px solid #282c3c;
+      border-radius: 38px;
+      background: #0d0f15;
+      padding: 18px 14px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.65);
+      position: relative;
+    }
+
+    .phone-notch {
+      width: 100px;
+      height: 16px;
+      background: #282c3c;
+      border-radius: 10px;
+      margin: -8px auto 14px;
+    }
+
+    .phone-tab-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+
+    .p-nav-item {
+      font-size: 10px;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px 0;
+      border-radius: 6px;
+    }
+
+    .p-nav-item.active {
+      color: var(--brand-primary);
+      background: rgba(255, 78, 31, 0.1);
+      font-weight: 700;
+    }
+
+    /* Streak Engine Showcase Box */
+    .streak-showcase {
+      background: linear-gradient(135deg, rgba(255, 78, 31, 0.08) 0%, rgba(20, 23, 34, 0.9) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin: 80px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-milestone-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+
+    .badge-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .badge-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .badge-icon-big {
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .badge-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .badge-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Core Features Grid */
+    .features-section {
+      padding: 90px 0;
+    }
+
+    .feature-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 48px;
+    }
+
+    .feature-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .feature-box:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    .icon-orange { background: rgba(255, 78, 31, 0.12); color: #ff6e47; }
+    .icon-green { background: rgba(0, 210, 106, 0.12); color: var(--accent-green); }
+    .icon-blue { background: rgba(50, 132, 255, 0.12); color: var(--accent-blue); }
+    .icon-gold { background: rgba(242, 201, 76, 0.12); color: var(--accent-gold); }
+    .icon-purple { background: rgba(155, 81, 224, 0.12); color: var(--accent-purple); }
+
+    .feature-title {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .feature-body {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* Pricing Section */
+    .pricing-section {
+      padding: 90px 0;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .pricing-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 30px 0 48px;
+    }
+
+    .toggle-lbl {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .toggle-lbl.active {
+      color: var(--text-main);
+    }
+
+    .toggle-switch {
+      width: 52px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 30px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-circle {
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s ease;
+    }
+
+    .toggle-switch.annual {
+      background: var(--brand-primary);
+    }
+
+    .toggle-switch.annual .toggle-circle {
+      transform: translateX(24px);
+    }
+
+    .discount-tag {
+      background: rgba(0, 210, 106, 0.15);
+      color: var(--accent-green);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .pricing-card.featured {
+      background: linear-gradient(180deg, #1e2233 0%, #151823 100%);
+      border-color: var(--brand-primary);
+      box-shadow: 0 10px 40px rgba(255, 78, 31, 0.2);
+      transform: scale(1.03);
+    }
+
+    .card-ribbon {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--brand-gradient);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(255, 78, 31, 0.4);
+    }
+
+    .plan-name {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .plan-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      min-height: 42px;
+    }
+
+    .plan-price-box {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .plan-price {
+      font-family: 'Outfit', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .plan-period {
+      font-size: 13px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .plan-features li {
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .plan-features li::before {
+      content: '✓';
+      color: var(--accent-green);
+      font-weight: 800;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      padding: 90px 0;
+    }
+
+    .faq-grid {
+      max-width: 800px;
+      margin: 40px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .faq-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+
+    .faq-item:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .faq-question {
+      padding: 18px 22px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 16.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-answer {
+      padding: 0 22px 18px;
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      display: none;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-icon {
+      font-size: 20px;
+      color: var(--text-dim);
+      transition: transform 0.2s ease;
+    }
+
+    /* Onboard Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.84);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-window {
+      background: #141620;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      padding: 36px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      position: relative;
+      animation: modalSlide 0.25s ease;
+    }
+
+    @keyframes modalSlide {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      background: #0c0e14;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      color: var(--text-main);
+      font-size: 14.5px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--brand-primary);
+    }
+
+    /* Footer */
+    .footer {
+      background: #07080a;
+      border-top: 1px solid var(--border-subtle);
+      padding: 60px 0 36px;
+      color: var(--text-dim);
+      font-size: 13.5px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .hero-title { font-size: 40px; }
+      .metric-bar, .feature-cards-grid, .pricing-grid, .badge-milestone-grid { grid-template-columns: 1fr; }
+      .mock-grid-2, .phone-container { flex-direction: column; display: flex; }
+      .pricing-card.featured { transform: none; }
+      .nav-links { display: none; }
+      .member-profile-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand-logo">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">Iron<span>line</span></div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#member-app">Member Mobile App</a></li>
+        <li><a href="#streaks">Streak Engine</a></li>
+        <li><a href="#preview">Live Previews</a></li>
+        <li><a href="#features">Gym Management</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn-secondary" onclick="simulateLogin()">Member / Staff Sign In</button>
+        <button class="btn-primary" onclick="openOnboardModal('pro')">
+          🚀 Onboard Your Gym
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="container">
+      <div class="hero-badge">🏆 Complete Gym Management & Member App</div>
+      <h1 class="hero-title">
+        Complete Control for Gym Owners. <span>A Branded Mobile App</span> for Your Members.
+      </h1>
+      <p class="hero-subtitle">
+        Manage member registrations with photo IDs, automate monthly fee collections, and give every lifter their own branded smartphone app to track workouts, log daily diet, record body weight transformations, and build attendance streaks.
+      </p>
+
+      <div class="hero-cta-group">
+        <button class="btn-primary btn-large" onclick="openOnboardModal('pro')">
+          🚀 Onboard Your Gym Today
+        </button>
+        <a href="#member-app" class="btn-secondary btn-large">
+          📱 Explore Member Mobile App
+        </a>
+      </div>
+
+      <!-- 4 Core Pillars -->
+      <div class="metric-bar">
+        <div class="metric-pill">
+          <div class="pill-icon">👥</div>
+          <div class="pill-value">Member Photo IDs</div>
+          <div class="pill-label">Store member pictures, phone numbers, emergency contacts & fitness goals.</div>
+        </div>
+        <div class="metric-pill">
+          <div class="pill-icon">📱</div>
+          <div class="pill-value">Branded Member App</div>
+          <div class="pill-label">Lifters log diet meals, body weight & follow custom gym workout routines.</div>
+        </div>
+        <div class="metric-pill">
+          <div class="pill-icon">🔥</div>
+          <div class="pill-value">Streak Retention Engine</div>
+          <div class="pill-label">Daily streak counter with milestone badges & weekly rest day protection.</div>
+        </div>
+        <div class="metric-pill">
+          <div class="pill-icon">💰</div>
+          <div class="pill-value">Clear Fee Tracking</div>
+          <div class="pill-label">Instantly know who paid, who is expiring, and who is overdue.</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section: Member Mobile App Deep-Dive -->
+  <section id="member-app" class="preview-section">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-tag">Member Experience</div>
+        <h2 class="section-headline">Your Gym Gets Its Own Branded Mobile App</h2>
+        <p class="section-sub">
+          When members join your gym, they install an app carrying <strong>YOUR GYM'S NAME & LOGO</strong> on their phone. They log in to track workouts, manage nutrition, record weight loss, and build workout streaks.
+        </p>
+      </div>
+
+      <div class="phone-container">
+        <!-- Phone Mockup Frame -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+
+          <!-- App Top Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 26px; height: 26px; background: #ff4e1f; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: white;">⚡</div>
+              <span style="font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase;">TITAN FITNESS</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-dim);">Hamza Tariq</span>
+          </div>
+
+          <!-- Phone Screen 1: Dashboard & Streak -->
+          <div id="pscreen-hub" class="phone-screen active">
+            <!-- Streak Card -->
+            <div style="background: linear-gradient(135deg, rgba(255, 78, 31, 0.22) 0%, rgba(255, 120, 54, 0.08) 100%); border: 1px solid rgba(255, 78, 31, 0.35); border-radius: 14px; padding: 12px; text-align: center; margin-bottom: 12px;">
+              <div style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900; color: #ff6e47;">🔥 18 DAYS</div>
+              <div style="font-size: 11px; font-weight: 700; color: white;">Workout Streak Active!</div>
+              <div style="font-size: 10px; color: #ff855e; margin-top: 2px;">🛡️ 1 Weekly Rest Day Ready (Safe)</div>
+            </div>
+
+            <!-- Today's Workout -->
+            <div style="background: #141722; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; margin-bottom: 10px; font-size: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 700; color: var(--text-main);">Today's Routine: Chest & Triceps</span>
+                <span class="mock-badge badge-green" style="font-size: 9px; padding: 2px 6px;">Assigned</span>
+              </div>
+              <div style="color: var(--text-dim); font-size: 11px; line-height: 1.5;">
+                <div>• Incline Barbell Press (4x8 @ 85kg)</div>
+                <div>• DB Overhead Tricep Extension (3x12)</div>
+                <div>• Cable Chest Flyes (3x15)</div>
+              </div>
+            </div>
+
+            <!-- Quick Nutrition Bar -->
+            <div style="background: #141722; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; font-size: 11px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span>Daily Nutrition Target</span>
+                <span style="color: var(--accent-green); font-weight: 700;">1,850 / 2,400 kcal</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 10px; overflow: hidden;">
+                <div style="width: 77%; height: 100%; background: var(--brand-gradient);"></div>
+              </div>
+            </div>
+
+            <!-- Quick Check In Button -->
+            <button style="width: 100%; background: var(--brand-gradient); border: none; border-radius: 10px; padding: 10px; color: white; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;">
+              📷 Front Desk Check-In
+            </button>
+          </div>
+
+          <!-- Phone Screen 2: Diet Log -->
+          <div id="pscreen-diet" class="phone-screen" style="display: none;">
+            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Daily Meal & Macro Tracker</div>
+            
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="font-weight: 700; color: #ff6e47; margin-bottom: 2px;">🍳 Breakfast (8:00 AM)</div>
+              <div style="color: var(--text-dim);">4 Boiled Eggs + 2 Brown Bread Slices + 1 Banana (480 kcal · 32g Protein)</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="font-weight: 700; color: #ff6e47; margin-bottom: 2px;">🍗 Lunch (1:30 PM)</div>
+              <div style="color: var(--text-dim);">200g Grilled Chicken + 1 Cup Brown Rice + Salad (620 kcal · 48g Protein)</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="font-weight: 700; color: #ff6e47; margin-bottom: 2px;">🥤 Pre-Workout Shake (5:30 PM)</div>
+              <div style="color: var(--text-dim);">Whey Isolate + Oats + Peanut Butter (380 kcal · 30g Protein)</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 8px 10px; font-size: 11px; display: flex; justify-content: space-between;">
+              <span>💧 Water Intake:</span>
+              <strong style="color: var(--accent-blue);">3.2 Liters / 4.0L</strong>
+            </div>
+          </div>
+
+          <!-- Phone Screen 3: Weight & Transformation -->
+          <div id="pscreen-weight" class="phone-screen" style="display: none;">
+            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Body Weight & Progress Logs</div>
+            
+            <div style="background: #141722; border-radius: 10px; padding: 12px; margin-bottom: 10px; text-align: center;">
+              <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim);">Current Body Weight</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900; color: var(--accent-green); margin: 2px 0;">
+                84.2 kg
+              </div>
+              <div style="font-size: 11px; color: var(--accent-green);">📉 -5.8 kg down from 90.0 kg start</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <span>Body Fat %</span>
+                <strong>18.4% (Down from 23%)</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Waist Size</span>
+                <strong>34 in (Down from 37 in)</strong>
+              </div>
+            </div>
+
+            <div style="border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px; padding: 10px; text-align: center; font-size: 11px; color: var(--text-dim);">
+              📸 Progress Photos Logged: 4 Weeks
+            </div>
+          </div>
+
+          <!-- Phone Screen 4: Workouts -->
+          <div id="pscreen-workouts" class="phone-screen" style="display: none;">
+            <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Active Gym Floor Routine</div>
+            
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px;">
+                <span>1. Incline Barbell Press</span>
+                <span style="color: var(--accent-green);">4 sets x 8 reps</span>
+              </div>
+              <div style="color: var(--text-dim);">Set 1: 80kg ✓ | Set 2: 85kg ✓ | Set 3: 85kg ✓</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 10px; margin-bottom: 8px; font-size: 11px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px;">
+                <span>2. Dumbbell Overhead Press</span>
+                <span style="color: var(--accent-green);">3 sets x 10 reps</span>
+              </div>
+              <div style="color: var(--text-dim);">Weight: 26 kg dumbbells</div>
+            </div>
+
+            <div style="background: #141722; border-radius: 10px; padding: 10px; font-size: 11px;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px;">
+                <span>3. Cable Tricep Pushdown</span>
+                <span style="color: var(--accent-green);">3 sets x 15 reps</span>
+              </div>
+              <div style="color: var(--text-dim);">Rest: 60s between sets</div>
+            </div>
+          </div>
+
+          <!-- Interactive Phone Tab Bar -->
+          <div class="phone-tab-bar">
+            <div class="p-nav-item active" onclick="switchPhoneScreen('hub', this)">
+              <div>🔥</div>
+              <div>Streak</div>
+            </div>
+            <div class="p-nav-item" onclick="switchPhoneScreen('diet', this)">
+              <div>🥗</div>
+              <div>Diet</div>
+            </div>
+            <div class="p-nav-item" onclick="switchPhoneScreen('weight', this)">
+              <div>⚖️</div>
+              <div>Weight</div>
+            </div>
+            <div class="p-nav-item" onclick="switchPhoneScreen('workouts', this)">
+              <div>🏋️</div>
+              <div>Workouts</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Phone Feature Explanations -->
+        <div style="flex: 1;">
+          <h3 style="font-size: 26px; margin-bottom: 16px;">Lifters Love Having Their Gym on Their Phone</h3>
+          <p style="color: var(--text-muted); font-size: 15.5px; line-height: 1.7; margin-bottom: 24px;">
+            Instead of carrying physical cards, paper workout sheets, or forgetting when their monthly fee is due, members open their custom gym app to stay connected:
+          </p>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <div style="width: 38px; height: 38px; background: rgba(255, 78, 31, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #ff6e47; flex-shrink: 0;">🥗</div>
+              <div>
+                <strong style="font-size: 16px; color: white;">Daily Diet & Macro Blueprint</strong>
+                <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">
+                  Members log breakfast, lunch, dinner, and water intake against caloric targets set by your gym coaches.
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <div style="width: 38px; height: 38px; background: rgba(0, 210, 106, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--accent-green); flex-shrink: 0;">⚖️</div>
+              <div>
+                <strong style="font-size: 16px; color: white;">Body Weight & Transformation Logs</strong>
+                <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">
+                  Weekly weigh-ins, body fat percentage, and progress photos prove your gym gets results — increasing renewal rates.
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <div style="width: 38px; height: 38px; background: rgba(50, 132, 255, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--accent-blue); flex-shrink: 0;">🏋️</div>
+              <div>
+                <strong style="font-size: 16px; color: white;">Gym Floor Workout Splits</strong>
+                <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">
+                  Custom routines (Push-Pull-Legs, Upper/Lower) with exercise sets, target reps, and rest timers.
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <div style="width: 38px; height: 38px; background: rgba(242, 201, 76, 0.12); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--accent-gold); flex-shrink: 0;">💳</div>
+              <div>
+                <strong style="font-size: 16px; color: white;">Monthly Fee Status & Receipt Archive</strong>
+                <div style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">
+                  Members always know when their monthly fee is due and can view official payment receipts directly in their app.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section: Streak System Highlight -->
+  <section id="streaks" class="container">
+    <div class="streak-showcase">
+      <div style="max-width: 780px;">
+        <span class="mock-badge badge-orange" style="margin-bottom: 12px;">🔥 Psychological Retention Engine</span>
+        <h2 style="font-size: 36px; line-height: 1.2; margin-bottom: 14px;">
+          Turn Gym Attendance into an Addictive Daily Habit
+        </h2>
+        <p style="font-size: 16px; color: var(--text-muted); line-height: 1.65;">
+          The biggest challenge for gym owners is member dropouts after the first month. Ironline solves this with a gamified attendance streak engine and built-in rest day protection that keeps lifters motivated:
+        </p>
+      </div>
+
+      <!-- Milestone Badges Grid -->
+      <div class="badge-milestone-grid">
+        <div class="badge-card">
+          <div class="badge-icon-big">🥉</div>
+          <div class="badge-name" style="color: #cd7f32;">7-Day Bronze</div>
+          <div class="badge-desc">First consistent week completed. The gym habit begins.</div>
+        </div>
+
+        <div class="badge-card">
+          <div class="badge-icon-big">🥈</div>
+          <div class="badge-name" style="color: #c0c0c0;">30-Day Silver</div>
+          <div class="badge-desc">One solid month of dedication. Member is 3x more likely to renew.</div>
+        </div>
+
+        <div class="badge-card">
+          <div class="badge-icon-big">🥇</div>
+          <div class="badge-name" style="color: #ffd700;">100-Day Gold</div>
+          <div class="badge-desc">Elite transformation level. Lifetime fitness commitment achieved.</div>
+        </div>
+
+        <div class="badge-card">
+          <div class="badge-icon-big">💎</div>
+          <div class="badge-name" style="color: #56ccf2;">365-Day Legend</div>
+          <div class="badge-desc">Full year of attendance. The highest honor in your gym.</div>
+        </div>
+      </div>
+
+      <!-- Rest Day Protection Callout -->
+      <div style="margin-top: 30px; background: rgba(0, 210, 106, 0.08); border: 1px solid rgba(0, 210, 106, 0.25); border-radius: var(--radius-md); padding: 20px 24px; display: flex; gap: 16px; align-items: center;">
+        <div style="font-size: 32px;">🛡️</div>
+        <div>
+          <strong style="color: var(--accent-green); font-size: 16px;">1-Day-Per-Week Rest Day Protection: Built for Real Athletes</strong>
+          <p style="font-size: 13.5px; color: var(--text-muted); margin-top: 2px;">
+            Real lifters need recovery! If a member takes Sunday off, their hard-earned streak does not reset to zero. The system automatically shields 1 rest day every 7 days while resetting members who disappear for multiple days.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Live Dashboard Preview Section -->
+  <section id="preview" class="preview-section">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-tag">Interactive Live Preview</div>
+        <h2 class="section-headline">Everything Gym Owners Need in One Screen</h2>
+        <p class="section-sub">
+          Click through the tabs below to inspect how member profiles, fee ledgers, front desk check-ins, and trainer studios look in real gym operations.
+        </p>
+      </div>
+
+      <!-- Tab Buttons -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('tab-members')">
+          <span>👥</span> Member Profiles & Photo ID
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-fees')">
+          <span>💰</span> Fee Collection & Overdue Alerts
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-attendance')">
+          <span>📋</span> Front-Desk Daily Attendance
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-trainers')">
+          <span>🏋️</span> Trainer & Progress Tracking
+        </button>
+      </div>
+
+      <!-- Mockup Window -->
+      <div class="mockup-display">
+
+        <!-- Tab 1: Member 360 Profiles & Photo IDs -->
+        <div id="tab-members" class="tab-panel active">
+          <div class="mock-topbar">
+            <div>
+              <h3 style="font-size: 18px;">Customer Directory & Member Profiles</h3>
+              <div style="font-size: 12px; color: var(--text-dim);">Instant search by name, phone, or username · Photo IDs attached</div>
+            </div>
+            <button class="btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="alert('Demo: Click + Add Customer in your real gym panel to register new members in 30 seconds!')">
+              + Add New Member
+            </button>
+          </div>
+
+          <div class="mock-grid-2">
+            <div>
+              <!-- Member Card 1 -->
+              <div class="member-profile-card">
+                <div class="member-avatar">
+                  <span>🧔🏽</span>
+                  <div class="avatar-photo-badge">📷</div>
+                </div>
+                <div class="member-info">
+                  <div class="member-name-row">
+                    <div class="member-name">Hamza Tariq</div>
+                    <span class="mock-badge badge-green">🟢 Active Member</span>
+                  </div>
+                  <div style="font-size: 12px; color: #ff6e47; font-weight: 600;">Monthly Fee: PKR 5,000 / mo</div>
+                  
+                  <div class="member-meta-grid">
+                    <div>📱 Phone: <strong>0300-8472910</strong></div>
+                    <div>🎯 Goal: <strong>Hypertrophy / Bulk</strong></div>
+                    <div>🏋️ Coach: <strong>Captain Zeeshan</strong></div>
+                    <div>🚨 Emergency: <strong>0321-9988776 (Brother)</strong></div>
+                    <div>📅 Joined: <strong>Jan 15, 2026</strong></div>
+                    <div>💳 Fee Status: <strong style="color: var(--accent-green);">Paid (Next: Oct 15)</strong></div>
+                  </div>
+
+                  <div style="display: flex; gap: 8px; margin-top: 14px;">
+                    <button class="action-pill-btn" onclick="alert('Viewing Hamza\'s complete attendance ledger (42 workouts logged)!')">
+                      📊 Attendance History
+                    </button>
+                    <button class="action-pill-btn" onclick="alert('Record manual fee payment for Hamza via Cash, Bank, or Card.')">
+                      💵 Record Payment
+                    </button>
+                    <button class="action-pill-btn" onclick="alert('One-click temporary password generated for Hamza!')">
+                      🔑 Reset Password
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Member Card 2 -->
+              <div class="member-profile-card">
+                <div class="member-avatar">
+                  <span>👨🏻</span>
+                  <div class="avatar-photo-badge">📷</div>
+                </div>
+                <div class="member-info">
+                  <div class="member-name-row">
+                    <div class="member-name">Saad Ali</div>
+                    <span class="mock-badge badge-gold">🟡 Due Soon (2 Days)</span>
+                  </div>
+                  <div style="font-size: 12px; color: #ff6e47; font-weight: 600;">Monthly Fee: PKR 6,500 / mo</div>
+                  
+                  <div class="member-meta-grid">
+                    <div>📱 Phone: <strong>0322-4512988</strong></div>
+                    <div>🎯 Goal: <strong>Fat Loss & Cardio</strong></div>
+                    <div>🏋️ Coach: <strong>Trainer Bilal</strong></div>
+                    <div>🚨 Emergency: <strong>0301-3344556 (Father)</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Side Inspector Drawer -->
+            <div>
+              <div class="mock-card">
+                <div class="mock-card-title">
+                  <span>Member Quick Search</span>
+                  <span class="mock-badge badge-blue">Live Filter</span>
+                </div>
+                <input type="text" placeholder="Type name, phone or username..." value="Hamza" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px 12px; color: white; font-size: 13px; margin-bottom: 14px;" readonly />
+
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+                  <div>📸 <strong>Photo ID Verification:</strong> Front desk immediately sees member picture to prevent friend pass sharing.</div>
+                  <div style="margin-top: 8px;">📋 <strong>Emergency Contact on Record:</strong> Instant access to family contact numbers in case of an injury or medical need on the gym floor.</div>
+                  <div style="margin-top: 8px;">🔐 <strong>One-Click Credentials:</strong> If a member forgets their password, reception can provide a temporary login in 1 click.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Fee Collection & Overdue Alerts -->
+        <div id="tab-fees" class="tab-panel">
+          <div class="mock-topbar">
+            <div>
+              <h3 style="font-size: 18px;">Monthly Fee Ledger & Revenue Dashboard</h3>
+              <div style="font-size: 12px; color: var(--text-dim);">Real-time tracking of cash, bank transfers, and mobile wallets</div>
+            </div>
+            <button class="btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="alert('Bulk Invoicing: 142 active members automatically billed for the month with 1 click!')">
+              ⚡ 1-Click Monthly Invoicing
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">
+            <div class="mock-card">
+              <div style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Collected This Month</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 900; color: var(--accent-green); margin-top: 4px;">
+                PKR 485,000
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">97 Members Settled</div>
+            </div>
+            <div class="mock-card">
+              <div style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Due Within 5 Days</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 900; color: var(--accent-gold); margin-top: 4px;">
+                PKR 45,000
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">9 Members Expiring</div>
+            </div>
+            <div class="mock-card">
+              <div style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Overdue Unpaid Dues</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 900; color: #ff6e47; margin-top: 4px;">
+                PKR 15,000
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">3 Follow-ups Required</div>
+            </div>
+          </div>
+
+          <div class="mock-card">
+            <div class="mock-card-title">
+              <span>Recent Payment Records</span>
+              <span style="font-size: 12px; color: var(--text-dim);">Automated Receipt Generator</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 13px;">
+                <div>
+                  <strong>Hamza Tariq</strong> · PKR 5,000
+                  <div style="font-size: 11px; color: var(--text-dim);">Paid via Cash @ Reception · Rec #9042</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="mock-badge badge-green">Paid · Valid until Oct 15</span>
+                  <button class="action-pill-btn" onclick="alert('Printing official payment receipt PDF for Hamza Tariq!')">🖨️ Receipt</button>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 13px;">
+                <div>
+                  <strong>Usman Sheikh</strong> · PKR 6,000
+                  <div style="font-size: 11px; color: var(--text-dim);">Paid via Bank Transfer / Raast · Ref #77810</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="mock-badge badge-green">Paid · Valid until Oct 10</span>
+                  <button class="action-pill-btn" onclick="alert('Printing official payment receipt PDF for Usman Sheikh!')">🖨️ Receipt</button>
+                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 13px;">
+                <div>
+                  <strong>Kashif Siddiqui</strong> · PKR 5,000
+                  <div style="font-size: 11px; color: var(--text-dim);">Monthly Fee Due on Sept 12 (3 Days Overdue)</div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span class="mock-badge badge-orange">Overdue</span>
+                  <button class="action-pill-btn" style="border-color: #ff6e47; color: #ff6e47;" onclick="alert('Record payment for Kashif or send reminder!')">💵 Collect Fee</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Front Desk Attendance -->
+        <div id="tab-attendance" class="tab-panel">
+          <div class="mock-topbar">
+            <div>
+              <h3 style="font-size: 18px;">Live Reception Desk Attendance Register</h3>
+              <div style="font-size: 12px; color: var(--text-dim);">Search by member name, phone or scan reception QR sign</div>
+            </div>
+            <span class="mock-badge badge-green">● Front Desk Live: 48 Members In Today</span>
+          </div>
+
+          <div class="mock-grid-2">
+            <div>
+              <div class="mock-card">
+                <div class="mock-card-title">
+                  <span>Today's Check-In Feed</span>
+                  <span style="font-size: 12px; color: var(--text-dim);">Real-time stream</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 12px; border-radius: 8px; font-size: 13px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 20px;">🧔🏽</span>
+                      <div>
+                        <strong>Hamza Tariq</strong>
+                        <div style="font-size: 11px; color: var(--text-dim);">07:42 PM · Phone QR Scan</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <span class="mock-badge badge-orange">🔥 14 Days</span>
+                      <span class="mock-badge badge-green">Fee Paid</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 12px; border-radius: 8px; font-size: 13px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 20px;">👨🏻</span>
+                      <div>
+                        <strong>Saad Ali</strong>
+                        <div style="font-size: 11px; color: var(--text-dim);">07:38 PM · Offline Auto-Synced</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <span class="mock-badge badge-blue">🛡️ Rest Day Protected</span>
+                      <span class="mock-badge badge-green">Fee Paid</span>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 12px; border-radius: 8px; font-size: 13px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <span style="font-size: 20px;">👨🏽</span>
+                      <div>
+                        <strong>Ali Raza</strong>
+                        <div style="font-size: 11px; color: var(--text-dim);">07:22 PM · Manual Front Desk Search</div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      <span class="mock-badge badge-orange">🔥 4 Days</span>
+                      <span class="mock-badge badge-green">Fee Paid</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="mock-card">
+                <div class="mock-card-title">Front Desk Operations</div>
+                <div style="font-size: 13px; color: var(--text-muted); line-height: 1.7;">
+                  <div style="margin-bottom: 10px;">
+                    ⚡ <strong>Printable Desk QR Sign:</strong> Print your high-res sign from Gym Profile and place it on your front desk. Members scan with their phone camera for instant check-in.
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    🔍 <strong>Quick Front Desk Search:</strong> If a member left their phone at home, receptionist types their name or phone to check them in manually in 2 seconds.
+                  </div>
+                  <div>
+                    📊 <strong>Peak Hours Graph:</strong> Discover your busiest hours (e.g. 6:30 PM – 8:30 PM) to manage floor trainers and equipment traffic.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Trainer & Progress Tracking -->
+        <div id="tab-trainers" class="tab-panel">
+          <div class="mock-topbar">
+            <div>
+              <h3 style="font-size: 18px;">Personal Trainers & Member Transformation Logs</h3>
+              <div style="font-size: 12px; color: var(--text-dim);">Track client results, body weight charts, and coach assignments</div>
+            </div>
+            <span class="mock-badge badge-orange">3 Active Floor Trainers</span>
+          </div>
+
+          <div class="mock-grid-2">
+            <div class="mock-card">
+              <div class="mock-card-title">Assigned Clients: Coach Zeeshan (12 Lifters)</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 13px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>Zubair Khan</strong>
+                    <span class="mock-badge badge-green">84 kg (-6 kg fat lost)</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Assigned: Hypertrophy Split · 2,400 kcal Target</div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; font-size: 13px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>Farhan Malik</strong>
+                    <span class="mock-badge badge-blue">72 kg (+3 kg muscle gained)</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Assigned: Strength 5x5 · 2,800 kcal Target</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mock-card">
+              <div class="mock-card-title">Transformation Proof</div>
+              <div style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+                <div>📸 <strong>Progress Photos:</strong> Members log front/side transformation photos to see visible results over time.</div>
+                <div style="margin-top: 8px;">⚖️ <strong>Body Weight Charts:</strong> Visual line graphs showing weight loss or muscle gain trends.</div>
+                <div style="margin-top: 8px;">💪 <strong>Proven Member Retention:</strong> Members who track progress renew their gym membership 3x longer than casual dropouts!</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Grid -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-tag">Essential Capabilities</div>
+        <h2 class="section-headline">Everything Built for Real Gym Owners</h2>
+        <p class="section-sub">
+          Stop struggling with paper registers, missing fee records, and WhatsApp clutter. Ironline organizes your entire gym.
+        </p>
+      </div>
+
+      <div class="feature-cards-grid">
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-orange">👥</div>
+          <h3 class="feature-title">Member 360° Profiles & Photo ID</h3>
+          <p class="feature-body">
+            Store member photo IDs, phone numbers, joining dates, assigned trainers, and emergency contacts. Search any member in under 1 second.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-green">💰</div>
+          <h3 class="feature-title">Clear Monthly Fee Tracking</h3>
+          <p class="feature-body">
+            Track cash collected at reception, direct bank transfers, and mobile wallets. Instant visual indicators for Paid, Expiring Soon, and Overdue dues.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-blue">📋</div>
+          <h3 class="feature-title">Fast Reception Attendance</h3>
+          <p class="feature-body">
+            Fast name/phone search at the front desk or instant smartphone QR check-in. Works 100% offline in basement gyms with zero signal.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-gold">📱</div>
+          <h3 class="feature-title">Your Own Branded Gym App</h3>
+          <p class="feature-body">
+            Members install your gym's official app on their phones with your gym name and logo on their home screen — no App Store fees.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-orange">🔥</div>
+          <h3 class="feature-title">Workout Streaks & Rest Days</h3>
+          <p class="feature-body">
+            Gamify attendance with milestone badges (Bronze, Silver, Gold, Diamond) and intelligent 1-day-per-week rest day protection.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrapper icon-purple">🏋️</div>
+          <h3 class="feature-title">Workouts, Diets & Coaches</h3>
+          <p class="feature-body">
+            Equip lifters with structured workout routines, custom meal plans, and body transformation graphs assigned by your personal trainers.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Tiers Section -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-tag">Affordable Pricing</div>
+        <h2 class="section-headline">Fair & Simple Plans for Every Gym</h2>
+        <p class="section-sub">
+          Straightforward pricing with no hidden charges. Choose the tier that fits your gym's size.
+        </p>
+
+        <!-- Billing Toggle -->
+        <div class="pricing-toggle">
+          <span class="toggle-lbl active" id="lbl-monthly">Billed Monthly</span>
+          <div class="toggle-switch" id="billing-toggle" onclick="togglePricing()">
+            <div class="toggle-circle"></div>
+          </div>
+          <span class="toggle-lbl" id="lbl-annual">Billed Annually</span>
+          <span class="discount-tag">Save 20%</span>
+        </div>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Plan 1: Starter -->
+        <div class="pricing-card">
+          <h3 class="plan-name">Starter Gym</h3>
+          <p class="plan-desc">For private studios and boutique gyms looking for clean member and fee management.</p>
+          <div class="plan-price-box">
+            <div class="plan-price" id="price-starter">PKR 3,500</div>
+            <div class="plan-period">per month · up to 100 members</div>
+          </div>
+          <ul class="plan-features">
+            <li>Up to 100 active gym members</li>
+            <li>Member profiles with photo IDs</li>
+            <li>Front-desk fast attendance register</li>
+            <li>Monthly fee collection & receipts</li>
+            <li>Overdue payment alerts</li>
+            <li>Printable reception desk sign</li>
+            <li>1 staff reception login</li>
+          </ul>
+          <button class="btn-secondary" style="width: 100%;" onclick="openOnboardModal('starter')">
+            Choose Starter
+          </button>
+        </div>
+
+        <!-- Plan 2: Pro Club (Featured) -->
+        <div class="pricing-card featured">
+          <div class="card-ribbon">Most Popular</div>
+          <h3 class="plan-name">Pro Fitness Club</h3>
+          <p class="plan-desc">The complete operating suite for established commercial gyms and fitness centers.</p>
+          <div class="plan-price-box">
+            <div class="plan-price" style="color: var(--brand-primary);" id="price-pro">PKR 7,500</div>
+            <div class="plan-period">per month · up to 350 members</div>
+          </div>
+          <ul class="plan-features">
+            <li><strong>Everything in Starter, plus:</strong></li>
+            <li>Up to 350 active members</li>
+            <li><strong>Your own branded mobile app (PWA)</strong></li>
+            <li>Member diet, calorie & macro tracking</li>
+            <li>Member body weight & progress logs</li>
+            <li>Streak engine & 1-day/week rest day protection</li>
+            <li>Workout routines & exercise logger</li>
+            <li>Unlimited personal trainer portals</li>
+            <li>1-click bulk monthly fee generator</li>
+            <li>Peak hours attendance heatmap</li>
+          </ul>
+          <button class="btn-primary" style="width: 100%;" onclick="openOnboardModal('pro')">
+            🚀 Onboard Pro Club
+          </button>
+        </div>
+
+        <!-- Plan 3: Enterprise -->
+        <div class="pricing-card">
+          <h3 class="plan-name">Elite Multi-Branch</h3>
+          <p class="plan-desc">For large fitness centers and multi-location gym franchises.</p>
+          <div class="plan-price-box">
+            <div class="plan-price" id="price-elite">PKR 14,000</div>
+            <div class="plan-period">per month · unlimited members</div>
+          </div>
+          <ul class="plan-features">
+            <li><strong>Everything in Pro, plus:</strong></li>
+            <li>Unlimited members & branches</li>
+            <li>Multi-branch central management</li>
+            <li>Custom domain setup (e.g. app.yourgym.com)</li>
+            <li>Dedicated onboarding manager</li>
+            <li>Turnstile / Electronic gate webhooks</li>
+            <li>Priority 24/7 WhatsApp & phone support</li>
+          </ul>
+          <button class="btn-secondary" style="width: 100%;" onclick="openOnboardModal('elite')">
+            Choose Elite
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-header-center">
+        <div class="section-tag">Frequently Asked Questions</div>
+        <h2 class="section-headline">Answers for Gym Owners</h2>
+      </div>
+
+      <div class="faq-grid">
+        <div class="faq-item open">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>How does member photo ID help our gym?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            When a member is registered, front desk staff can upload or take their picture. Whenever a member checks in, their picture displays on the screen, preventing members from letting unauthorized friends use their membership pass.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>What do members see inside their branded mobile app?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Members install an app with your gym's official name and logo on their home screen. Inside, they can log their daily meals and calories, record their weekly body weight and measurements, follow custom workout routines assigned by your trainers, and track their workout streaks.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>How does the streak retention system prevent member dropouts?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Every time a member visits your gym, their streak increments (+1 day) and unlocks milestone badges (7-Day Bronze, 30-Day Silver, 100-Day Gold, 365-Day Legend). Furthermore, the built-in 1-day-per-week rest day protection ensures that taking Sunday off doesn't reset their streak — keeping them motivated and renewing every month!
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>How easy is it to record cash and bank fee payments?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Extremely easy! In the Fees tab, click "Record Payment", select Cash, Bank Transfer, or Mobile Wallet, enter the amount, and click Save. The member's status updates to Paid immediately, their renewal date advances by 30 days, and you can print a clean receipt.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            <span>What if our gym basement has no internet or cellular reception?</span>
+            <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            Ironline is built offline-first! Even with zero mobile data, check-ins are recorded safely on the device. As soon as the phone catches WiFi or cell service, visits automatically synchronize with your gym dashboard with the exact timestamp.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <div style="font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: white; margin-bottom: 4px;">
+          Iron<span>line</span> Gym Management Platform
+        </div>
+        <div>Empowering Gym Owners · Inspiring Lifters</div>
+      </div>
+
+      <div style="display: flex; gap: 24px;">
+        <a href="#member-app" style="color: var(--text-dim); text-decoration: none;">Member App</a>
+        <a href="#streaks" style="color: var(--text-dim); text-decoration: none;">Streak Engine</a>
+        <a href="#preview" style="color: var(--text-dim); text-decoration: none;">Live Previews</a>
+        <a href="#pricing" style="color: var(--text-dim); text-decoration: none;">Pricing</a>
+        <a href="javascript:void(0)" onclick="openOnboardModal('pro')" style="color: var(--brand-primary); text-decoration: none; font-weight: 700;">Onboard Your Gym</a>
+      </div>
+
+      <div>© 2026 Ironline. All Rights Reserved.</div>
+    </div>
+  </footer>
+
+  <!-- Onboard Modal -->
+  <div class="modal-overlay" id="onboard-modal">
+    <div class="modal-window">
+      <button class="modal-close" onclick="closeOnboardModal()">&times;</button>
+      
+      <div id="modal-form-view">
+        <div style="font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 6px;">
+          🚀 Onboard Your Gym
+        </div>
+        <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px;">
+          Fill out the quick form below. Our onboarding team will set up your branded gym portal and member database.
+        </p>
+
+        <form id="onboard-form" onsubmit="handleOnboardSubmit(event)">
+          <div class="form-group">
+            <label class="form-label" for="gym-name">Gym Name</label>
+            <input class="form-input" id="gym-name" placeholder="e.g. Titan Fitness Club" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="owner-name">Owner / Manager Name</label>
+            <input class="form-input" id="owner-name" placeholder="e.g. Muhammad Ahsan" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phone">WhatsApp / Mobile Number</label>
+            <input class="form-input" id="phone" placeholder="e.g. 0300-1234567" required />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="city">City</label>
+              <input class="form-input" id="city" placeholder="e.g. Lahore / Karachi" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="members-count">Active Members</label>
+              <select class="form-select" id="members-count">
+                <option value="1-50">1 - 50 members</option>
+                <option value="51-150" selected>51 - 150 members</option>
+                <option value="151-300">151 - 300 members</option>
+                <option value="300+">300+ members</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="selected-plan">Selected Package</label>
+            <select class="form-select" id="selected-plan">
+              <option value="starter">Starter Gym (PKR 3,500/mo)</option>
+              <option value="pro" selected>Pro Fitness Club (PKR 7,500/mo - Recommended)</option>
+              <option value="elite">Elite Multi-Branch (PKR 14,000/mo)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-size: 15px; margin-top: 8px;">
+            Submit Onboarding Request
+          </button>
+        </form>
+      </div>
+
+      <!-- Success Screen -->
+      <div id="modal-success-view" style="display: none; text-align: center; padding: 20px 10px;">
+        <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+        <h3 style="font-size: 24px; margin-bottom: 8px;">Request Received!</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.6;">
+          Thank you! We have received your onboarding request. Our team will contact you via WhatsApp to activate your gym portal and help import your members.
+        </p>
+
+        <a id="whatsapp-quick-link" href="https://wa.me/" target="_blank" class="btn-primary" style="display: inline-flex; justify-content: center; width: 100%; padding: 13px; text-decoration: none;">
+          💬 Chat with Onboarding Team on WhatsApp
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Tab Switcher for Admin Previews
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Phone Screen Switcher (Member App Mockup)
+    function switchPhoneScreen(screenKey, navEl) {
+      document.querySelectorAll('.phone-screen').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.p-nav-item').forEach(el => el.classList.remove('active'));
+
+      document.getElementById('pscreen-' + screenKey).style.display = 'block';
+      navEl.classList.add('active');
+    }
+
+    // Pricing Annual/Monthly Toggle
+    let isAnnual = false;
+    function togglePricing() {
+      isAnnual = !isAnnual;
+      const toggle = document.getElementById('billing-toggle');
+      const lblMonthly = document.getElementById('lbl-monthly');
+      const lblAnnual = document.getElementById('lbl-annual');
+
+      const starter = document.getElementById('price-starter');
+      const pro = document.getElementById('price-pro');
+      const elite = document.getElementById('price-elite');
+
+      if (isAnnual) {
+        toggle.classList.add('annual');
+        lblMonthly.classList.remove('active');
+        lblAnnual.classList.add('active');
+        starter.innerText = 'PKR 2,800';
+        pro.innerText = 'PKR 6,000';
+        elite.innerText = 'PKR 11,200';
+      } else {
+        toggle.classList.remove('annual');
+        lblMonthly.classList.add('active');
+        lblAnnual.classList.remove('active');
+        starter.innerText = 'PKR 3,500';
+        pro.innerText = 'PKR 7,500';
+        elite.innerText = 'PKR 14,000';
+      }
+    }
+
+    // FAQ Accordion
+    function toggleFaq(header) {
+      const item = header.parentElement;
+      item.classList.toggle('open');
+    }
+
+    // Modal Handling
+    function openOnboardModal(planKey) {
+      const modal = document.getElementById('onboard-modal');
+      const planSelect = document.getElementById('selected-plan');
+      if (planKey && planSelect) {
+        planSelect.value = planKey;
+      }
+      document.getElementById('modal-form-view').style.display = 'block';
+      document.getElementById('modal-success-view').style.display = 'none';
+      modal.classList.add('open');
+    }
+
+    function closeOnboardModal() {
+      document.getElementById('onboard-modal').classList.remove('open');
+    }
+
+    // Form Submission Simulation
+    function handleOnboardSubmit(e) {
+      e.preventDefault();
+      const gymName = document.getElementById('gym-name').value;
+      const phone = document.getElementById('phone').value;
+      const plan = document.getElementById('selected-plan').value;
+
+      document.getElementById('modal-form-view').style.display = 'none';
+      document.getElementById('modal-success-view').style.display = 'block';
+
+      const waText = encodeURIComponent(`Hi Ironline Team! I just submitted an onboarding inquiry for ${gymName} (${plan} plan). My phone is ${phone}. Please help me set up our gym portal.`);
+      document.getElementById('whatsapp-quick-link').href = `https://wa.me/?text=${waText}`;
+    }
+
+    function simulateLogin() {
+      window.location.href = '/login';
+    }
+  </script>
+</body>
+</html>
