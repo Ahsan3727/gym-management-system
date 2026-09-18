@@ -3,8 +3,13 @@
  */
 function validateEnv() {
   const isProd = process.env.NODE_ENV === 'production';
-  const required = ['MONGODB_URI', 'JWT_SECRET'];
-  const missing = required.filter((key) => !process.env[key]);
+  const missing = [];
+  if (!process.env.MONGO_URI && !process.env.MONGODB_URI) {
+    missing.push('MONGO_URI');
+  }
+  if (!process.env.JWT_SECRET) {
+    missing.push('JWT_SECRET');
+  }
 
   if (missing.length > 0) {
     const msg = `[env] FATAL: Missing required environment variable(s): ${missing.join(', ')}`;

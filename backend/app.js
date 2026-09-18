@@ -60,7 +60,9 @@ app.use(
       ) {
         return callback(null, true);
       }
-      return callback(null, allowedOrigins[0] || true);
+      // L1 FIX: Reject unknown origins properly so browsers receive a real
+      // CORS error rather than a mismatched Access-Control-Allow-Origin header.
+      return callback(new Error(`CORS: origin ${origin} not allowed`));
     },
     credentials: true,
   })
@@ -90,6 +92,11 @@ app.use('/api/auth/login', loginLimiter);
 // Change-password is also sensitive — limit to 10 attempts per 15 min.
 const changePasswordLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
 app.use('/api/auth/change-password', changePasswordLimiter);
+
+// M2 FIX: Refresh endpoint was unthrottled — a stolen token could rotate
+// indefinitely. 30 req/15 min is generous for legitimate clients.
+const refreshLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
+app.use('/api/auth/refresh', refreshLimiter);
 
 // Super Admin actions carry platform-wide power - rate-limit generously but
 // firmly, on top of the audit logging done inside the route handlers.

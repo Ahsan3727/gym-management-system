@@ -23,7 +23,7 @@ const protect = asyncHandler(async (req, res, next) => {
     return res.status(401).json({ message: 'Invalid or expired token.' });
   }
 
-  const user = await User.findById(payload.id);
+  const user = await User.findById(payload.id).select('-passwordHash');
   if (!user || !user.isActive) {
     return res.status(401).json({ message: 'Account not found or disabled.' });
   }

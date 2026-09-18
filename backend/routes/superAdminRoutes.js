@@ -28,16 +28,7 @@ const router = express.Router();
 
 router.use(protect, authorize('super_admin'));
 
-function logAction(req, action, targetType, targetId, metadata = {}) {
-  return AuditLog.create({
-    actor: req.user._id,
-    actorRole: req.user.role,
-    action,
-    targetType,
-    targetId,
-    metadata,
-  });
-}
+const logAction = (req, ...args) => AuditLog.log(req, ...args);
 
 /* ------------------------------ Admin accounts ------------------------------ */
 

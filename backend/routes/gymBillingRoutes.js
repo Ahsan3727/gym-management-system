@@ -32,16 +32,7 @@ function buildBankInstructions(settings) {
   return parts.join('\n');
 }
 
-function logAction(req, action, targetType, targetId, metadata = {}) {
-  return AuditLog.create({
-    actor: req.user._id,
-    actorRole: req.user.role,
-    action,
-    targetType,
-    targetId,
-    metadata,
-  }).catch((err) => console.error('[audit-log] Failed to log action:', err.message));
-}
+const logAction = (req, ...args) => AuditLog.log(req, ...args);
 
 /* ========================================================================== */
 /*                       SUPER ADMIN PLATFORM BILLING                         */

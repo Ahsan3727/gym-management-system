@@ -30,11 +30,7 @@ router.post(
   validate(loginSchema),
   asyncHandler(async (req, res) => {
     const { username, password, gymSlug } = req.body;
-    if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required.' });
-    }
-
-    const cleanUsername = username.trim().toLowerCase();
+    const cleanUsername = username;
     let gym = null;
 
     if (gymSlug) {
@@ -248,15 +244,13 @@ router.put(
   validate(changePasswordSchema),
   asyncHandler(async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword || !newPassword || newPassword.length < 8) {
-      return res.status(400).json({ message: 'New password must be at least 8 characters.' });
-    }
-    const match = await req.user.comparePassword(currentPassword);
+    const user = await User.findById(req.user._id);
+    const match = await user.comparePassword(currentPassword);
     if (!match) {
       return res.status(401).json({ message: 'Current password is incorrect.' });
     }
-    req.user.passwordHash = await User.hashPassword(newPassword);
-    await req.user.save();
+    user.passwordHash = await User.hashPassword(newPassword);
+    await user.save();
 
     // Revoke all existing refresh tokens for security
     await RefreshToken.deleteMany({ user: req.user._id });

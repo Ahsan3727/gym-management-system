@@ -39,6 +39,7 @@ const {
 } = require('../schemas/adminSchemas');
 const qrcode = require('qrcode');
 const PDFDocument = require('pdfkit');
+const AuditLog = require('../models/AuditLog');
 
 const router = express.Router();
 
@@ -560,6 +561,9 @@ router.put(
     userDoc.passwordHash = await User.hashPassword(newPassword);
     await userDoc.save();
 
+    // L2 FIX: Audit sensitive password change so it's traceable.
+    await AuditLog.log(req, 'customer.reset_password', 'Customer', customer._id);
+
     res.json({
       message: `Password reset successfully for ${customer.name}.`,
       newPassword,           // Shown on screen for admin to hand to member
@@ -588,6 +592,8 @@ router.post(
       const isActive = action === 'activate';
       await Customer.updateMany({ _id: { $in: ids }, admin: req.adminId }, { isActive });
       affected = customers.length;
+      // L2 FIX: Log bulk membership status changes.
+      await AuditLog.log(req, `customer.bulk_${action}`, 'Admin', req.adminId);
     } else if (action === 'send-announcement') {
       const docs = customers.map((c) => ({ user: c.user?._id, type: 'admin_alert', message }));
       if (docs.length) await Notification.insertMany(docs.filter((d) => d.user));

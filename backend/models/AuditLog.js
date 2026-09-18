@@ -21,4 +21,15 @@ const auditLogSchema = new mongoose.Schema(
 // sort order.
 auditLogSchema.index({ created_at: -1 });
 
+auditLogSchema.statics.log = function (req, action, targetType, targetId, metadata = {}) {
+  return this.create({
+    actor: req.user?._id || req.user?.id,
+    actorRole: req.user?.role || 'unknown',
+    action,
+    targetType,
+    targetId,
+    metadata,
+  }).catch((err) => console.error('[audit-log] Failed to log action:', err.message));
+};
+
 module.exports = mongoose.model('AuditLog', auditLogSchema);

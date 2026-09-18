@@ -33,6 +33,10 @@ const attachCustomerTenant = asyncHandler(async (req, res, next) => {
   if (!customerDoc) {
     return res.status(403).json({ message: 'No customer profile is associated with this account.' });
   }
+  // M1 FIX: mirror the trainer middleware — reject deactivated members immediately.
+  if (!customerDoc.isActive) {
+    return res.status(403).json({ message: 'Your membership has been deactivated. Please contact your gym.' });
+  }
   req.customerDoc = customerDoc;
   req.customerId = customerDoc._id;
   req.adminId = customerDoc.admin;
