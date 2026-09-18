@@ -12,7 +12,8 @@ export function AuthProvider({ children }) {
 
   const refreshMe = useCallback(async () => {
     const token = localStorage.getItem('gym_token');
-    if (!token) {
+    const refreshToken = localStorage.getItem('gym_refresh_token');
+    if (!token && !refreshToken) {
       setLoading(false);
       return;
     }

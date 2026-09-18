@@ -54,6 +54,9 @@ export default function IconSprite() {
         <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" /><path d="M11 12h10M17 8l4 4-4 4" /></symbol>
         {/* Circular refresh/reload icon for Notifications refresh button */}
         <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 1.5 4.7" /><path d="M4 16.5V12H8.5" /></symbol>
+        {/* Eye icons for password show/hide toggle */}
+        <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></symbol>
+        <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.9 17.9A10 10 0 0 1 12 19c-6.4 0-10-7-10-7a17.8 17.8 0 0 1 5.1-5.9M9.9 4.2A9.3 9.3 0 0 1 12 4c6.4 0 10 8 10 8a17.6 17.6 0 0 1-2.4 3.7M3 3l18 18" /></symbol>
       </defs>
     </svg>
   );
