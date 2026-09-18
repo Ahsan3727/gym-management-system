@@ -196,4 +196,61 @@ html.light {
       radial-gradient(480px 360px at 92% 88%, rgb(var(--c-ember-light) / 0.16), transparent 55%);
     pointer-events: none;
   }
+  /* ── Login page animations ──────────────────────────────────── */
+
+  /* Card entrance: rises from below with a subtle blur-in */
+  @keyframes login-card-in {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); filter: blur(4px); }
+    to   { opacity: 1; transform: translateY(0)   scale(1);    filter: blur(0); }
+  }
+  .login-card {
+    animation: login-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Slow-drifting ember orbs in the background */
+  @keyframes orb-drift-1 {
+    0%, 100% { transform: translate(0, 0)   scale(1); }
+    50%       { transform: translate(40px, -30px) scale(1.08); }
+  }
+  @keyframes orb-drift-2 {
+    0%, 100% { transform: translate(0, 0)   scale(1); }
+    50%       { transform: translate(-30px, 25px) scale(1.05); }
+  }
+  .login-orb-1 {
+    animation: orb-drift-1 12s ease-in-out infinite;
+  }
+  .login-orb-2 {
+    animation: orb-drift-2 16s ease-in-out infinite;
+  }
+
+  /* Gradient brand name */
+  .brand-gradient {
+    background: linear-gradient(90deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Spinning loader inside submit button */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .login-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* Logo pulse glow */
+  @keyframes logo-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(var(--c-ember) / 0.0); }
+    50%       { box-shadow: 0 0 24px 6px rgb(var(--c-ember) / 0.35); }
+  }
+  .login-logo {
+    animation: logo-glow 3s ease-in-out infinite;
+  }
 }

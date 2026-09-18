@@ -86,32 +86,75 @@ export default function Login() {
   const gymLogo = isMemberMode ? tenant.gymLogoUrl : null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bone p-4">
-      <form onSubmit={handleSubmit} className="panel w-full max-w-sm px-7 py-8 shadow-soft">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bone p-4">
 
-        <div className="mb-6 flex items-center gap-3">
+      {/* Animated background orbs */}
+      <div
+        className="login-orb-1 pointer-events-none absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full opacity-20"
+        style={{ background: 'radial-gradient(circle, rgb(var(--c-ember)) 0%, transparent 70%)' }}
+      />
+      <div
+        className="login-orb-2 pointer-events-none absolute -bottom-52 -right-52 h-[600px] w-[600px] rounded-full opacity-10"
+        style={{ background: 'radial-gradient(circle, rgb(var(--c-ember-light)) 0%, transparent 65%)' }}
+      />
+
+      {/* Subtle grid texture overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: 'linear-gradient(rgb(var(--c-ink)) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--c-ink)) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
+      />
+
+      {/* Card */}
+      <form
+        onSubmit={handleSubmit}
+        className="login-card panel relative z-10 w-full max-w-sm px-7 py-9 shadow-soft"
+      >
+        {/* Header */}
+        <div className="mb-8 flex flex-col items-center text-center">
           {gymLogo ? (
-            <img src={gymLogo} alt={gymName} className="h-12 w-12 rounded-2xl object-cover border border-ink/10 shadow-sm" />
+            <img
+              src={gymLogo}
+              alt={gymName}
+              className="login-logo mb-4 h-16 w-16 rounded-2xl object-cover border border-ink/10"
+            />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember shadow-soft text-white">
-              <svg className="icon !h-6 !w-6"><use href="#i-zap" /></svg>
+            <div className="login-logo mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-ember text-white">
+              <svg className="icon !h-8 !w-8"><use href="#i-zap" /></svg>
             </div>
           )}
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-ember">
-              {isMemberMode ? gymName : 'Ironline'}
-            </div>
-            <h1 className="font-display text-xl font-bold tracking-tight text-ink">Sign In</h1>
+
+          {/* Brand name with gradient */}
+          <span className="brand-gradient mb-1 font-display text-2xl font-extrabold tracking-tight">
+            {isMemberMode ? gymName : 'Ironline'}
+          </span>
+
+          {/* Eyebrow divider */}
+          <div className="mb-1 flex items-center gap-2 w-full">
+            <div className="h-px flex-1 bg-ink/10" />
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-steel-light">
+              {isMemberMode ? 'Member Portal' : 'Gym Platform'}
+            </span>
+            <div className="h-px flex-1 bg-ink/10" />
           </div>
+
+          <h1 className="mt-2 font-display text-xl font-bold tracking-tight text-ink">
+            Welcome back
+          </h1>
+          <p className="mt-1 text-sm text-steel">Sign in to access your dashboard</p>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="mb-4 flex items-start gap-2 rounded-2xl border border-ember/30 bg-ember/5 px-3.5 py-3 text-sm text-ember-dark">
+          <div className="mb-5 flex items-start gap-2 rounded-2xl border border-ember/30 bg-ember/5 px-3.5 py-3 text-sm text-ember-dark">
             <svg className="icon !h-4 !w-4 mt-0.5 shrink-0"><use href="#i-close" /></svg>
             <span>{error}</span>
           </div>
         )}
 
+        {/* Username */}
         <div className="mb-4">
           <label className="field-label" htmlFor="login-username">Username</label>
           <div className="relative">
@@ -130,7 +173,8 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="mb-6">
+        {/* Password */}
+        <div className="mb-7">
           <label className="field-label" htmlFor="login-password">Password</label>
           <div className="relative">
             <svg className="icon pointer-events-none absolute left-3.5 top-1/2 !h-[18px] !w-[18px] -translate-y-1/2 text-steel-light">
@@ -148,10 +192,17 @@ export default function Login() {
           </div>
         </div>
 
-        <button type="submit" id="login-submit" disabled={submitting} className="btn-primary w-full">
-          {submitting ? 'Signing in...' : 'Sign In'}
+        {/* Submit */}
+        <button type="submit" id="login-submit" disabled={submitting} className="btn-primary w-full gap-2">
+          {submitting ? (
+            <>
+              <span className="login-spinner" />
+              Signing in…
+            </>
+          ) : 'Sign In'}
         </button>
       </form>
     </div>
   );
 }
+
