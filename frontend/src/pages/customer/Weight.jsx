@@ -281,7 +281,7 @@ export default function Weight() {
         </div>
 
         <div className="col-span-2 md:col-span-4">
-          {error && <div className="mb-3 text-sm text-ember-dark">{error}</div>}
+          {error && <div className="mb-3 text-sm text-danger">{error}</div>}
           <button type="submit" disabled={saving || uploading} className="btn-primary">
             {saving ? 'Saving…' : 'Log entry'}
           </button>

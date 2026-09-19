@@ -70,7 +70,12 @@ router.put(
       defaultMemberMonthlyFee,
       defaultFeeDueDay,
     } = req.body;
-    if (gymName !== undefined) req.adminDoc.gymName = gymName;
+    if (gymName !== undefined) {
+      if (/[<>]/.test(gymName)) {
+        return res.status(400).json({ message: 'Gym name contains invalid characters (<, >).' });
+      }
+      req.adminDoc.gymName = gymName.trim();
+    }
     if (gymLogoUrl !== undefined) req.adminDoc.gymLogoUrl = gymLogoUrl;
     if (address !== undefined) req.adminDoc.address = address;
     if (contact !== undefined) req.adminDoc.contact = contact;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTenant } from '../context/TenantContext.jsx';
+import { fetchTenantBranding } from '../theme/branding.js';
 
 const roleHome = {
   customer: '/customer',
@@ -41,8 +42,7 @@ export default function Login() {
     const params = new URLSearchParams(location.search);
     const gymSlug = params.get('gym');
     if (gymSlug && tenant?.slug !== gymSlug) {
-      fetch(`/api/public/branding/${gymSlug}`)
-        .then((r) => r.ok ? r.json() : null)
+      fetchTenantBranding(gymSlug)
         .then((data) => {
           if (data?.gymName) {
             setTenant({ slug: gymSlug, ...data });
@@ -50,7 +50,7 @@ export default function Login() {
         })
         .catch(() => {});
     }
-  }, [location.search, tenant]);
+  }, [location.search, tenant, setTenant]);
 
   useEffect(() => {
     const standalone =
@@ -159,7 +159,7 @@ export default function Login() {
               className="login-logo mb-4 h-16 w-16 rounded-2xl object-cover border border-ink/10"
             />
           ) : (
-            <div className="login-logo mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-ember text-white">
+            <div className="login-logo mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-ember text-on-primary">
               <svg className="icon !h-8 !w-8"><use href="#i-zap" /></svg>
             </div>
           )}
@@ -186,7 +186,7 @@ export default function Login() {
 
         {/* Error */}
         {error && (
-          <div className="mb-5 flex items-start gap-2 rounded-2xl border border-ember/30 bg-ember/5 px-3.5 py-3 text-sm text-ember-dark">
+          <div className="mb-5 flex items-start gap-2 rounded-2xl border border-danger/30 bg-danger/5 px-3.5 py-3 text-sm text-danger">
             <svg className="icon !h-4 !w-4 mt-0.5 shrink-0"><use href="#i-close" /></svg>
             <span>{error}</span>
           </div>

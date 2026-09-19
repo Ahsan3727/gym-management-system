@@ -85,7 +85,7 @@ export default function Branches() {
         </button>
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {branches.map((b) => (
@@ -204,7 +204,7 @@ export default function Branches() {
                 />
               </div>
             </div>
-            {addError && <div className="mb-3 text-sm text-ember-dark">{addError}</div>}
+            {addError && <div className="mb-3 text-sm text-danger">{addError}</div>}
             <button type="submit" disabled={adding} className="btn-primary w-full">
               {adding ? 'Adding…' : 'Create Branch'}
             </button>

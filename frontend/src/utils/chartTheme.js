@@ -38,10 +38,42 @@ const PALETTE = {
   },
 };
 
+function readCssRgb(varName, fallbackHex) {
+  if (typeof window === 'undefined' || !document.documentElement) return fallbackHex;
+  try {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    if (!raw) return fallbackHex;
+    const parts = raw.split(/\s+/).map(Number);
+    if (parts.length === 3 && parts.every((n) => !isNaN(n))) {
+      return `rgb(${parts[0]}, ${parts[1]}, ${parts[2]})`;
+    }
+  } catch {}
+  return fallbackHex;
+}
+
 /** Returns the current theme's chart color set, plus ready-made prop bundles for common Recharts elements. */
 export function useChartColors() {
   const { theme } = useTheme();
-  const c = PALETTE[theme] || PALETTE.dark;
+  const fallback = PALETTE[theme] || PALETTE.dark;
+
+  const ember = readCssRgb('--c-ember', fallback.ember);
+  const iron = readCssRgb('--c-iron', fallback.iron);
+  const chalk = readCssRgb('--c-chalk', fallback.chalk);
+  const danger = readCssRgb('--c-danger', fallback.ember);
+  const axisTick = readCssRgb('--c-steel', fallback.axisTick);
+  const tooltipBg = readCssRgb('--c-panel', fallback.tooltipBg);
+  const tooltipText = readCssRgb('--c-ink', fallback.tooltipText);
+
+  const c = {
+    ...fallback,
+    ember,
+    iron,
+    chalk,
+    danger,
+    axisTick,
+    tooltipBg,
+    tooltipText,
+  };
 
   return {
     ...c,
@@ -57,3 +89,4 @@ export function useChartColors() {
     tooltipCursor: { fill: c.cursorFill },
   };
 }
+

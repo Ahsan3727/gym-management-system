@@ -4,15 +4,22 @@ import Modal from '../../components/Modal.jsx';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { escapeHtml } from '../../utils/escapeHtml.js';
 
 function printReceiptSlip({ gymName, memberName, phone, receiptNumber, amount, admissionFee, totalPaid, paymentMethod, validUntil, date }) {
   const win = window.open('', '_blank', 'width=600,height=700');
   if (!win) return;
+  const safeGymName = escapeHtml(gymName || 'GYM MEMBERSHIP');
+  const safeMemberName = escapeHtml(memberName);
+  const safePhone = escapeHtml(phone);
+  const safeReceiptNumber = escapeHtml(receiptNumber || 'REC-' + Date.now());
+  const safePaymentMethod = escapeHtml(paymentMethod || 'Cash');
+
   win.document.write(`
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Receipt - ${receiptNumber || 'Membership Fee'}</title>
+        <title>Receipt - ${safeReceiptNumber}</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 28px; color: #111; max-width: 460px; margin: 0 auto; }
           .header { text-align: center; border-bottom: 2px dashed #ccc; padding-bottom: 16px; margin-bottom: 16px; }
@@ -31,20 +38,20 @@ function printReceiptSlip({ gymName, memberName, phone, receiptNumber, amount, a
       </head>
       <body>
         <div class="header">
-          <h1 class="gym-name">${gymName || 'GYM MEMBERSHIP'}</h1>
+          <h1 class="gym-name">${safeGymName}</h1>
           <div class="receipt-title">OFFICIAL PAYMENT RECEIPT</div>
-          <div class="receipt-num">${receiptNumber || 'REC-' + Date.now()}</div>
+          <div class="receipt-num">${safeReceiptNumber}</div>
         </div>
         <div class="details">
           <div class="row"><span class="label">Date:</span><span class="val">${new Date(date || Date.now()).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>
-          <div class="row"><span class="label">Member:</span><span class="val">${memberName}</span></div>
-          ${phone ? `<div class="row"><span class="label">Phone:</span><span class="val">${phone}</span></div>` : ''}
+          <div class="row"><span class="label">Member:</span><span class="val">${safeMemberName}</span></div>
+          ${phone ? `<div class="row"><span class="label">Phone:</span><span class="val">${safePhone}</span></div>` : ''}
           <div class="divider"></div>
           <div class="row"><span class="label">Monthly Subscription:</span><span class="val">Rs. ${Number(amount || 0).toLocaleString()}</span></div>
           ${Number(admissionFee || 0) > 0 ? `<div class="row"><span class="label">Admission / Reg. Fee:</span><span class="val">Rs. ${Number(admissionFee).toLocaleString()}</span></div>` : ''}
           <div class="total-row"><span>Total Paid:</span><span>Rs. ${Number(totalPaid || amount || 0).toLocaleString()}</span></div>
           <div class="divider"></div>
-          <div class="row"><span class="label">Payment Method:</span><span class="val" style="text-transform: uppercase;">${paymentMethod || 'Cash'}</span></div>
+          <div class="row"><span class="label">Payment Method:</span><span class="val" style="text-transform: uppercase;">${safePaymentMethod}</span></div>
           ${validUntil ? `<div class="row"><span class="label">Membership Valid Until:</span><span class="val" style="color: #059669;">${new Date(validUntil).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>` : ''}
         </div>
         <div class="footer">
@@ -502,7 +509,7 @@ export default function Customers() {
         </div>
       )}
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       <ListCard>
         {/* Select-all header */}
@@ -735,7 +742,7 @@ export default function Customers() {
                 </div>
               </div>
 
-              {createError && <div className="rounded-xl bg-ember/10 px-3 py-2 text-sm text-ember-dark">{createError}</div>}
+              {createError && <div className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{createError}</div>}
 
               <button type="submit" disabled={creating} className="btn-primary w-full">
                 {creating ? 'Registering Member…' : 'Register Member & Generate Receipt'}
@@ -1074,7 +1081,7 @@ export default function Customers() {
                 <span>Active Member</span>
               </label>
             </div>
-            {editError && <div className="rounded-xl bg-ember/10 px-3 py-2 text-sm text-ember-dark">{editError}</div>}
+            {editError && <div className="rounded-xl bg-danger/10 px-3 py-2 text-sm text-danger">{editError}</div>}
             <button type="submit" disabled={savingEdit} className="btn-primary w-full">
               {savingEdit ? 'Saving…' : 'Save Changes'}
             </button>
@@ -1144,7 +1151,7 @@ export default function Customers() {
       {progressFor && (
         <Modal title={`${progressFor.name} — Progress & Stats`} onClose={() => setProgressFor(null)} width="max-w-2xl">
           {progressError ? (
-            <div className="py-8 text-center text-sm text-ember-dark">{progressError}</div>
+            <div className="py-8 text-center text-sm text-danger">{progressError}</div>
           ) : !progress ? (
             <div className="py-8 text-center text-sm text-steel">Loading member progress…</div>
           ) : (

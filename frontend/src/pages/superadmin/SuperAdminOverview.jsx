@@ -17,7 +17,7 @@ export default function SuperAdminOverview() {
   }, []);
 
   if (loading) return <div className="text-sm text-steel">Loading platform analytics…</div>;
-  if (error) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error) return <div className="text-sm text-danger">{error}</div>;
 
   const maxRevenue = Math.max(...(analytics?.monthlyRevenue || []).map((r) => r.revenue), 100);
   const maxGymGrowth = Math.max(...(analytics?.monthlyGymGrowth || []).map((g) => g.count), 2);
@@ -171,7 +171,7 @@ export default function SuperAdminOverview() {
                   <td className="py-3 px-3 text-center">
                     <span
                       className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${
-                        g.isSuspended ? 'bg-ember/15 text-ember-dark' : 'bg-chalk/15 text-chalk-dark'
+                        g.isSuspended ? 'bg-danger/15 text-danger' : 'bg-chalk/15 text-chalk-dark'
                       }`}
                     >
                       {g.isSuspended ? 'Suspended' : 'Active'}
@@ -194,7 +194,7 @@ export default function SuperAdminOverview() {
       {/* Staff App Quick Banner */}
       <div className="panel p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember text-white shadow-soft">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember text-on-primary shadow-soft">
             <svg className="icon !h-6 !w-6"><use href="#i-briefcase" /></svg>
           </div>
           <div>

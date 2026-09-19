@@ -2,17 +2,10 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 
 const ThemeContext = createContext(null);
 const STORAGE_KEY = 'ironline_theme';
+const EXPLICIT_KEY = 'ironline_theme_explicit';
 
-/**
- * Dark is the default (matches the Apex Elite design). Passing 'light'
- * restores the original IRONLINE brand palette. See src/index.css for the
- * actual color values — this context only ever toggles a class on <html>.
- *
- * A blocking inline script in index.html applies the stored class before
- * React mounts, so there's no light-theme flash on reload.
- */
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
+  const [theme, setThemeState] = useState(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       return stored === 'light' || stored === 'dark' ? stored : 'dark';
@@ -26,23 +19,35 @@ export function ThemeProvider({ children }) {
     root.classList.toggle('light', theme === 'light');
     try {
       localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // localStorage unavailable (private mode, etc.) — theme just won't persist
-    }
-    // Phase 4 QA: index.html set <meta name="theme-color"> once, to the new
-    // dark-ember accent, but never made it theme-aware — so a phone's
-    // browser chrome / PWA titlebar stayed dark-orange even in light mode.
-    // Keep it in sync with the active theme's ember token.
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'light' ? '#E1553A' : '#ff4e1f');
+    } catch {}
   }, [theme]);
 
+  const setTheme = useCallback((newTheme) => {
+    try {
+      localStorage.setItem(EXPLICIT_KEY, 'true');
+    } catch {}
+    setThemeState(newTheme);
+  }, []);
+
   const toggleTheme = useCallback(() => {
-    setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+    try {
+      localStorage.setItem(EXPLICIT_KEY, 'true');
+    } catch {}
+    setThemeState((t) => (t === 'dark' ? 'light' : 'dark'));
+  }, []);
+
+  // Sets default mode only if the user hasn't explicitly chosen light/dark (D5)
+  const setDefaultMode = useCallback((mode) => {
+    if (!mode || (mode !== 'dark' && mode !== 'light')) return;
+    try {
+      const explicit = localStorage.getItem(EXPLICIT_KEY);
+      if (explicit === 'true') return;
+    } catch {}
+    setThemeState(mode);
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, setDefaultMode }}>
       {children}
     </ThemeContext.Provider>
   );

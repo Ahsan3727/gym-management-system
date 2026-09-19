@@ -3,6 +3,8 @@ const express = require('express');
 const Admin = require('../models/Admin');
 const asyncHandler = require('../utils/asyncHandler');
 const { transformCloudinaryUrl } = require('../utils/cloudinaryTransform');
+const { publicMemberBranding } = require('../utils/branding');
+const { THEME_MANIFEST, APP_DEFAULT } = require('../constants/branding');
 
 const router = express.Router();
 
@@ -44,6 +46,15 @@ function iconsFor(admin) {
 }
 
 function buildManifest(admin, slug) {
+  let themeColor = admin ? admin.themeColor || DEFAULT_THEME_COLOR : DEFAULT_THEME_COLOR;
+  let backgroundColor = DEFAULT_BACKGROUND_COLOR;
+
+  const memberTheme = admin?.branding?.memberApp?.theme;
+  if (memberTheme && memberTheme !== 'ember' && THEME_MANIFEST[memberTheme]) {
+    themeColor = THEME_MANIFEST[memberTheme].primary;
+    backgroundColor = THEME_MANIFEST[memberTheme].bg;
+  }
+
   return {
     name: admin ? admin.gymName : DEFAULT_GYM_NAME,
     short_name: admin ? shortNameFor(admin.gymName) : DEFAULT_SHORT_NAME,
@@ -56,8 +67,8 @@ function buildManifest(admin, slug) {
     // is safe to serve from /api/public/manifest/:slug rather than a static
     // /manifest.json.
     start_url: admin ? `/g/${slug}` : '/',
-    background_color: DEFAULT_BACKGROUND_COLOR,
-    theme_color: admin ? admin.themeColor || DEFAULT_THEME_COLOR : DEFAULT_THEME_COLOR,
+    background_color: backgroundColor,
+    theme_color: themeColor,
     display: 'standalone',
     orientation: 'portrait',
   };
@@ -65,20 +76,11 @@ function buildManifest(admin, slug) {
 
 // GET /api/public/manifest/:slug
 // Web App Manifest for a specific gym's installable identity.
-//
-// Unknown slug: we still return a 200 with the generic default Ironline
-// manifest rather than a 404/error body. Two reasons: (1) an actual error
-// status would make some browsers refuse to treat the response as an
-// installable manifest at all, breaking the fallback experience for direct/
-// marketing visits; (2) always returning a well-formed manifest either way
-// means this endpoint can't be used to enumerate which slugs exist — a
-// request for a real gym and a made-up one are indistinguishable from the
-// outside.
 router.get(
   '/manifest/:slug',
   asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'public, max-age=300');
-    const admin = await Admin.findOne({ slug: req.params.slug }).select('gymName gymLogoUrl themeColor slug');
+    const admin = await Admin.findOne({ slug: req.params.slug }).select('gymName gymLogoUrl themeColor slug branding');
     res.json(buildManifest(admin, req.params.slug));
   })
 );
@@ -86,20 +88,19 @@ router.get(
 // GET /api/public/branding/:slug
 // Small JSON payload the customer app reads on page load
 // (frontend-customer/src/main.jsx) to
-// swap <title>, apple-touch-icon and the theme-color meta tag directly —
-// needed separately from the manifest because iOS Safari never reads
-// manifest.json at all.
+// swap <title>, apple-touch-icon and the theme-color meta tag directly
 router.get(
   '/branding/:slug',
   asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'public, max-age=300');
-    const admin = await Admin.findOne({ slug: req.params.slug }).select('gymName gymLogoUrl themeColor');
+    const admin = await Admin.findOne({ slug: req.params.slug }).select('gymName gymLogoUrl themeColor branding');
 
     if (!admin) {
       return res.json({
         gymName: DEFAULT_GYM_NAME,
         gymLogoUrl: DEFAULT_ICON_512,
         themeColor: DEFAULT_THEME_COLOR,
+        branding: { ...APP_DEFAULT, version: 1 },
       });
     }
 
@@ -111,6 +112,7 @@ router.get(
         ? transformCloudinaryUrl(admin.gymLogoUrl, { width: 192, height: 192 })
         : DEFAULT_ICON_192,
       themeColor: admin.themeColor || DEFAULT_THEME_COLOR,
+      branding: publicMemberBranding(admin),
     });
   })
 );

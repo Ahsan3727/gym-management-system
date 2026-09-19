@@ -520,7 +520,7 @@ export default function Fees() {
         )}
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       {/* Fees List / Table */}
       <div className="panel overflow-hidden border border-ink/10 shadow-soft">
@@ -869,7 +869,7 @@ export default function Fees() {
               />
             </div>
 
-            {createError && <div className="rounded-xl bg-ember/10 p-3 text-sm text-ember-dark">{createError}</div>}
+            {createError && <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">{createError}</div>}
 
             <button type="submit" disabled={creating} className="btn-primary w-full">
               {creating ? 'Recording Fee…' : 'Record Fee & Generate Receipt'}
@@ -932,7 +932,7 @@ export default function Fees() {
               </div>
             </div>
 
-            {bulkError && <div className="rounded-xl bg-ember/10 p-3 text-sm text-ember-dark">{bulkError}</div>}
+            {bulkError && <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">{bulkError}</div>}
 
             <button type="submit" disabled={bulking} className="btn-primary w-full">
               {bulking ? 'Generating Invoices…' : 'Generate Monthly Invoices'}
@@ -993,7 +993,7 @@ export default function Fees() {
               />
             </div>
 
-            {payError && <div className="rounded-xl bg-ember/10 p-3 text-sm text-ember-dark">{payError}</div>}
+            {payError && <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">{payError}</div>}
 
             <button type="submit" disabled={savingPay} className="btn-primary w-full">
               {savingPay ? 'Saving…' : 'Confirm Payment & Issue Receipt'}
@@ -1084,7 +1084,7 @@ export default function Fees() {
               />
             </div>
 
-            {editError && <div className="rounded-xl bg-ember/10 p-3 text-sm text-ember-dark">{editError}</div>}
+            {editError && <div className="rounded-xl bg-danger/10 p-3 text-sm text-danger">{editError}</div>}
 
             <button type="submit" disabled={savingEdit} className="btn-primary w-full">
               {savingEdit ? 'Saving…' : 'Save Changes'}

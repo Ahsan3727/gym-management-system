@@ -114,10 +114,10 @@ export default function Account() {
     }
   }
 
-  if (error && !profile) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error && !profile) return <div className="text-sm text-danger">{error}</div>;
   if (!profile) return <div className="text-sm text-steel">Loading…</div>;
 
-  const statusAccent = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-ember-dark' };
+  const statusAccent = { paid: 'text-chalk-dark', unpaid: 'text-steel', overdue: 'text-danger' };
 
   function fmtAmount(amount) {
     return Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -205,7 +205,7 @@ export default function Account() {
             </div>
           </div>
           {message && <div className="mb-3 text-sm text-chalk-dark">{message}</div>}
-          {error && <div className="mb-3 text-sm text-ember-dark">{error}</div>}
+          {error && <div className="mb-3 text-sm text-danger">{error}</div>}
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? 'Saving…' : 'Save changes'}
           </button>
@@ -236,7 +236,7 @@ export default function Account() {
             />
           </div>
           {pwMessage && <div className="mb-3 text-sm text-chalk-dark">{pwMessage}</div>}
-          {pwError && <div className="mb-3 text-sm text-ember-dark">{pwError}</div>}
+          {pwError && <div className="mb-3 text-sm text-danger">{pwError}</div>}
           <button type="submit" disabled={pwSaving} className="btn-secondary">
             {pwSaving ? 'Updating…' : 'Update password'}
           </button>
@@ -250,7 +250,7 @@ export default function Account() {
           <ListRow
             key={fee._id}
             icon="card"
-            iconBg={fee.status === 'paid' ? 'bg-chalk/15 text-chalk-dark' : fee.status === 'overdue' ? 'bg-ember/15 text-ember-dark' : 'bg-ink/5'}
+            iconBg={fee.status === 'paid' ? 'bg-chalk/15 text-chalk-dark' : fee.status === 'overdue' ? 'bg-danger/15 text-danger' : 'bg-ink/5'}
             title={`Rs. ${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
             subtitle={
               fee.status === 'paid'

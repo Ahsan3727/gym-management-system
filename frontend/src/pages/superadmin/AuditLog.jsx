@@ -31,7 +31,7 @@ export default function AuditLog() {
       <h1 className="mb-1 text-2xl font-semibold text-ink">Audit log</h1>
       <p className="mb-8 text-sm text-steel">Every super-admin action, most recent first.</p>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       <div className="panel p-6">
         {loading ? (

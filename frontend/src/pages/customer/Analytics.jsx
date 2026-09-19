@@ -46,7 +46,7 @@ export default function Analytics() {
   }, [days]);
 
 
-  if (error) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error) return <div className="text-sm text-danger">{error}</div>;
   if (!data) return <div className="text-sm text-steel">Loading…</div>;
 
   const weightSeries = data.weight

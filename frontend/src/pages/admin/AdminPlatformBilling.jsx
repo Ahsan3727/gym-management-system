@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { escapeHtml } from '../../utils/escapeHtml.js';
 
 export default function AdminPlatformBilling() {
   const [fees, setFees] = useState([]);
@@ -79,10 +80,18 @@ export default function AdminPlatformBilling() {
 
   function printInvoiceSlip(fee) {
     const win = window.open('', '_blank');
+    const safeInvoiceNumber = escapeHtml(fee.invoiceNumber);
+    const safeStatus = escapeHtml(fee.status);
+    const safeBillingCycle = escapeHtml(fee.billingCycle || 'N/A');
+    const safePaymentMethod = escapeHtml(fee.paymentMethod || '');
+    const safeTransactionReference = escapeHtml(fee.transactionReference || '');
+    const safeTitle = escapeHtml(fee.title || 'Platform Fee');
+    const safeFeeType = escapeHtml(fee.feeType || 'Subscription');
+
     win.document.write(`
       <html>
         <head>
-          <title>Invoice - ${fee.invoiceNumber}</title>
+          <title>Invoice - ${safeInvoiceNumber}</title>
           <style>
             body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 40px; color: #111; max-width: 750px; margin: 0 auto; }
             .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e4e4e7; padding-bottom: 20px; }
@@ -108,24 +117,24 @@ export default function AdminPlatformBilling() {
               <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Software License & Platform Subscription</div>
             </div>
             <div style="text-align: right;">
-              <h2 style="margin: 0; font-size: 20px;">${fee.invoiceNumber}</h2>
-              <div style="margin-top: 6px;"><span class="badge ${fee.status}">${fee.status}</span></div>
+              <h2 style="margin: 0; font-size: 20px;">${safeInvoiceNumber}</h2>
+              <div style="margin-top: 6px;"><span class="badge ${safeStatus}">${safeStatus}</span></div>
             </div>
           </div>
 
           <div class="details-grid">
             <div class="box">
               <h4>Invoice Meta</h4>
-              Billing Period: <strong>${fee.billingCycle || 'N/A'}</strong><br/>
+              Billing Period: <strong>${safeBillingCycle}</strong><br/>
               Issue Date: <strong>${new Date(fee.created_at).toLocaleDateString()}</strong><br/>
               Due Date: <strong>${new Date(fee.dueDate).toLocaleDateString()}</strong><br/>
-              ${fee.paidOn ? `Paid On: <strong>${new Date(fee.paidOn).toLocaleDateString()}</strong><br/>Method: <strong>${fee.paymentMethod}</strong>` : ''}
-              ${fee.transactionReference ? `<br/>Ref #: <strong>${fee.transactionReference}</strong>` : ''}
+              ${fee.paidOn ? `Paid On: <strong>${new Date(fee.paidOn).toLocaleDateString()}</strong><br/>Method: <strong>${safePaymentMethod}</strong>` : ''}
+              ${fee.transactionReference ? `<br/>Ref #: <strong>${safeTransactionReference}</strong>` : ''}
             </div>
             <div class="box">
               <h4>Payment Status</h4>
-              Current Status: <strong>${fee.status.toUpperCase()}</strong><br/>
-              Total Billed: <strong>Rs. ${fee.amount.toLocaleString()}</strong>
+              Current Status: <strong>${safeStatus.toUpperCase()}</strong><br/>
+              Total Billed: <strong>Rs. ${Number(fee.amount || 0).toLocaleString()}</strong>
             </div>
           </div>
 
@@ -140,16 +149,16 @@ export default function AdminPlatformBilling() {
             </thead>
             <tbody>
               <tr>
-                <td><strong>${fee.title}</strong></td>
-                <td style="text-transform: capitalize;">${fee.feeType}</td>
-                <td>${fee.billingCycle || '—'}</td>
-                <td style="text-align: right; font-weight: 700;">Rs. ${fee.amount.toLocaleString()}</td>
+                <td><strong>${safeTitle}</strong></td>
+                <td style="text-transform: capitalize;">${safeFeeType}</td>
+                <td>${safeBillingCycle || '—'}</td>
+                <td style="text-align: right; font-weight: 700;">Rs. ${Number(fee.amount || 0).toLocaleString()}</td>
               </tr>
             </tbody>
           </table>
 
           <div class="total">
-            Total Amount: Rs. ${fee.amount.toLocaleString()}
+            Total Amount: Rs. ${Number(fee.amount || 0).toLocaleString()}
           </div>
 
           <div class="footer">
@@ -178,15 +187,15 @@ export default function AdminPlatformBilling() {
         </p>
       </div>
 
-      {error && <div className="text-sm text-ember-dark">{error}</div>}
+      {error && <div className="text-sm text-danger">{error}</div>}
 
       {/* Standing Banner */}
       <div
         className={`panel p-6 border-l-4 ${
           isSevere
-            ? 'border-l-ember-dark bg-ember/5'
+            ? 'border-l-danger bg-danger/5'
             : isOverdue
-            ? 'border-l-ember bg-ember/5'
+            ? 'border-l-danger bg-danger/5'
             : hasDues
             ? 'border-l-iron bg-iron/5'
             : 'border-l-chalk-dark bg-chalk/5'
@@ -485,7 +494,7 @@ export default function AdminPlatformBilling() {
               />
             </div>
 
-            {proofError && <div className="text-sm text-ember-dark">{proofError}</div>}
+            {proofError && <div className="text-sm text-danger">{proofError}</div>}
 
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setProofingFee(null)} className="btn-secondary">

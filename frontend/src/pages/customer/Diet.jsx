@@ -123,7 +123,7 @@ export default function Diet() {
           <input type="number" className="field-input" value={form.waterMl} onChange={(e) => setForm({ ...form, waterMl: e.target.value })} />
         </div>
         <div className="col-span-2 flex items-end md:col-span-3">
-          {error && <div className="mb-1 text-sm text-ember-dark">{error}</div>}
+          {error && <div className="mb-1 text-sm text-danger">{error}</div>}
         </div>
         <div className="col-span-2 md:col-span-5">
           <button type="submit" disabled={saving} className="btn-primary">

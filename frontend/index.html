@@ -24,13 +24,23 @@
     />
     <title>Ironline · Gym Management</title>
     <script>
-      // Apply the saved theme before React mounts / CSS paints, so a user
-      // who picked "light" doesn't see a flash of the (now default) dark
-      // theme on reload. Dark needs no class — it's the :root default.
+      // Apply the saved theme and custom branding CSS variables before React mounts / CSS paints,
+      // preventing light-theme flash and theme-accent flash on cold load or PWA offline launch.
       (function () {
         try {
           if (localStorage.getItem('ironline_theme') === 'light') {
             document.documentElement.classList.add('light');
+          }
+          var rawVars = localStorage.getItem('ironline_theme_vars');
+          if (rawVars) {
+            var data = JSON.parse(rawVars);
+            if (data.vars) {
+              for (var k in data.vars) {
+                document.documentElement.style.setProperty(k, data.vars[k]);
+              }
+            }
+            if (data.theme) document.documentElement.dataset.theme = data.theme;
+            if (data.surface) document.documentElement.dataset.surface = data.surface;
           }
         } catch (e) {}
       })();

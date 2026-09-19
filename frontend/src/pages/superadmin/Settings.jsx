@@ -34,7 +34,7 @@ export default function Settings() {
     }
   }
 
-  if (error && !settings) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error && !settings) return <div className="text-sm text-danger">{error}</div>;
   if (!settings) return <div className="text-sm text-steel">Loading settings…</div>;
 
   return (
@@ -184,7 +184,7 @@ export default function Settings() {
             {message}
           </div>
         )}
-        {error && <div className="text-sm text-ember-dark">{error}</div>}
+        {error && <div className="text-sm text-danger">{error}</div>}
 
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Saving...' : 'Save Platform Settings'}

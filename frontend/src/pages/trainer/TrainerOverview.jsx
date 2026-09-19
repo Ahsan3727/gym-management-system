@@ -32,7 +32,7 @@ export default function TrainerOverview() {
   }, []);
 
   if (loading) return <div className="text-sm text-steel">Loading trainer dashboard…</div>;
-  if (error) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error) return <div className="text-sm text-danger">{error}</div>;
 
   const trainer = profileData?.trainer;
   const gym = profileData?.gym;

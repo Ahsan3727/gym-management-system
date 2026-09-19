@@ -70,9 +70,9 @@ const ICON = {
 
 const STYLE = {
   success: 'bg-green-600 text-white',
-  error:   'bg-ember text-white',
+  error:   'bg-danger text-on-primary',
   warning: 'bg-amber-500 text-white',
-  info:    'bg-chalk text-white',
+  info:    'bg-iron text-on-primary',
 };
 
 function ToastItem({ toast, onDismiss }) {

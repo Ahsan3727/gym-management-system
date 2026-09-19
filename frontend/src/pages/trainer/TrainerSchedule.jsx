@@ -133,7 +133,7 @@ export default function TrainerSchedule() {
         </button>
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       {/* Metric Cards */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -185,7 +185,7 @@ export default function TrainerSchedule() {
                     s.status === 'completed'
                       ? 'bg-chalk/20 text-chalk-dark'
                       : s.status === 'cancelled'
-                      ? 'bg-ember/15 text-ember-dark'
+                      ? 'bg-danger/15 text-danger'
                       : 'bg-iron/15 text-iron'
                   }`}
                 >
@@ -201,7 +201,7 @@ export default function TrainerSchedule() {
                         s.status === 'completed'
                           ? 'bg-chalk/20 text-chalk-dark'
                           : s.status === 'cancelled'
-                          ? 'bg-ember/15 text-ember-dark'
+                          ? 'bg-danger/15 text-danger'
                           : 'bg-iron/15 text-iron'
                       }`}
                     >

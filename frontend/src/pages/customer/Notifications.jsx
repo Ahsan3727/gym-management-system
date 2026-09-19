@@ -104,7 +104,7 @@ export default function Notifications() {
       />
 
       {error && (
-        <div className="rounded-2xl border border-ember/30 bg-ember/5 px-4 py-3 text-sm text-ember-dark">
+        <div className="rounded-2xl border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}

@@ -23,6 +23,8 @@ const {
   suspendAdminSchema,
   disableAdminSchema,
 } = require('../schemas/superAdminSchemas');
+const { brandingSchema } = require('../schemas/brandingSchemas');
+const { resolveBranding } = require('../utils/branding');
 
 const router = express.Router();
 
@@ -107,6 +109,25 @@ router.put(
     if (themeColor !== undefined) admin.themeColor = themeColor;
     await admin.save();
     await logAction(req, 'admin.update', 'Admin', admin._id);
+    res.json(admin);
+  })
+);
+
+router.put(
+  '/admins/:id/branding',
+  validate(brandingSchema),
+  asyncHandler(async (req, res) => {
+    const admin = await Admin.findById(req.params.id);
+    if (!admin) return res.status(404).json({ message: 'Gym not found.' });
+    const before = resolveBranding(admin);
+    admin.branding = {
+      memberApp: req.body.memberApp,
+      adminApp: req.body.adminApp,
+      version: (admin.branding?.version ?? 1) + 1,
+    };
+    await admin.save();
+    const after = resolveBranding(admin);
+    await logAction(req, 'admin.branding_update', 'Admin', admin._id, { before, after });
     res.json(admin);
   })
 );

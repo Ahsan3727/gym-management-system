@@ -29,7 +29,7 @@ export default function SegmentedControl({ options, value, onChange, accent = 'e
             type="button"
             onClick={() => onChange(optValue)}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
-              active ? `${accentBg} text-white shadow-soft` : 'text-steel hover:text-ink'
+              active ? `${accentBg} text-on-primary shadow-soft` : 'text-steel hover:text-ink'
             }`}
           >
             {optLabel}

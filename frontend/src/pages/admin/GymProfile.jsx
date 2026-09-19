@@ -165,7 +165,7 @@ export default function GymProfile() {
     }
   }
 
-  if (error && !profile) return <div className="text-sm text-ember-dark">{error}</div>;
+  if (error && !profile) return <div className="text-sm text-danger">{error}</div>;
   if (!profile) return <div className="text-sm text-steel">Loading…</div>;
 
   return (
@@ -214,7 +214,7 @@ export default function GymProfile() {
                 </button>
               )}
             </div>
-            {uploadError && <div className="mt-2 text-xs text-ember-dark">{uploadError}</div>}
+            {uploadError && <div className="mt-2 text-xs text-danger">{uploadError}</div>}
           </div>
         </div>
 
@@ -252,7 +252,7 @@ export default function GymProfile() {
               placeholder="#e11d48"
             />
           </div>
-          <p className="mt-1 text-xs text-steel">Used for your installed app's status bar and icon background.</p>
+          <p className="mt-1 text-xs text-steel">Used for the install icon and browser bar. Your Ironline admin sets the app theme.</p>
         </div>
         <div className="md:col-span-2">
           <label className="field-label">Address</label>
@@ -317,7 +317,7 @@ export default function GymProfile() {
 
         <div className="md:col-span-2">
           {message && <div className="mb-3 text-sm text-chalk-dark">{message}</div>}
-          {error && <div className="mb-3 text-sm text-ember-dark">{error}</div>}
+          {error && <div className="mb-3 text-sm text-danger">{error}</div>}
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? 'Saving…' : 'Save changes'}
           </button>
@@ -341,7 +341,7 @@ export default function GymProfile() {
         </div>
 
         {installError ? (
-          <div className="text-sm text-ember-dark">{installError}</div>
+          <div className="text-sm text-danger">{installError}</div>
         ) : !installData ? (
           <div className="text-sm text-steel">Loading your install link…</div>
         ) : (

@@ -24,6 +24,16 @@ const adminSchema = new mongoose.Schema(
     // (optionally) in-dashboard branding. Defaults to the platform's own
     // brand red so gyms that never touch this still get a sensible value.
     themeColor: { type: String, default: '#e11d48' },
+    themePreset: {
+      type: String,
+      default: 'ember',
+      enum: ['ember', 'ocean', 'forest', 'violet', 'gold', 'slate'],
+    },
+    layoutVariant: {
+      type: String,
+      default: 'sidebar',
+      enum: ['sidebar', 'topnav', 'minimal'],
+    },
     gymLogoUrl: { type: String, default: '' },
     address: { type: String, default: '' },
     contact: { type: String, default: '' },
@@ -36,6 +46,23 @@ const adminSchema = new mongoose.Schema(
     customMonthlyFee: { type: Number, default: null, min: 0 },
     defaultMemberMonthlyFee: { type: Number, default: 3000, min: 0 },
     defaultFeeDueDay: { type: Number, default: 10, min: 1, max: 31 },
+    branding: {
+      memberApp: {
+        theme: { type: String, default: 'ember' },
+        shell: { type: String, default: 'sidebar' },
+        dashboard: { type: String, default: 'classic' },
+        surface: { type: String, default: 'accent' },
+        defaultMode: { type: String, default: 'dark' },
+      },
+      adminApp: {
+        theme: { type: String, default: 'ember' },
+        shell: { type: String, default: 'sidebar' },
+        dashboard: { type: String, default: 'classic' },
+        surface: { type: String, default: 'accent' },
+        defaultMode: { type: String, default: 'dark' },
+      },
+      version: { type: Number, default: 1 },
+    },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } }
 );

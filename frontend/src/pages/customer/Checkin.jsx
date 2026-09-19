@@ -299,7 +299,7 @@ export default function CustomerCheckin() {
         </div>
       )}
 
-      {error && <div className="rounded-2xl bg-ember/10 p-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="rounded-2xl bg-danger/10 p-4 text-sm text-danger">{error}</div>}
 
       {/* Main Check-In Hero Card */}
       <div className="panel p-8 text-center relative overflow-hidden shadow-soft">

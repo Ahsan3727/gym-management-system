@@ -157,7 +157,7 @@ export default function TrainerClients() {
         )}
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
       {message && <div className="mb-4 text-sm text-chalk-dark">{message}</div>}
 
       {clients.length === 0 ? (

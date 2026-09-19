@@ -45,6 +45,13 @@
   --c-iron: 94 168 255;        /* info accent                 #5ea8ff */
   --c-iron-dark: 59 130 246;
   --c-iron-light: 147 197 253;
+
+  /* Semantic status tokens decoupled from brand */
+  --c-danger: 255 107 71;      /* #ff6b47 - default danger matches current ember-dark */
+  --c-danger-dark: 220 38 38;
+  --c-success: 126 231 135;    /* #7ee787 - matches chalk */
+  --c-warning: 234 179 8;      /* #eab308 */
+  --c-on-primary: 255 255 255; /* text on primary brand accent */
 }
 
 html.light {
@@ -70,6 +77,13 @@ html.light {
   --c-iron: 47 93 138;         /* #2F5D8A */
   --c-iron-dark: 35 71 100;    /* #234764 */
   --c-iron-light: 108 147 184; /* #6C93B8 */
+
+  /* Semantic status tokens for light mode */
+  --c-danger: 196 63 39;       /* #C43F27 */
+  --c-danger-dark: 185 28 28;
+  --c-success: 34 197 94;      /* #22c55e */
+  --c-warning: 202 138 4;      /* #ca8a04 */
+  --c-on-primary: 255 255 255;
 }
 
 @layer base {
@@ -252,5 +266,40 @@ html.light {
   }
   .login-logo {
     animation: logo-glow 3s ease-in-out infinite;
+  }
+
+  /* Surface Styling Variants (Phase 8 §8.7) */
+  .page-header {
+    letter-spacing: -0.02em;
+  }
+
+  .hero-card {
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+  }
+
+  /* data-surface="tinted": soft atmospheric wash across panels */
+  [data-surface="tinted"] .panel {
+    background-color: rgb(var(--c-panel));
+    border-color: rgb(var(--c-ember, var(--c-iron)) / 0.15);
+  }
+  @supports (background-color: color-mix(in srgb, red, blue)) {
+    [data-surface="tinted"] .panel {
+      background-color: color-mix(in srgb, rgb(var(--c-panel)) 94%, rgb(var(--c-ember, var(--c-iron))) 6%);
+      border-color: color-mix(in srgb, rgb(var(--c-ink-line)) 80%, rgb(var(--c-ember, var(--c-iron))) 20%);
+    }
+  }
+
+  /* data-surface="bold": high-energy brand gradient headings and hero cards */
+  [data-surface="bold"] .page-header {
+    background: linear-gradient(135deg, rgb(var(--c-ink)), rgb(var(--c-ember, var(--c-iron))));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  [data-surface="bold"] .hero-card {
+    background: linear-gradient(135deg, rgb(var(--c-panel)), rgb(var(--c-ember, var(--c-iron)) / 0.12));
+    border-color: rgb(var(--c-ember, var(--c-iron)) / 0.3);
   }
 }

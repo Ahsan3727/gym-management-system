@@ -40,6 +40,17 @@ export default {
           dark: 'rgb(var(--c-iron-dark) / <alpha-value>)',
           light: 'rgb(var(--c-iron-light) / <alpha-value>)',
         },
+        danger: {
+          DEFAULT: 'rgb(var(--c-danger) / <alpha-value>)',
+          dark: 'rgb(var(--c-danger-dark, var(--c-danger)) / <alpha-value>)',
+        },
+        success: {
+          DEFAULT: 'rgb(var(--c-success) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--c-warning) / <alpha-value>)',
+        },
+        'on-primary': 'rgb(var(--c-on-primary) / <alpha-value>)',
       },
       fontFamily: {
         // Apex Elite's type system is Inter end-to-end (headings lean on

@@ -80,7 +80,7 @@ export default function Plans() {
         </button>
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       <div className="grid gap-4 md:grid-cols-3">
         {plans.map((plan) => (
@@ -100,7 +100,7 @@ export default function Plans() {
               <button onClick={() => toggleActive(plan)} className="text-steel hover:text-ink">
                 {plan.isActive ? 'Deactivate' : 'Activate'}
               </button>
-              <button onClick={() => handleDelete(plan)} className="text-steel hover:text-ember-dark">Delete</button>
+              <button onClick={() => handleDelete(plan)} className="text-steel hover:text-danger">Delete</button>
             </div>
           </div>
         ))}
@@ -122,7 +122,7 @@ export default function Plans() {
               <label className="field-label">Duration (months)</label>
               <input type="number" className="field-input" value={form.durationMonths} onChange={(e) => setForm({ ...form, durationMonths: e.target.value })} required />
             </div>
-            {saveError && <div className="mb-3 text-sm text-ember-dark">{saveError}</div>}
+            {saveError && <div className="mb-3 text-sm text-danger">{saveError}</div>}
             <button type="submit" disabled={saving} className="btn-primary w-full">
               {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add plan'}
             </button>

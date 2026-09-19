@@ -4,6 +4,8 @@ import Modal from '../../components/Modal.jsx';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { escapeHtml } from '../../utils/escapeHtml.js';
+import GymBranding from './GymBranding.jsx';
 
 function installUrlFor(admin) {
   if (!admin?.slug) return null;
@@ -24,6 +26,8 @@ export default function Admins() {
   const [editing, setEditing] = useState(null);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState('');
+
+  const [brandingGym, setBrandingGym] = useState(null);
 
   const [summaryFor, setSummaryFor] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -121,16 +125,19 @@ export default function Admins() {
   function printStaffFlyer() {
     if (!staffQr?.qrDataUrl) return;
     const win = window.open('');
+    const safeInstallUrl = escapeHtml(staffQr.staffInstallUrl);
     win.document.write(
-      `<html><head><title>Staff Operations App - Setup Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:30px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Ironline Platform</h2><h1>Staff Operations App</h1><p>Dedicated management portal for Gym Admins, Front Desk Staff, and Personal Trainers.</p><div class="card"><img src="${staffQr.qrDataUrl}"/><br/><span class="url">${staffQr.staffInstallUrl}</span></div><div class="instructions"><strong>Setup Instructions:</strong><ol><li>Open the camera on your smartphone or tablet and scan the QR code.</li><li>Tap the link to open the Staff Portal.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your staff credentials.</li></ol></div><script>window.print();</script></body></html>`
+      `<html><head><title>Staff Operations App - Setup Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:30px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Ironline Platform</h2><h1>Staff Operations App</h1><p>Dedicated management portal for Gym Admins, Front Desk Staff, and Personal Trainers.</p><div class="card"><img src="${staffQr.qrDataUrl}"/><br/><span class="url">${safeInstallUrl}</span></div><div class="instructions"><strong>Setup Instructions:</strong><ol><li>Open the camera on your smartphone or tablet and scan the QR code.</li><li>Tap the link to open the Staff Portal.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your staff credentials.</li></ol></div><script>window.print();</script></body></html>`
     );
     win.document.close();
   }
 
   function printMemberFlyer(admin, qrDataUrl, installUrl) {
     const win = window.open('');
+    const safeGymName = escapeHtml(admin?.gymName);
+    const safeInstallUrl = escapeHtml(installUrl);
     win.document.write(
-      `<html><head><title>${admin.gymName} - Member App Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:32px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Official Gym App</h2><h1>${admin.gymName}</h1><p>Scan with your phone to install our official member app. Track workouts, diets, attendance streaks and dues.</p><div class="card"><img src="${qrDataUrl}"/><br/><span class="url">${installUrl}</span></div><div class="instructions"><strong>Quick Setup:</strong><ol><li>Scan the QR code with your smartphone camera.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your member username & password.</li></ol></div><script>window.print();</script></body></html>`
+      `<html><head><title>${safeGymName} - Member App Flyer</title><style>body{text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;padding:40px;color:#111;}h2{font-size:14px;color:#ff4e1f;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}h1{font-size:32px;margin-top:0;margin-bottom:8px;font-weight:800;}.card{display:inline-block;padding:24px;border:2px solid #e4e4e7;border-radius:20px;margin:20px 0;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.06);}img{width:280px;height:280px;}.url{font-family:monospace;font-size:14px;background:#f4f4f5;padding:8px 16px;border-radius:8px;display:inline-block;margin-top:12px;color:#27272a;}.instructions{max-width:440px;margin:24px auto 0;text-align:left;font-size:14px;line-height:1.6;color:#52525b;}.instructions ol{padding-left:20px;}</style></head><body><h2>Official Gym App</h2><h1>${safeGymName}</h1><p>Scan with your phone to install our official member app. Track workouts, diets, attendance streaks and dues.</p><div class="card"><img src="${qrDataUrl}"/><br/><span class="url">${safeInstallUrl}</span></div><div class="instructions"><strong>Quick Setup:</strong><ol><li>Scan the QR code with your smartphone camera.</li><li>Tap <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong>.</li><li>Sign in with your member username & password.</li></ol></div><script>window.print();</script></body></html>`
     );
     win.document.close();
   }
@@ -220,29 +227,35 @@ export default function Admins() {
         </div>
       </div>
 
-      {error && <div className="mb-4 text-sm text-ember-dark">{error}</div>}
+      {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
       <ListCard>
         {admins.map((admin) => (
           <ListRow
             key={admin._id}
             icon="building"
-            iconBg={admin.isSuspended ? 'bg-ember/15 text-ember-dark' : 'bg-chalk/15 text-chalk-dark'}
+            iconBg={admin.isSuspended ? 'bg-danger/15 text-danger' : 'bg-chalk/15 text-chalk-dark'}
             title={admin.gymName}
             subtitle={
               <>
                 {admin.user?.username} ·{' '}
-                <span className={admin.user?.isActive === false ? 'text-ember-dark' : 'text-chalk-dark'}>
+                <span className={admin.user?.isActive === false ? 'text-danger' : 'text-chalk-dark'}>
                   {admin.user?.isActive === false ? 'Login disabled' : 'Login enabled'}
                 </span>{' '}
                 ·{' '}
-                <span className={admin.isSuspended ? 'text-ember-dark font-medium' : 'text-chalk-dark font-medium'}>
+                <span className={admin.isSuspended ? 'text-danger font-medium' : 'text-chalk-dark font-medium'}>
                   {admin.isSuspended ? 'Suspended' : 'Active'}
                 </span>
               </>
             }
             trailing={
               <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+                <button
+                  onClick={() => setBrandingGym(admin)}
+                  className="rounded-lg bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-ink/10 transition-colors"
+                >
+                  🎨 Branding
+                </button>
                 <button onClick={() => openInstallLink(admin)} className="text-xs font-medium text-iron hover:underline">Install link</button>
                 <button onClick={() => copyInstallLink(admin)} className="text-xs font-medium text-steel hover:text-ink">Copy link</button>
                 <button onClick={() => openSummary(admin)} className="text-xs font-medium text-iron hover:underline">Summary</button>
@@ -293,7 +306,7 @@ export default function Admins() {
               <label className="field-label">Working hours</label>
               <input className="field-input" value={form.workingHours} onChange={(e) => setForm({ ...form, workingHours: e.target.value })} />
             </div>
-            {createError && <div className="mb-3 text-sm text-ember-dark">{createError}</div>}
+            {createError && <div className="mb-3 text-sm text-danger">{createError}</div>}
             <button type="submit" disabled={creating} className="btn-primary w-full">
               {creating ? 'Creating…' : 'Create gym account'}
             </button>
@@ -320,7 +333,7 @@ export default function Admins() {
               <label className="field-label">Working hours</label>
               <input className="field-input" value={editing.workingHours || ''} onChange={(e) => setEditing({ ...editing, workingHours: e.target.value })} />
             </div>
-            {editError && <div className="mb-3 text-sm text-ember-dark">{editError}</div>}
+            {editError && <div className="mb-3 text-sm text-danger">{editError}</div>}
             <button type="submit" disabled={savingEdit} className="btn-primary w-full">
               {savingEdit ? 'Saving…' : 'Save changes'}
             </button>
@@ -332,7 +345,7 @@ export default function Admins() {
         <Modal title={`${summaryFor.gymName} — summary`} onClose={() => setSummaryFor(null)}>
           {/* BUG #11 FIX: Show error instead of infinite "Loading…" */}
           {summaryError ? (
-            <div className="py-8 text-center text-sm text-ember-dark">{summaryError}</div>
+            <div className="py-8 text-center text-sm text-danger">{summaryError}</div>
           ) : !summary ? (
             <div className="py-8 text-center text-sm text-steel">Loading…</div>
           ) : (
@@ -348,7 +361,7 @@ export default function Admins() {
               </div>
               <div className="panel px-4 py-3 col-span-2">
                 <div className="text-xs uppercase tracking-wide text-steel">Overdue fees</div>
-                <div className={`stat-number mt-1 text-lg ${summary.overdueFees ? 'text-ember-dark' : ''}`}>{summary.overdueFees}</div>
+                <div className={`stat-number mt-1 text-lg ${summary.overdueFees ? 'text-danger' : ''}`}>{summary.overdueFees}</div>
               </div>
             </div>
           )}
@@ -371,7 +384,7 @@ export default function Admins() {
             </button>
           </div>
           {installError ? (
-            <div className="py-4 text-center text-sm text-ember-dark">{installError}</div>
+            <div className="py-4 text-center text-sm text-danger">{installError}</div>
           ) : !installQr ? (
             <div className="py-8 text-center text-sm text-steel">Generating QR code…</div>
           ) : (
@@ -399,7 +412,7 @@ export default function Admins() {
             Installable management app for Gym Admins, Receptionists, and Personal Trainers. Scan with any mobile or tablet camera to install.
           </p>
           {staffQrError ? (
-            <div className="py-4 text-center text-sm text-ember-dark">{staffQrError}</div>
+            <div className="py-4 text-center text-sm text-danger">{staffQrError}</div>
           ) : !staffQr ? (
             <div className="py-8 text-center text-sm text-steel">Generating Staff App QR…</div>
           ) : (
@@ -439,6 +452,26 @@ export default function Admins() {
           <div className="rounded-sm border border-ink/15 bg-ink/[0.03] px-4 py-4 text-sm text-ink">
             {resetMessage}
           </div>
+        </Modal>
+      )}
+
+      {brandingGym && (
+        <Modal
+          title={`Branding & Layout — ${brandingGym.gymName}`}
+          onClose={() => setBrandingGym(null)}
+          width="max-w-5xl"
+        >
+          <GymBranding
+            admin={brandingGym}
+            allAdmins={admins}
+            onClose={() => setBrandingGym(null)}
+            onUpdated={(updated) => {
+              setAdmins((prev) =>
+                prev.map((a) => (a._id === updated._id ? { ...a, ...updated } : a))
+              );
+              load();
+            }}
+          />
         </Modal>
       )}
     </div>

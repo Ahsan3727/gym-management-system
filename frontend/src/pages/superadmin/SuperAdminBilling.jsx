@@ -389,7 +389,7 @@ export default function SuperAdminBilling() {
         </div>
       </div>
 
-      {error && <div className="text-sm text-ember-dark">{error}</div>}
+      {error && <div className="text-sm text-danger">{error}</div>}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -412,7 +412,7 @@ export default function SuperAdminBilling() {
           label="Overdue Invoices"
           value={stats?.overdueCount || 0}
           sub="Past due date"
-          accent="text-ember-dark"
+          accent="text-danger"
         />
         <StatCard
           icon="bell"
@@ -523,7 +523,7 @@ export default function SuperAdminBilling() {
                             isPaid
                               ? 'bg-chalk/15 text-chalk-dark border border-chalk/30'
                               : isOverdue
-                              ? 'bg-ember/15 text-ember-dark border border-ember/30'
+                              ? 'bg-danger/15 text-danger border border-danger/30'
                               : f.status === 'waived'
                               ? 'bg-steel/15 text-steel'
                               : 'bg-iron/10 text-iron border border-iron/20'
@@ -710,7 +710,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            {createError && <div className="text-sm text-ember-dark">{createError}</div>}
+            {createError && <div className="text-sm text-danger">{createError}</div>}
 
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary">
@@ -777,7 +777,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            {bulkError && <div className="text-sm text-ember-dark">{bulkError}</div>}
+            {bulkError && <div className="text-sm text-danger">{bulkError}</div>}
 
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setShowBulk(false)} className="btn-secondary">
@@ -858,7 +858,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            {payError && <div className="text-sm text-ember-dark">{payError}</div>}
+            {payError && <div className="text-sm text-danger">{payError}</div>}
 
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setPayingFee(null)} className="btn-secondary">
@@ -929,7 +929,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            {editError && <div className="text-sm text-ember-dark">{editError}</div>}
+            {editError && <div className="text-sm text-danger">{editError}</div>}
 
             <div className="flex justify-end gap-3 pt-2">
               <button type="button" onClick={() => setEditingFee(null)} className="btn-secondary">

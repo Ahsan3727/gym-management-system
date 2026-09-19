@@ -9,6 +9,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { protect } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { loginSchema, changePasswordSchema } = require('../schemas/authSchemas');
+const { resolveBranding } = require('../utils/branding');
 
 const router = express.Router();
 
@@ -83,6 +84,7 @@ router.post(
     let gymName = null;
     let gymLogoUrl = null;
     let resolvedGymSlug = null;
+    let resolvedBranding = null;
 
     // Check if the gym is suspended (for admin, customer, or trainer)
     if (user.role === 'admin') {
@@ -93,6 +95,7 @@ router.post(
       gymName = adminDoc?.gymName || null;
       gymLogoUrl = adminDoc?.gymLogoUrl || null;
       resolvedGymSlug = adminDoc?.slug || null;
+      resolvedBranding = adminDoc ? resolveBranding(adminDoc) : null;
     } else if (user.admin) {
       const adminDoc = await Admin.findById(user.admin);
       if (adminDoc?.isSuspended) {
@@ -101,6 +104,7 @@ router.post(
       gymName = adminDoc?.gymName || null;
       gymLogoUrl = adminDoc?.gymLogoUrl || null;
       resolvedGymSlug = adminDoc?.slug || null;
+      resolvedBranding = adminDoc ? resolveBranding(adminDoc) : null;
     }
 
     const token = generateToken(user);
@@ -119,6 +123,7 @@ router.post(
         gymName,
         gymLogoUrl,
         gymSlug: resolvedGymSlug,
+        branding: resolvedBranding,
       },
     });
   })
@@ -196,7 +201,7 @@ router.get(
   '/me',
   protect,
   asyncHandler(async (req, res) => {
-    const base = { id: req.user._id, username: req.user.username, role: req.user.role };
+    const base = { id: req.user._id, username: req.user.username, role: req.user.role, branding: null };
 
     if (req.user.role === 'admin') {
       const adminDoc = await Admin.findOne({ user: req.user._id });
@@ -206,6 +211,7 @@ router.get(
         gymName: adminDoc?.gymName || null,
         gymLogoUrl: adminDoc?.gymLogoUrl || null,
         gymSlug: adminDoc?.slug || null,
+        branding: adminDoc ? resolveBranding(adminDoc) : null,
       });
     }
     if (req.user.role === 'customer') {
@@ -217,6 +223,7 @@ router.get(
         gymName: adminDoc?.gymName || null,
         gymLogoUrl: adminDoc?.gymLogoUrl || null,
         gymSlug: adminDoc?.slug || null,
+        branding: adminDoc ? resolveBranding(adminDoc) : null,
       });
     }
     if (req.user.role === 'trainer') {
@@ -228,6 +235,7 @@ router.get(
         gymName: adminDoc?.gymName || null,
         gymLogoUrl: adminDoc?.gymLogoUrl || null,
         gymSlug: adminDoc?.slug || null,
+        branding: adminDoc ? resolveBranding(adminDoc) : null,
       });
     }
     res.json(base); // super_admin has no extra profile document
