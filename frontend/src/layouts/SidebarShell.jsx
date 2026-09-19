@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTenant } from '../context/TenantContext.jsx';
-import { BrandHeader, NavItemLink, AccountCard, useAccentClasses } from './shellParts.jsx';
+import { BrandHeader, NavItemLink, AccountCard, useAccentStyles } from './shellParts.jsx';
 
 export default function SidebarShell({ navItems, accent = 'ember', roleLabel, brandSub }) {
   const { user, logout } = useAuth();
@@ -27,7 +27,7 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
     };
   }, [mobileOpen]);
 
-  const { accentText, accentBg, accentActiveBg, accentIconBg } = useAccentClasses(accent);
+  const { bgStyle, colorStyle } = useAccentStyles();
   const initials = (user?.username || '?').trim().charAt(0).toUpperCase();
 
   const sidebarContent = (
@@ -37,8 +37,6 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
         gymName={gymName}
         roleLabel={roleLabel}
         brandSub={brandSub}
-        accentBg={accentBg}
-        accentText={accentText}
         isSuperAdmin={isSuperAdmin}
         onClose={() => setMobileOpen(false)}
       />
@@ -48,9 +46,6 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
           <NavItemLink
             key={item.to}
             item={item}
-            accentActiveBg={accentActiveBg}
-            accentText={accentText}
-            accentIconBg={accentIconBg}
             onClick={() => setMobileOpen(false)}
           />
         ))}
@@ -60,7 +55,6 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
         user={user}
         roleLabel={roleLabel}
         initials={initials}
-        accentBg={accentBg}
         onLogout={() => {
           setMobileOpen(false);
           logout();
@@ -77,7 +71,7 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
           {gymLogo ? (
             <img src={gymLogo} alt={gymName} className="h-8 w-8 shrink-0 rounded-xl object-cover border border-ink/10 shadow-sm" />
           ) : (
-            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${accentBg}`}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={bgStyle}>
               <svg className="icon !h-4 !w-4 text-on-primary">
                 <use href={isSuperAdmin ? '#i-shield' : '#i-zap'} />
               </svg>
@@ -86,7 +80,7 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
           <span className="font-display text-base font-bold tracking-wide text-ink truncate uppercase">
             {gymName}
           </span>
-          <span className={`shrink-0 text-[11px] font-bold uppercase tracking-wide ${accentText}`}>· {roleLabel}</span>
+          <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide" style={colorStyle}>· {roleLabel}</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -123,7 +117,7 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
 
       {/* Main Content Body */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-10">
+        <div className="mx-auto max-w-5xl overflow-x-hidden px-4 py-6 md:px-8 md:py-10">
           <Outlet />
         </div>
       </main>

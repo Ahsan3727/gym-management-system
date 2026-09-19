@@ -10,7 +10,8 @@ export default function DashboardRenderer({ app = 'member' }) {
   const { tenant } = useTenant();
   const { settings } = resolveBranding(user?.role, tenant, user);
 
-  const blockIds = resolveDashboardBlocks(app, settings?.dashboard);
+  const preset = settings?.dashboard || 'classic';
+  const blockIds = resolveDashboardBlocks(app, preset);
   const blockRegistry = app === 'member' ? MEMBER_BLOCKS : ADMIN_BLOCKS;
 
   const isStatBlock = (id) =>
@@ -33,7 +34,10 @@ export default function DashboardRenderer({ app = 'member' }) {
         i++;
       }
       elements.push(
-        <div key={`stat-group-${statGroup.join('-')}`} className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div
+          key={`stat-group-${statGroup.join('-')}`}
+          className={`mb-6 grid gap-4 ${statGroup.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'}`}
+        >
           {statGroup.map((statId) => {
             const Comp = blockRegistry[statId];
             return Comp ? <Comp key={statId} /> : null;
@@ -51,7 +55,7 @@ export default function DashboardRenderer({ app = 'member' }) {
         i++;
       }
       elements.push(
-        <div key={`chart-group-${chartGroup.join('-')}`} className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div key={`chart-group-${chartGroup.join('-')}`} className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {chartGroup.map((chartId) => {
             const Comp = blockRegistry[chartId];
             return Comp ? <Comp key={chartId} /> : null;
@@ -65,7 +69,7 @@ export default function DashboardRenderer({ app = 'member' }) {
     const Component = blockRegistry[id];
     if (Component) {
       elements.push(
-        <div key={id} className="mb-8">
+        <div key={id} className={preset === 'compact' ? 'mb-4' : 'mb-8'}>
           <Component />
         </div>
       );
@@ -73,5 +77,5 @@ export default function DashboardRenderer({ app = 'member' }) {
     i++;
   }
 
-  return <div className="dashboard-container">{elements}</div>;
+  return <div className={`dashboard-container dashboard--${preset}`}>{elements}</div>;
 }

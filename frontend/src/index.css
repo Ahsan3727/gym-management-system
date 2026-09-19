@@ -114,7 +114,7 @@ html.light {
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-soft transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-on-primary shadow-soft transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
     background: linear-gradient(135deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)) 70%);
   }
   .btn-primary:hover:not(:disabled) {
@@ -124,7 +124,7 @@ html.light {
     @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-panel px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/30 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ember/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-ember-dark transition-colors hover:bg-ember/10 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-danger/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-danger-dark transition-colors hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50;
   }
   .field-label {
     @apply mb-1.5 block text-sm font-medium text-steel;
@@ -302,4 +302,25 @@ html.light {
     background: linear-gradient(135deg, rgb(var(--c-panel)), rgb(var(--c-ember, var(--c-iron)) / 0.12));
     border-color: rgb(var(--c-ember, var(--c-iron)) / 0.3);
   }
+
+  /* ── Dashboard Preset Strategies ────────────────────────────────────── */
+
+  /* compact: tighter spacing throughout */
+  .dashboard--compact .mb-6 { margin-bottom: 0.75rem; }
+  .dashboard--compact .mb-4 { margin-bottom: 0.5rem; }
+
+  /* focus: hero treatment on the first full-width block */
+  .dashboard--focus > div:first-child > * {
+    @apply hero-card;
+    background: linear-gradient(135deg, rgb(var(--c-panel)), rgb(var(--c-ember, var(--c-iron)) / 0.08));
+    border: 1px solid rgb(var(--c-ember, var(--c-iron)) / 0.2);
+  }
 }
+
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+/* scrollbar-none: used by TopBarShell horizontal sub-nav on mobile         */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar { display: none; }

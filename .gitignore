@@ -3,3 +3,13 @@ dist/
 .env
 *.log
 .DS_Store
+
+# CodeGraph — auto-generated outputs (regenerate with: python .codegraph/export_graph.py)
+.codegraph/graph.db
+.codegraph/graph.json
+.codegraph/graph.html
+.codegraph/CODEGRAPH_REPORT.md
+
+# Playwright — snapshots committed after baseline recording; reports are CI artifacts
+frontend/playwright-report/
+frontend/test-results/

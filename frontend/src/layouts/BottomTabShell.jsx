@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTenant } from '../context/TenantContext.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
-import { useAccentClasses } from './shellParts.jsx';
+import { useAccentStyles } from './shellParts.jsx';
 
 export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }) {
   const { user, logout } = useAuth();
@@ -14,7 +14,7 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
   const gymName = isSuperAdmin ? 'IRONLINE' : (user?.gymName || tenant?.gymName || 'IRONLINE');
   const gymLogo = isSuperAdmin ? null : (user?.gymLogoUrl || tenant?.gymLogoUrl || null);
 
-  const { accentText, accentBg, accentActiveBg } = useAccentClasses(accent);
+  const { bgStyle, activeBgStyle, colorStyle } = useAccentStyles();
   const initials = (user?.username || '?').trim().charAt(0).toUpperCase();
 
   // Split primary tabs (max 4) vs extra items in "More"
@@ -29,7 +29,7 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
           {gymLogo ? (
             <img src={gymLogo} alt={gymName} className="h-8 w-8 shrink-0 rounded-xl object-cover border border-ink/10 shadow-sm" />
           ) : (
-            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${accentBg}`}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl" style={bgStyle}>
               <svg className="icon !h-4 !w-4 text-on-primary">
                 <use href={isSuperAdmin ? '#i-shield' : '#i-zap'} />
               </svg>
@@ -38,19 +38,22 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
           <span className="font-display text-base font-bold tracking-wide text-ink truncate uppercase">
             {gymName}
           </span>
-          <span className={`shrink-0 text-[11px] font-bold uppercase tracking-wide ${accentText}`}>· {roleLabel}</span>
+          <span className="shrink-0 text-[11px] font-bold uppercase tracking-wide" style={colorStyle}>· {roleLabel}</span>
         </div>
 
         <div className="flex items-center gap-2">
           <ThemeToggle className="scale-90" />
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-on-primary ${accentBg}`}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-on-primary" style={bgStyle}>
             {initials}
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 pb-24 px-4 py-6 md:px-8 max-w-5xl mx-auto w-full">
+      <main
+        className="flex-1 overflow-x-hidden px-4 py-6 md:px-8 max-w-5xl mx-auto w-full"
+        style={{ paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         <Outlet />
       </main>
 
@@ -89,9 +92,10 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
               onClick={() => setShowMore(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors ${
-                  isActive ? `${accentActiveBg} ${accentText}` : 'text-steel hover:bg-ink/5 hover:text-ink'
+                  isActive ? '' : 'text-steel hover:bg-ink/5 hover:text-ink'
                 }`
               }
+              style={({ isActive }) => isActive ? { ...activeBgStyle, ...colorStyle } : {}}
             >
               <svg className="icon !h-5 !w-5">
                 <use href={`#i-${item.icon || 'dots'}`} />
@@ -103,7 +107,7 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
 
         <div className="border-t border-ink/10 pt-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-on-primary ${accentBg}`}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-on-primary" style={bgStyle}>
               {initials}
             </div>
             <div className="text-xs font-semibold text-ink">{user?.username}</div>
@@ -140,8 +144,9 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
               <>
                 <div
                   className={`flex h-8 w-12 items-center justify-center rounded-xl mb-0.5 transition-colors ${
-                    isActive ? accentActiveBg : 'hover:bg-ink/5'
+                    isActive ? '' : 'hover:bg-ink/5'
                   }`}
+                  style={isActive ? activeBgStyle : {}}
                 >
                   <svg className="icon !h-5 !w-5">
                     <use href={`#i-${item.icon || 'dots'}`} />

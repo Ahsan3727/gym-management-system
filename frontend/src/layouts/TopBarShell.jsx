@@ -3,7 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTenant } from '../context/TenantContext.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
-import { useAccentClasses } from './shellParts.jsx';
+import { useAccentStyles } from './shellParts.jsx';
 
 export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
   const { user, logout } = useAuth();
@@ -14,7 +14,7 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
   const gymName = isSuperAdmin ? 'IRONLINE' : (user?.gymName || tenant?.gymName || 'IRONLINE');
   const gymLogo = isSuperAdmin ? null : (user?.gymLogoUrl || tenant?.gymLogoUrl || null);
 
-  const { accentText, accentBg, accentActiveBg, accentIconBg } = useAccentClasses(accent);
+  const { bgStyle, activeBgStyle, colorStyle } = useAccentStyles();
   const initials = (user?.username || '?').trim().charAt(0).toUpperCase();
 
   return (
@@ -31,7 +31,7 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
                 className="h-9 w-9 shrink-0 rounded-xl object-cover border border-ink/10 shadow-sm"
               />
             ) : (
-              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${accentBg} shadow-sm`}>
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm`} style={bgStyle}>
                 <svg className="icon !h-5 !w-5 text-on-primary">
                   <use href={isSuperAdmin ? '#i-shield' : '#i-zap'} />
                 </svg>
@@ -41,7 +41,7 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
               <div className="font-display text-base font-extrabold tracking-tight text-ink uppercase truncate">
                 {gymName}
               </div>
-              <div className={`text-[10px] font-bold uppercase tracking-wider ${accentText}`}>
+              <div className="text-[10px] font-bold uppercase tracking-wider" style={colorStyle}>
                 {roleLabel}
               </div>
             </div>
@@ -56,11 +56,10 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
                 end={item.end}
                 className={({ isActive }) =>
                   `flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold transition-colors ${
-                    isActive
-                      ? `${accentActiveBg} ${accentText} font-bold shadow-sm`
-                      : 'text-steel hover:bg-ink/5 hover:text-ink'
+                    isActive ? 'font-bold shadow-sm' : 'text-steel hover:bg-ink/5 hover:text-ink'
                   }`
                 }
+                style={({ isActive }) => isActive ? { ...activeBgStyle, ...colorStyle } : {}}
               >
                 <svg className="icon !h-4 !w-4">
                   <use href={`#i-${item.icon || 'dots'}`} />
@@ -77,7 +76,8 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
               <button
                 type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-on-primary ${accentBg} ring-2 ring-transparent hover:ring-ink/20 transition-all`}
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-on-primary ring-2 ring-transparent hover:ring-ink/20 transition-all`}
+              style={bgStyle}
                 aria-label="User menu"
               >
                 {initials}
@@ -117,11 +117,10 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
               end={item.end}
               className={({ isActive }) =>
                 `flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  isActive
-                    ? `${accentActiveBg} ${accentText} font-bold`
-                    : 'text-steel hover:bg-ink/5 hover:text-ink'
+                  isActive ? 'font-bold' : 'text-steel hover:bg-ink/5 hover:text-ink'
                 }`
               }
+              style={({ isActive }) => isActive ? { ...activeBgStyle, ...colorStyle } : {}}
             >
               <svg className="icon !h-3.5 !w-3.5">
                 <use href={`#i-${item.icon || 'dots'}`} />
