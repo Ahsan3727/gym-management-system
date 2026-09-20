@@ -72,7 +72,7 @@ const STYLE = {
   success: 'bg-green-600 text-white',
   error:   'bg-danger text-on-primary',
   warning: 'bg-amber-500 text-white',
-  info:    'bg-iron text-on-primary',
+  info:    'bg-panel border border-ink/20 text-ink shadow-lg',
 };
 
 function ToastItem({ toast, onDismiss }) {

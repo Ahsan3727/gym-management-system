@@ -24,7 +24,9 @@ const {
   disableAdminSchema,
 } = require('../schemas/superAdminSchemas');
 const { brandingSchema } = require('../schemas/brandingSchemas');
+const { createBrandPackageSchema } = require('../schemas/brandPackageSchemas');
 const { resolveBranding } = require('../utils/branding');
+const BrandPackage = require('../models/BrandPackage');
 
 const router = express.Router();
 
@@ -454,6 +456,43 @@ router.get(
       monthlyGymGrowth,
       topGyms,
     });
+  })
+);
+
+
+/* ----------------------- Custom Brand Packages ----------------------- */
+
+// GET all custom packages (newest first)
+router.get(
+  '/brand-packages',
+  asyncHandler(async (req, res) => {
+    const packages = await BrandPackage.find().sort({ created_at: -1 }).lean();
+    res.json(packages);
+  })
+);
+
+// POST create a new package
+router.post(
+  '/brand-packages',
+  validate(createBrandPackageSchema),
+  asyncHandler(async (req, res) => {
+    const pkg = await BrandPackage.create({
+      ...req.body,
+      createdBy: req.user._id,
+    });
+    await logAction(req, 'brand_package_create', `Created package "${pkg.name}"`);
+    res.status(201).json(pkg);
+  })
+);
+
+// DELETE a package
+router.delete(
+  '/brand-packages/:id',
+  asyncHandler(async (req, res) => {
+    const pkg = await BrandPackage.findByIdAndDelete(req.params.id);
+    if (!pkg) return res.status(404).json({ message: 'Package not found.' });
+    await logAction(req, 'brand_package_delete', `Deleted package "${pkg.name}"`);
+    res.json({ message: 'Deleted.' });
   })
 );
 

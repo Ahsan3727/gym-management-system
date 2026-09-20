@@ -159,7 +159,10 @@ export default function Login() {
               className="login-logo mb-4 h-16 w-16 rounded-2xl object-cover border border-ink/10"
             />
           ) : (
-            <div className="login-logo mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-ember text-on-primary">
+            <div
+              className="login-logo mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-on-primary"
+              style={{ backgroundColor: 'rgb(var(--c-ember))' }}
+            >
               <svg className="icon !h-8 !w-8"><use href="#i-zap" /></svg>
             </div>
           )}
@@ -248,7 +251,8 @@ export default function Login() {
               id="login-remember"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded border-ink/20 accent-ember cursor-pointer"
+              className="h-4 w-4 rounded border-ink/20 cursor-pointer"
+              style={{ accentColor: 'rgb(var(--c-ember))' }}
             />
             <span>Remember username</span>
           </label>

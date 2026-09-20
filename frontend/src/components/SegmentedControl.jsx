@@ -15,7 +15,9 @@ import React from 'react';
  * `options` also accepts a plain string array (used as both value and label).
  */
 export default function SegmentedControl({ options, value, onChange, accent = 'ember', className = '' }) {
-  const accentBg = { ember: 'bg-ember', iron: 'bg-iron', chalk: 'bg-chalk' }[accent] || 'bg-ember';
+  // CSS variable drives active colour — works with all 12 themes.
+  // accent prop kept for API compatibility but is no longer needed.
+  const activeBgStyle = { backgroundColor: 'rgb(var(--c-ember))' };
 
   return (
     <div className={`inline-flex rounded-full border border-ink/10 bg-panel p-1 ${className}`}>
@@ -29,8 +31,9 @@ export default function SegmentedControl({ options, value, onChange, accent = 'e
             type="button"
             onClick={() => onChange(optValue)}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
-              active ? `${accentBg} text-on-primary shadow-soft` : 'text-steel hover:text-ink'
+              active ? 'text-on-primary shadow-soft' : 'text-steel hover:text-ink'
             }`}
+            style={active ? activeBgStyle : {}}
           >
             {optLabel}
           </button>

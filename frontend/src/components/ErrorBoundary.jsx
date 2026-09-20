@@ -40,7 +40,7 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bone px-6 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ember/15 text-ember">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-danger/15 text-danger">
             <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
               <path
                 d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.93 21h16.14a2 2 0 0 0 1.82-2.96L13.71 3.86a2 2 0 0 0-3.42 0Z"

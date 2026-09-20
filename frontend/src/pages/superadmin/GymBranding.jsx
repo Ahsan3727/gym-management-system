@@ -8,12 +8,16 @@ import DashboardPicker from '../../components/branding/DashboardPicker.jsx';
 import SurfacePicker from '../../components/branding/SurfacePicker.jsx';
 import BrandingPreview from '../../components/branding/BrandingPreview.jsx';
 import { DEFAULT_APP } from '../../theme/themes.js';
+import PackagePicker from '../../components/branding/PackagePicker.jsx';
+import SavePackageModal from '../../components/branding/SavePackageModal.jsx';
 
 export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] }) {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState('memberApp'); // 'memberApp' | 'adminApp'
+  const [activeTab, setActiveTab] = useState('memberApp');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [showSavePackage, setShowSavePackage] = useState(false);
+  const [pkgRefreshKey, setPkgRefreshKey] = useState(0);
 
   const initialMember = admin?.branding?.memberApp || { ...DEFAULT_APP };
   const initialAdmin = admin?.branding?.adminApp || { ...DEFAULT_APP };
@@ -62,6 +66,12 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
       setAdminDraft({ ...DEFAULT_APP });
     }
     showToast(`Reset ${activeTab === 'memberApp' ? 'Member' : 'Admin'} app to default settings.`);
+  }
+
+  function handlePackageSelect(pkg) {
+    setMemberDraft({ ...pkg.memberApp });
+    setAdminDraft({ ...pkg.adminApp });
+    showToast(`Applied "${pkg.name}" package — review and save when ready.`, { type: 'success' });
   }
 
   function handleCopyFrom(otherGymId) {
@@ -118,6 +128,14 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
 
           <button
             type="button"
+            onClick={() => setShowSavePackage(true)}
+            className="btn-secondary text-xs py-1.5 px-3"
+            title="Save current settings as a reusable package"
+          >
+            💾 Save as Package
+          </button>
+          <button
+            type="button"
             onClick={handleReset}
             className="btn-secondary text-xs py-1.5 px-3"
           >
@@ -135,6 +153,20 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
       </div>
 
       {error && <div className="rounded-xl bg-danger/10 border border-danger/30 p-3 text-xs text-danger">{error}</div>}
+
+      {/* Recommended Packages */}
+      <PackagePicker
+        activeTab={activeTab}
+        onSelect={handlePackageSelect}
+        refreshKey={pkgRefreshKey}
+      />
+
+      {/* Divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 border-t border-ink/10" />
+        <span className="text-[10px] uppercase tracking-widest text-steel/60 font-semibold">or configure manually</span>
+        <div className="flex-1 border-t border-ink/10" />
+      </div>
 
       {/* App Target Tabs */}
       <div className="flex border-b border-ink/10">
@@ -246,6 +278,17 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
           </div>
         </div>
       </div>
+      {showSavePackage && (
+        <SavePackageModal
+          memberDraft={memberDraft}
+          adminDraft={adminDraft}
+          onClose={() => setShowSavePackage(false)}
+          onSaved={() => {
+            setShowSavePackage(false);
+            setPkgRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
     </div>
   );
 }

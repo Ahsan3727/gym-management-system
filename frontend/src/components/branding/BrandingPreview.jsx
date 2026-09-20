@@ -23,7 +23,10 @@ export default function BrandingPreview({ settings, app = 'memberApp', gymName =
     >
       <div className="mb-4 flex items-center justify-between border-b border-ink/10 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-ember text-on-primary font-bold text-xs">
+          <div
+            className="flex h-8 w-8 items-center justify-center rounded-xl text-on-primary font-bold text-xs"
+            style={{ backgroundColor: 'rgb(var(--c-ember))' }}
+          >
             ⚡
           </div>
           <div>

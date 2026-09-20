@@ -11,7 +11,8 @@ import React from 'react';
  *   />
  */
 export default function Timeline({ items, accent = 'ember' }) {
-  const accentBg = { ember: 'bg-ember', iron: 'bg-iron', chalk: 'bg-chalk' }[accent] || 'bg-ember';
+  // CSS variable drives dot colour — works with all 12 themes.
+  const accentDotStyle = { backgroundColor: 'rgb(var(--c-ember))' };
 
   return (
     <div className="relative pl-6">
@@ -20,7 +21,8 @@ export default function Timeline({ items, accent = 'ember' }) {
         {items.map((item, i) => (
           <div key={item.id ?? i} className="relative">
             <span
-              className={`absolute -left-6 top-1 h-3.5 w-3.5 rounded-full border-2 border-panel ${accentBg}`}
+              className="absolute -left-6 top-1 h-3.5 w-3.5 rounded-full border-2 border-panel"
+              style={accentDotStyle}
             />
             <div className="flex items-baseline justify-between gap-3">
               <div className="text-sm font-semibold text-ink">{item.title}</div>

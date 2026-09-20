@@ -26,7 +26,7 @@ export default function CoachingSessionsBlock() {
                   <div className="text-xs text-steel mt-0.5">
                     Coach {s.trainer?.name || 'Assigned Trainer'}
                   </div>
-                  <div className="text-xs text-iron mt-1 font-medium">
+                  <div className="text-xs text-steel mt-1 font-medium">
                     🗓️ {sDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} at{' '}
                     {sDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ({s.durationMinutes}m)
                   </div>
