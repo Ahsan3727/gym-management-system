@@ -61,10 +61,13 @@ export default class ErrorBoundary extends React.Component {
           <button onClick={this.handleReload} className="btn-primary">
             Reload page
           </button>
-          {import.meta.env.DEV && this.state.error && (
-            <pre className="mt-4 max-w-xl overflow-auto rounded-xl bg-ink/5 p-4 text-left text-xs text-steel">
-              {String(this.state.error?.stack || this.state.error)}
-            </pre>
+          {this.state.error && (import.meta.env.DEV || localStorage.getItem('gym_user')?.includes('admin')) && (
+            <details className="mt-4 max-w-xl text-left text-xs text-steel">
+              <summary className="cursor-pointer font-medium hover:text-ink">Technical details</summary>
+              <pre className="mt-2 overflow-auto rounded-xl bg-ink/5 p-4 font-mono text-[11px]">
+                {String(this.state.error?.message || this.state.error)}
+              </pre>
+            </details>
           )}
         </div>
       );

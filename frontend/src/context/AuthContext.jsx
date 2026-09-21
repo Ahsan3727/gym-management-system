@@ -5,8 +5,13 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem('gym_user');
-    return raw ? JSON.parse(raw) : null;
+    try {
+      const raw = localStorage.getItem('gym_user');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      localStorage.removeItem('gym_user');
+      return null;
+    }
   });
   const [loading, setLoading] = useState(true);
 
@@ -21,11 +26,13 @@ export function AuthProvider({ children }) {
       const { data } = await api.get('/auth/me');
       setUser(data);
       localStorage.setItem('gym_user', JSON.stringify(data));
-    } catch {
-      localStorage.removeItem('gym_token');
-      localStorage.removeItem('gym_user');
-      localStorage.removeItem('gym_refresh_token');
-      setUser(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('gym_token');
+        localStorage.removeItem('gym_user');
+        localStorage.removeItem('gym_refresh_token');
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

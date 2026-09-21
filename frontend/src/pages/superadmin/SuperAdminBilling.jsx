@@ -441,11 +441,11 @@ export default function SuperAdminBilling() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 w-full sm:w-auto">
           <select
             value={gymFilter}
             onChange={(e) => setGymFilter(e.target.value)}
-            className="field-input !py-1.5 !text-xs max-w-[200px]"
+            className="field-input !py-1.5 !text-xs w-full sm:w-auto sm:max-w-[200px]"
           >
             <option value="">All Gyms</option>
             {admins.map((g) => (
@@ -458,14 +458,68 @@ export default function SuperAdminBilling() {
             placeholder="Search invoice # or title..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="field-input !py-1.5 !text-xs max-w-[220px]"
+            className="field-input !py-1.5 !text-xs w-full sm:w-auto sm:max-w-[220px]"
           />
         </div>
       </div>
 
       {/* Invoices List */}
       <div className="panel overflow-hidden">
-        <div className="overflow-x-auto">
+
+        {/* Mobile card layout — shown on xs/sm only */}
+        <div className="sm:hidden divide-y divide-ink/10">
+          {fees.length === 0 ? (
+            <div className="px-5 py-10 text-center text-steel text-sm">
+              No platform invoices found matching the current filters.
+            </div>
+          ) : fees.map((f) => {
+            const hasProof = Boolean(f.paymentProof?.reference);
+            const isPaid = f.status === 'paid';
+            const isOverdue = f.status === 'overdue';
+            const statusClass = isPaid
+              ? 'bg-chalk/15 text-chalk-dark border-chalk/30'
+              : isOverdue
+              ? 'bg-danger/15 text-danger border-danger/30'
+              : f.status === 'waived'
+              ? 'bg-steel/15 text-steel border-steel/20'
+              : 'bg-iron/10 text-iron border-iron/20';
+            return (
+              <div key={f._id} className="p-4 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-ink truncate">{f.admin?.gymName || 'Unknown Gym'}</div>
+                    <div className="text-[11px] font-mono text-steel">{f.invoiceNumber} · {f.title}</div>
+                  </div>
+                  <span className={`shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize border ${statusClass}`}>
+                    {f.status}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-bold text-ink font-mono">Rs. {f.amount.toLocaleString()}</span>
+                  <span className="text-xs text-steel">Due: {new Date(f.dueDate).toLocaleDateString()}</span>
+                </div>
+                {hasProof && !isPaid && (
+                  <div className="inline-flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-600 border border-amber-500/20">
+                    Proof: #{f.paymentProof.reference}
+                  </div>
+                )}
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => setViewingFee(f)} className="btn-secondary text-xs py-1.5 px-3 flex-1">
+                    View
+                  </button>
+                  {!isPaid && f.status !== 'waived' && (
+                    <button onClick={() => openPayModal(f)} className="btn-primary text-xs py-1.5 px-3 flex-1">
+                      {hasProof ? 'Verify & Pay' : 'Mark Paid'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop table — hidden on mobile */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-ink/10 bg-ink/[0.02] text-xs font-semibold text-steel uppercase tracking-wider">
               <tr>
@@ -587,7 +641,7 @@ export default function SuperAdminBilling() {
               )}
             </tbody>
           </table>
-        </div>
+        </div>{/* end desktop table */}
       </div>
 
       {/* Modal: Create Gym Fee */}

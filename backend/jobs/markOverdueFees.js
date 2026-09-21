@@ -69,6 +69,7 @@ async function markOverdueFees() {
           console.error(`[overdue-cron] Failed to email overdue notice to ${recipientEmail}:`, mailErr.message);
         }
       }
+    }
   }
 
   // Also scan unpaid GymBillingFee (platform fees for gym owners)

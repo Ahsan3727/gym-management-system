@@ -97,7 +97,7 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {hasChanges && (
             <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-500">
               ● Unsaved Changes

@@ -25,12 +25,12 @@ export default function SuperAdminOverview() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Platform Executive Overview</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-ink">Platform Executive Overview</h1>
         <p className="mt-1 text-sm text-steel">Aggregated operations, SaaS subscriptions, and gym revenue metrics.</p>
       </div>
 
       {/* Top KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
         <StatCard
           icon="building"
           hi
@@ -155,8 +155,8 @@ export default function SuperAdminOverview() {
             <thead>
               <tr className="border-b border-ink/10 text-steel">
                 <th className="py-2.5 px-3 font-semibold">Gym Name</th>
-                <th className="py-2.5 px-3 font-semibold">Slug / URL</th>
-                <th className="py-2.5 px-3 font-semibold text-right">Active Members</th>
+                <th className="py-2.5 px-3 font-semibold hidden sm:table-cell">Slug / URL</th>
+                <th className="py-2.5 px-3 font-semibold text-right hidden sm:table-cell">Active Members</th>
                 <th className="py-2.5 px-3 font-semibold text-right">Revenue Collected</th>
                 <th className="py-2.5 px-3 font-semibold text-center">Status</th>
               </tr>
@@ -165,8 +165,8 @@ export default function SuperAdminOverview() {
               {(analytics?.topGyms || []).map((g) => (
                 <tr key={g._id} className="border-b border-ink/5 hover:bg-ink/[0.02]">
                   <td className="py-3 px-3 font-medium text-ink">{g.gymName}</td>
-                  <td className="py-3 px-3 font-mono text-steel">/g/{g.slug}</td>
-                  <td className="py-3 px-3 text-right font-medium text-ink">{g.memberCount}</td>
+                  <td className="py-3 px-3 font-mono text-steel hidden sm:table-cell">/g/{g.slug}</td>
+                  <td className="py-3 px-3 text-right font-medium text-ink hidden sm:table-cell">{g.memberCount}</td>
                   <td className="py-3 px-3 text-right font-bold text-iron">Rs. {g.revenue.toLocaleString()}</td>
                   <td className="py-3 px-3 text-center">
                     <span

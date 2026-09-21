@@ -11,6 +11,8 @@
     "dev": "npm run dev:frontend",
     "seed": "npm run seed --prefix backend",
     "backfill-slugs": "node scripts/backfill-slugs.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "test": "npm --prefix backend test && npm --prefix frontend test",
     "start": "npm run start --prefix backend"
   },
   "dependencies": {

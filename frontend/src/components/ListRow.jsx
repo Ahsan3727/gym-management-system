@@ -9,7 +9,7 @@ import React from 'react';
  *     <ListRow icon="user" title="Jordan Blake" subtitle="Premium plan" trailing="Active" onClick={...} />
  *   </ListCard>
  */
-export default function ListRow({ icon, iconBg = 'bg-ink/5', title, subtitle, trailing, onClick }) {
+export default function ListRow({ icon, iconBg = 'bg-ink/5', title, subtitle, trailing, onClick, className = '' }) {
   const Comp = onClick ? 'button' : 'div';
   return (
     <Comp
@@ -17,7 +17,7 @@ export default function ListRow({ icon, iconBg = 'bg-ink/5', title, subtitle, tr
       onClick={onClick}
       className={`flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors ${
         onClick ? 'hover:bg-ink/5' : ''
-      }`}
+      } ${className}`}
     >
       {icon && (
         <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconBg}`}>

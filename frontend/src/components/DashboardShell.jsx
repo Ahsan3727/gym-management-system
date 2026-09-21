@@ -12,6 +12,25 @@ const SHELLS = {
   'top-bar': TopBarShell,
 };
 
+class ShellBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    console.error('[ShellBoundary] shell failed, falling back to SidebarShell:', error, info?.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
 /**
  * Thin selector component: delegates dynamically to the configured responsive shell
  * based on tenant and user branding settings, while App.jsx routing remains untouched (D7).
@@ -23,5 +42,14 @@ export default function DashboardShell(props) {
 
   // Super admin always gets the Sidebar shell (D3). Others get configured or default.
   const Shell = app ? (SHELLS[settings.shell] ?? SidebarShell) : SidebarShell;
-  return <Shell {...props} />;
+
+  if (Shell === SidebarShell) {
+    return <SidebarShell {...props} />;
+  }
+
+  return (
+    <ShellBoundary fallback={<SidebarShell {...props} />}>
+      <Shell {...props} />
+    </ShellBoundary>
+  );
 }

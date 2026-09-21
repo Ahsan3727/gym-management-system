@@ -4,6 +4,7 @@ import { useTenant } from '../context/TenantContext.jsx';
 import { resolveBranding } from '../theme/branding.js';
 import { MEMBER_BLOCKS, ADMIN_BLOCKS } from './registry.js';
 import { resolveDashboardBlocks } from './dashboards.js';
+import BlockBoundary from '../components/BlockBoundary.jsx';
 
 export default function DashboardRenderer({ app = 'member' }) {
   const { user } = useAuth();
@@ -40,7 +41,11 @@ export default function DashboardRenderer({ app = 'member' }) {
         >
           {statGroup.map((statId) => {
             const Comp = blockRegistry[statId];
-            return Comp ? <Comp key={statId} /> : null;
+            return Comp ? (
+              <BlockBoundary key={statId} name={statId}>
+                <Comp />
+              </BlockBoundary>
+            ) : null;
           })}
         </div>
       );
@@ -58,7 +63,11 @@ export default function DashboardRenderer({ app = 'member' }) {
         <div key={`chart-group-${chartGroup.join('-')}`} className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           {chartGroup.map((chartId) => {
             const Comp = blockRegistry[chartId];
-            return Comp ? <Comp key={chartId} /> : null;
+            return Comp ? (
+              <BlockBoundary key={chartId} name={chartId}>
+                <Comp />
+              </BlockBoundary>
+            ) : null;
           })}
         </div>
       );
@@ -70,7 +79,9 @@ export default function DashboardRenderer({ app = 'member' }) {
     if (Component) {
       elements.push(
         <div key={id} className={preset === 'compact' ? 'mb-4' : 'mb-8'}>
-          <Component />
+          <BlockBoundary name={id}>
+            <Component />
+          </BlockBoundary>
         </div>
       );
     }

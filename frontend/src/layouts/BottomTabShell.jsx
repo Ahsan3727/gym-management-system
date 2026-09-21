@@ -136,9 +136,10 @@ export default function BottomTabShell({ navItems, accent = 'ember', roleLabel }
             end={item.end}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 text-[11px] font-medium transition-colors ${
-                isActive ? `${accentText} font-bold` : 'text-steel hover:text-ink'
+                isActive ? 'font-bold' : 'text-steel hover:text-ink'
               }`
             }
+            style={({ isActive }) => (isActive ? colorStyle : {})}
           >
             {({ isActive }) => (
               <>

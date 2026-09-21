@@ -210,7 +210,7 @@ export default function Admins() {
 
   return (
     <div>
-      <div className="mb-8 flex items-start justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="mb-1 text-2xl font-semibold text-ink">Gym accounts</h1>
           <p className="text-sm text-steel">Create, monitor and manage every gym on the platform.</p>
@@ -236,6 +236,7 @@ export default function Admins() {
             icon="building"
             iconBg={admin.isSuspended ? 'bg-danger/15 text-danger' : 'bg-chalk/15 text-chalk-dark'}
             title={admin.gymName}
+            className="flex-col sm:flex-row !items-start sm:!items-center"
             subtitle={
               <>
                 {admin.user?.username} ·{' '}
@@ -249,7 +250,7 @@ export default function Admins() {
               </>
             }
             trailing={
-              <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:gap-x-3 sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">
                 <button
                   onClick={() => setBrandingGym(admin)}
                   className="rounded-lg bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-ink/10 transition-colors"

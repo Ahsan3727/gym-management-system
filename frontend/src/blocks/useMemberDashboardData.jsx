@@ -27,8 +27,8 @@ export function MemberDashboardProvider({ children }) {
       setProfile(profileRes.data);
       setStreak(streakRes.data);
       setMembership(membershipRes.data);
-      setWeightLogs(weightRes.data || []);
-      setSessions(sessionsRes.data || []);
+      setWeightLogs(Array.isArray(weightRes.data) ? weightRes.data : []);
+      setSessions(Array.isArray(sessionsRes.data) ? sessionsRes.data : []);
       setError('');
     } catch {
       setError('Could not load your dashboard.');
