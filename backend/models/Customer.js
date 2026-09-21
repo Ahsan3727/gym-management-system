@@ -26,5 +26,7 @@ const customerSchema = new mongoose.Schema(
 );
 
 customerSchema.index({ admin: 1, name: 1 });
+customerSchema.index({ admin: 1, isActive: 1 });
+customerSchema.index({ admin: 1, created_at: -1 });
 
 module.exports = mongoose.model('Customer', customerSchema);

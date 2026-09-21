@@ -21,32 +21,5 @@ export default function BrandingApplier() {
     }
   }, [user?.branding?.version, user?.role, tenant?.branding, theme, setDefaultMode]);
 
-  // T9.1 Version Check: On window focus, refresh /auth/me if branding version incremented
-  useEffect(() => {
-    if (!user || user.role === 'super_admin') return;
-
-    async function checkVersionOnFocus() {
-      if (document.visibilityState !== 'visible') return;
-      try {
-        const res = await api.get('/auth/me');
-        const freshUser = res.data;
-        if (freshUser?.branding?.version && freshUser.branding.version !== lastVersionRef.current) {
-          lastVersionRef.current = freshUser.branding.version;
-          if (typeof updateUser === 'function') {
-            updateUser(freshUser);
-          }
-        }
-      } catch {}
-    }
-
-    window.addEventListener('focus', checkVersionOnFocus);
-    document.addEventListener('visibilitychange', checkVersionOnFocus);
-
-    return () => {
-      window.removeEventListener('focus', checkVersionOnFocus);
-      document.removeEventListener('visibilitychange', checkVersionOnFocus);
-    };
-  }, [user, updateUser]);
-
   return null;
 }

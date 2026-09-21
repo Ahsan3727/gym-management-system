@@ -87,16 +87,16 @@ function applyStaffBranding() {
   document.title = 'Ironline Staff · Operations & Studio';
 }
 
-async function bootstrap() {
+function bootstrap() {
   const pathname = window.location.pathname;
   const searchParams = new URLSearchParams(window.location.search);
   const gymParam = searchParams.get('gym');
   const match = pathname.match(TENANT_PATH_RE);
 
   if (match) {
-    await resolveTenantBranding(match[1]);
+    resolveTenantBranding(match[1]);
   } else if (gymParam) {
-    await resolveTenantBranding(gymParam);
+    resolveTenantBranding(gymParam);
   } else if (pathname.startsWith('/staff')) {
     applyStaffBranding();
   } else {

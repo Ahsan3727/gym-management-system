@@ -13,7 +13,15 @@ export function AuthProvider({ children }) {
       return null;
     }
   });
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] = useState(() => {
+    const token = localStorage.getItem('gym_token');
+    const refreshToken = localStorage.getItem('gym_refresh_token');
+    const rawUser = localStorage.getItem('gym_user');
+    if (!token && !refreshToken) return false;
+    if (rawUser) return false;
+    return true;
+  });
 
   const refreshMe = useCallback(async () => {
     const token = localStorage.getItem('gym_token');

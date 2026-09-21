@@ -204,7 +204,7 @@ router.get(
     const base = { id: req.user._id, username: req.user.username, role: req.user.role, branding: null };
 
     if (req.user.role === 'admin') {
-      const adminDoc = await Admin.findOne({ user: req.user._id });
+      const adminDoc = await Admin.findOne({ user: req.user._id }).lean();
       return res.json({
         ...base,
         profile: adminDoc,
@@ -215,8 +215,8 @@ router.get(
       });
     }
     if (req.user.role === 'customer') {
-      const customerDoc = await Customer.findOne({ user: req.user._id }).populate('plan');
-      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin) : null;
+      const customerDoc = await Customer.findOne({ user: req.user._id }).populate('plan').lean();
+      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin).lean() : null;
       return res.json({
         ...base,
         profile: customerDoc,
@@ -227,8 +227,8 @@ router.get(
       });
     }
     if (req.user.role === 'trainer') {
-      const trainerDoc = await Trainer.findOne({ user: req.user._id }).populate('assignedCustomers', 'name phone');
-      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin) : null;
+      const trainerDoc = await Trainer.findOne({ user: req.user._id }).populate('assignedCustomers', 'name phone').lean();
+      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin).lean() : null;
       return res.json({
         ...base,
         profile: trainerDoc,

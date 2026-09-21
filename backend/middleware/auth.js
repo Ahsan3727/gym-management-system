@@ -23,12 +23,12 @@ const protect = asyncHandler(async (req, res, next) => {
     return res.status(401).json({ message: 'Invalid or expired token.' });
   }
 
-  const user = await User.findById(payload.id).select('-passwordHash');
+  const user = await User.findById(payload.id).select('-passwordHash').lean();
   if (!user || !user.isActive) {
     return res.status(401).json({ message: 'Account not found or disabled.' });
   }
 
-  req.user = user; // full mongoose doc, role is source of truth from DB
+  req.user = user; // plain object, role is source of truth from DB
   next();
 });
 
