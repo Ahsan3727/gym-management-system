@@ -57,6 +57,11 @@ export default function IconSprite() {
         {/* Eye icons for password show/hide toggle */}
         <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></symbol>
         <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.9 17.9A10 10 0 0 1 12 19c-6.4 0-10-7-10-7a17.8 17.8 0 0 1 5.1-5.9M9.9 4.2A9.3 9.3 0 0 1 12 4c6.4 0 10 8 10 8a17.6 17.6 0 0 1-2.4 3.7M3 3l18 18" /></symbol>
+        {/* Added for Customers page redesign */}
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5.5 7h13l-1 12a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 6.5 19L5.5 7Z"/><path d="M3.5 7h17M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2"/></symbol>
+        <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M10.5 17.5h3" stroke-linecap="round"/></symbol>
+        <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="7.5" r="3"/><path d="M3.5 19.5c1-3 2.8-4.5 5.5-4.5s4.5 1.5 5.5 4.5"/><path d="M16 4a3 3 0 0 1 0 7M20.5 19.5c-.7-2.8-2.2-4.5-4.5-4.5"/></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M20 20l-4-4"/></symbol>
       </defs>
     </svg>
   );

@@ -516,32 +516,40 @@ export default function Customers() {
 
       {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
-      <ListCard>
-        {/* Select-all header */}
-        {customers.length > 0 && (
-          <div className="flex items-center gap-3 border-b border-ink/5 px-4 py-2 bg-ink/[0.01]">
-            <input
-              type="checkbox"
-              checked={selected.size === customers.length && customers.length > 0}
-              onChange={toggleSelectAll}
-              className="rounded"
-              id="select-all-customers"
-              title="Select all"
-            />
-            <label htmlFor="select-all-customers" className="text-xs font-medium text-steel cursor-pointer">
-              Select all members ({customers.length})
-            </label>
-          </div>
-        )}
+      {/* Member count + select-all bar */}
+      {customers.length > 0 && (
+        <div className="mb-3 flex items-center gap-3 px-1">
+          <input
+            type="checkbox"
+            checked={selected.size === customers.length && customers.length > 0}
+            onChange={toggleSelectAll}
+            className="rounded"
+            id="select-all-customers"
+            title="Select all"
+          />
+          <label htmlFor="select-all-customers" className="text-xs font-medium text-steel cursor-pointer">
+            {selected.size > 0 ? `${selected.size} of ${customers.length} selected` : `${customers.length} member${customers.length !== 1 ? 's' : ''}`}
+          </label>
+        </div>
+      )}
 
+      {/* Member Cards Grid */}
+      <div className="space-y-2">
         {customers.map((c) => {
-          // Compute fee status badge using new badge system
+          const initials = (c.name || c.user?.username || '?').trim().charAt(0).toUpperCase();
+          const isActive = c.isActive;
+
+          // Fee status badge
           let feePill = null;
           if (c.feeStatus === 'paid') {
-            const exp = c.membershipExpiresAt ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) : 'Active';
+            const exp = c.membershipExpiresAt
+              ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
+              : 'Active';
             feePill = <span className="badge-active">Paid · {exp}</span>;
           } else if (c.feeStatus === 'due_soon') {
-            const exp = c.membershipExpiresAt ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) : 'Soon';
+            const exp = c.membershipExpiresAt
+              ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
+              : 'Soon';
             feePill = <span className="badge-warning">Due Soon · {exp}</span>;
           } else if (c.feeStatus === 'overdue') {
             feePill = <span className="badge-danger">Overdue</span>;
@@ -552,72 +560,151 @@ export default function Customers() {
           }
 
           return (
-            <div key={c._id} className="flex items-center gap-3 pr-4 border-b border-ink/5 last:border-0 hover:bg-ink/[0.01]">
-              <div className="pl-4">
-                <input
-                  type="checkbox"
-                  checked={selected.has(c._id)}
-                  onChange={() => toggleSelect(c._id)}
-                  className="rounded"
-                />
-              </div>
-              <div className="flex-1 py-1">
-                <ListRow
-                  icon="user"
-                  iconBg={c.isActive ? 'bg-chalk/15 text-chalk-dark' : 'bg-ink/5 text-steel'}
-                  title={
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-ink">{c.name}</span>
-                      <span className="text-xs text-steel font-mono">@{c.user?.username || '—'}</span>
-                      {feePill}
-                    </div>
-                  }
-                  subtitle={
-                    <div className="flex items-center gap-2 text-xs text-steel flex-wrap mt-0.5">
-                      <span>{c.phone ? `📞 ${c.phone}` : 'No phone'}</span>
-                      <span>·</span>
-                      <span className="font-medium text-ink">Rs. {Number(c.monthlyFee ?? 3000).toLocaleString()}/month</span>
-                      <span>·</span>
-                      <span className={c.isActive ? 'badge-active' : 'badge-inactive'}>
-                        {c.isActive ? 'Active' : 'Inactive'}
+            <div
+              key={c._id}
+              className={`group relative rounded-[14px] border bg-panel transition-all duration-200 hover:shadow-soft hover:-translate-y-px ${
+                selected.has(c._id)
+                  ? 'border-ember/30 bg-ember/[0.02]'
+                  : isActive
+                  ? 'border-ink/10'
+                  : 'border-ink/5 opacity-75'
+              }`}
+            >
+              <div className="flex items-start gap-3 p-4">
+
+                {/* Checkbox */}
+                <div className="pt-0.5 shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(c._id)}
+                    onChange={() => toggleSelect(c._id)}
+                    className="rounded"
+                  />
+                </div>
+
+                {/* Avatar */}
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] text-base font-bold text-on-primary shadow-xs"
+                  style={{
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)))'
+                      : 'rgb(var(--c-ink-soft))',
+                    color: 'rgb(var(--c-on-primary))',
+                  }}
+                >
+                  {initials}
+                </div>
+
+                {/* Main info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-ink truncate">{c.name}</span>
+                    <span className="text-xs font-mono text-steel">@{c.user?.username || '—'}</span>
+                    <span className={isActive ? 'badge-active' : 'badge-inactive'}>
+                      {isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-steel">
+                    {c.phone && (
+                      <span className="flex items-center gap-1">
+                        <svg className="icon !h-3 !w-3"><use href="#i-phone" /></svg>
+                        {c.phone}
                       </span>
-                    </div>
-                  }
-                  trailing={
-                    <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+                    )}
+                    <span className="font-medium text-ink">
+                      Rs.&nbsp;{Number(c.monthlyFee ?? 3000).toLocaleString()}<span className="text-steel font-normal">/mo</span>
+                    </span>
+                    {feePill}
+                  </div>
+                </div>
+
+                {/* Action buttons — desktop: always visible, mobile: shown on tap */}
+                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
+                  {/* Collect Fee — primary action */}
+                  <button
+                    onClick={() => openQuickFee(c)}
+                    className="btn-sm border border-iron/20 bg-iron/10 text-iron hover:bg-iron/20 hover:border-iron/30 transition-colors"
+                    title="Collect or Add Fee"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-plus" /></svg>
+                    Fee
+                  </button>
+
+                  {/* Progress */}
+                  <button
+                    onClick={() => openProgress(c)}
+                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    title="View Progress"
+                    aria-label="View progress"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-trend" /></svg>
+                  </button>
+
+                  {/* Edit */}
+                  <button
+                    onClick={() => setEditing({ ...c })}
+                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    title="Edit Member"
+                    aria-label="Edit member"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
+                  </button>
+
+                  {/* More actions dropdown toggle — Reset PW + Remove */}
+                  <div className="relative group/more">
+                    <button
+                      className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                      title="More actions"
+                      aria-label="More actions"
+                      onClick={(e) => {
+                        const menu = e.currentTarget.nextSibling;
+                        menu.classList.toggle('hidden');
+                      }}
+                    >
+                      <svg className="icon !h-3.5 !w-3.5"><use href="#i-dots" /></svg>
+                    </button>
+                    <div className="hidden absolute right-0 top-9 z-20 w-40 rounded-[12px] border border-ink/10 bg-panel shadow-lg py-1">
                       <button
-                        onClick={() => openQuickFee(c)}
-                        className="rounded-lg bg-iron/10 px-2.5 py-1 text-xs font-semibold text-iron hover:bg-iron/20 transition-colors"
-                        title="Collect or Add Fee"
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); openReset(c); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
                       >
-                        + Collect Fee
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
+                        Reset Password
                       </button>
-                      <button onClick={() => openProgress(c)} className="text-xs font-medium text-steel hover:text-ink">
-                        Progress
-                      </button>
-                      <button onClick={() => setEditing({ ...c })} className="text-xs font-medium text-steel hover:text-ink">
-                        Edit
-                      </button>
-                      <button onClick={() => openReset(c)} className="text-xs font-medium text-steel hover:text-ink">
-                        Reset PW
-                      </button>
-                      <button onClick={() => handleDelete(c)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                        Remove
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); handleDelete(c); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/5 transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-trash" /></svg>
+                        Remove Member
                       </button>
                     </div>
-                  }
-                />
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
 
         {customers.length === 0 && (
-          <div className="px-4 py-12 text-center text-sm text-steel">
-            No members found matching your search.
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-7 !w-7 text-steel"><use href="#i-users" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No members found</h3>
+            <p className="text-caption max-w-xs">
+              {search || status ? 'Try adjusting your search or filter.' : 'Add your first gym member to get started.'}
+            </p>
+            {!search && !status && (
+              <button className="btn-primary btn-md mt-5" onClick={openCreateModal}>
+                <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+                Add First Member
+              </button>
+            )}
           </div>
         )}
-      </ListCard>
+      </div>
+
 
       {/* ── Create Modal ───────────────────────────────────────────────────── */}
       {showCreate && (
