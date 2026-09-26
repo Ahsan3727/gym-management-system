@@ -162,7 +162,7 @@ export default function AdminAttendance() {
               <div className="flex items-center gap-3">
                 <div
                   className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold ${
-                    record.method === 'qr' ? 'bg-iron/15 text-iron' : 'bg-chalk/15 text-chalk-dark'
+                    record.method === 'qr' ? 'bg-iron/10 text-iron' : 'bg-chalk/10 text-chalk-dark'
                   }`}
                 >
                   <svg className="icon !h-5 !w-5">

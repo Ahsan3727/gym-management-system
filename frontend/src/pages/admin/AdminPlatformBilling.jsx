@@ -391,11 +391,11 @@ export default function AdminPlatformBilling() {
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                             isPaid
-                              ? 'bg-chalk/15 text-chalk-dark border border-chalk/30'
+                              ? 'bg-chalk/10 text-chalk-dark border border-chalk/30'
                               : isOverdue
-                              ? 'bg-ember/15 text-ember-dark border border-ember/30'
+                              ? 'bg-ember/10 text-ember-dark border border-ember/30'
                               : f.status === 'waived'
-                              ? 'bg-steel/15 text-steel'
+                              ? 'bg-steel/10 text-steel'
                               : 'bg-iron/10 text-iron border border-iron/20'
                           }`}
                         >
@@ -407,7 +407,7 @@ export default function AdminPlatformBilling() {
                           {!isPaid && f.status !== 'waived' && (
                             <button
                               onClick={() => openProofModal(f)}
-                              className="rounded bg-iron px-3 py-1 text-paper hover:brightness-110 transition-all"
+                              className="rounded bg-iron px-3 py-1 text-on-primary hover:brightness-110 transition-all"
                             >
                               {hasProof ? 'Update Proof' : 'Submit Proof'}
                             </button>

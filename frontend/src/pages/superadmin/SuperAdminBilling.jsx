@@ -432,7 +432,7 @@ export default function SuperAdminBilling() {
               onClick={() => setStatusFilter(st)}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
                 statusFilter === st
-                  ? 'bg-ink text-paper'
+                  ? 'bg-ink text-on-primary'
                   : 'bg-ink/5 text-steel hover:bg-ink/10 hover:text-ink'
               }`}
             >
@@ -477,11 +477,11 @@ export default function SuperAdminBilling() {
             const isPaid = f.status === 'paid';
             const isOverdue = f.status === 'overdue';
             const statusClass = isPaid
-              ? 'bg-chalk/15 text-chalk-dark border-chalk/30'
+              ? 'bg-chalk/10 text-chalk-dark border-chalk/30'
               : isOverdue
-              ? 'bg-danger/15 text-danger border-danger/30'
+              ? 'bg-danger/10 text-danger border-danger/30'
               : f.status === 'waived'
-              ? 'bg-steel/15 text-steel border-steel/20'
+              ? 'bg-steel/10 text-steel border-steel/20'
               : 'bg-iron/10 text-iron border-iron/20';
             return (
               <div key={f._id} className="p-4 space-y-2">
@@ -575,11 +575,11 @@ export default function SuperAdminBilling() {
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                             isPaid
-                              ? 'bg-chalk/15 text-chalk-dark border border-chalk/30'
+                              ? 'bg-chalk/10 text-chalk-dark border border-chalk/30'
                               : isOverdue
-                              ? 'bg-danger/15 text-danger border border-danger/30'
+                              ? 'bg-danger/10 text-danger border border-danger/30'
                               : f.status === 'waived'
-                              ? 'bg-steel/15 text-steel'
+                              ? 'bg-steel/10 text-steel'
                               : 'bg-iron/10 text-iron border border-iron/20'
                           }`}
                         >
@@ -591,7 +591,7 @@ export default function SuperAdminBilling() {
                           {!isPaid && f.status !== 'waived' && (
                             <button
                               onClick={() => openPayModal(f)}
-                              className="rounded bg-chalk-dark px-2.5 py-1 text-paper hover:brightness-110 transition-all"
+                              className="rounded bg-chalk-dark px-2.5 py-1 text-on-primary hover:brightness-110 transition-all"
                             >
                               {hasProof ? 'Verify & Pay' : 'Mark Paid'}
                             </button>

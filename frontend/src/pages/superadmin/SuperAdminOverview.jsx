@@ -70,7 +70,7 @@ export default function SuperAdminOverview() {
               <h3 className="font-semibold text-ink">Platform Revenue Velocity</h3>
               <p className="text-xs text-steel">Aggregated payments across all tenant gyms</p>
             </div>
-            <span className="rounded-lg bg-chalk/15 px-2.5 py-1 text-xs font-semibold text-chalk-dark">
+            <span className="rounded-lg bg-chalk/10 px-2.5 py-1 text-xs font-semibold text-chalk-dark">
               Last 6 Months
             </span>
           </div>
@@ -80,7 +80,7 @@ export default function SuperAdminOverview() {
               const heightPercent = Math.max(Math.round((item.revenue / maxRevenue) * 100), 4);
               return (
                 <div key={idx} className="group relative flex flex-1 flex-col items-center h-full justify-end">
-                  <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-paper shadow-md z-10 whitespace-nowrap">
+                  <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-on-primary shadow-md z-10 whitespace-nowrap">
                     Rs. {item.revenue.toLocaleString()}
                   </div>
                   <div
@@ -117,7 +117,7 @@ export default function SuperAdminOverview() {
               const heightPercent = Math.max(Math.round((item.count / maxGymGrowth) * 100), 8);
               return (
                 <div key={idx} className="group relative flex flex-1 flex-col items-center h-full justify-end">
-                  <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-paper shadow-md z-10 whitespace-nowrap">
+                  <div className="absolute -top-9 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg bg-ink px-2 py-1 text-[11px] font-mono text-on-primary shadow-md z-10 whitespace-nowrap">
                     {item.count} gym{item.count === 1 ? '' : 's'} registered
                   </div>
                   <div
@@ -171,7 +171,7 @@ export default function SuperAdminOverview() {
                   <td className="py-3 px-3 text-center">
                     <span
                       className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${
-                        g.isSuspended ? 'bg-danger/15 text-danger' : 'bg-chalk/15 text-chalk-dark'
+                        g.isSuspended ? 'bg-danger/10 text-danger' : 'bg-chalk/10 text-chalk-dark'
                       }`}
                     >
                       {g.isSuspended ? 'Suspended' : 'Active'}

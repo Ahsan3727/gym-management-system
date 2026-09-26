@@ -179,7 +179,7 @@ export default function Settings() {
         </div>
 
         {message && (
-          <div className="flex items-center gap-2 rounded-lg bg-chalk/15 px-4 py-3 text-sm font-medium text-chalk-dark border border-chalk/30">
+          <div className="flex items-center gap-2 rounded-lg bg-chalk/10 px-4 py-3 text-sm font-medium text-chalk-dark border border-chalk/30">
             <svg className="icon !h-5 !w-5"><use href="#i-check-circle" /></svg>
             {message}
           </div>

@@ -252,7 +252,7 @@ export default function CustomerCheckin() {
         {/* Network indicator pill */}
         <div className="flex items-center gap-2">
           <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-            isOnline ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/15 text-amber-700'
+            isOnline ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-700'
           }`}>
             <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
             {isOnline ? 'Online' : 'Offline Mode'}
@@ -303,7 +303,7 @@ export default function CustomerCheckin() {
 
       {/* Main Check-In Hero Card */}
       <div className="panel p-8 text-center relative overflow-hidden shadow-soft">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-ember/15 text-ember shadow-soft">
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-ember/10 text-ember shadow-soft">
           <svg className="icon !h-10 !w-10">
             <use href={checkedInToday ? '#i-check-circle' : '#i-zap'} />
           </svg>
@@ -311,7 +311,7 @@ export default function CustomerCheckin() {
 
         {checkedInToday ? (
           <div>
-            <span className="inline-flex rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-700 mb-2">
+            <span className="inline-flex rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 mb-2">
               Verified Today ✅
             </span>
             <h2 className="text-2xl font-bold text-ink">You're Checked In!</h2>

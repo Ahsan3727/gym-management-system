@@ -132,7 +132,7 @@ export default function Trainers() {
           <ListRow
             key={t._id}
             icon="user"
-            iconBg="bg-iron/15 text-iron"
+            iconBg="bg-iron/10 text-iron"
             title={`Coach ${t.name}`}
             subtitle={`${t.specialty || 'General'} · ${t.phone || 'No phone'} · ${t.assignedCustomers?.length || 0} client(s)`}
             trailing={
@@ -232,7 +232,7 @@ export default function Trainers() {
           ) : (
             <div className="text-center">
               <div className="mb-4 flex items-center justify-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/15 text-green-500">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/10 text-green-500">
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-3-3a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>

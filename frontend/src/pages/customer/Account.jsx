@@ -137,7 +137,7 @@ export default function Account() {
       {/* Plan Card */}
       <div className="panel card--tint mb-8 flex flex-wrap items-center justify-between gap-4 p-6">
         <div className="relative flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ember/15 text-ember">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ember/10 text-ember">
             <svg className="icon !h-5 !w-5"><use href="#i-card" /></svg>
           </span>
           <div>
@@ -250,7 +250,7 @@ export default function Account() {
           <ListRow
             key={fee._id}
             icon="card"
-            iconBg={fee.status === 'paid' ? 'bg-chalk/15 text-chalk-dark' : fee.status === 'overdue' ? 'bg-danger/15 text-danger' : 'bg-ink/5'}
+            iconBg={fee.status === 'paid' ? 'bg-chalk/10 text-chalk-dark' : fee.status === 'overdue' ? 'bg-danger/10 text-danger' : 'bg-ink/5'}
             title={`Rs. ${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
             subtitle={
               fee.status === 'paid'

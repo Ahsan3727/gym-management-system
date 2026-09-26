@@ -169,9 +169,12 @@ export default function GymProfile() {
   if (!profile) return <div className="text-sm text-steel">Loading…</div>;
 
   return (
-    <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">Gym profile</h1>
-      <p className="mb-8 text-sm text-steel">Branding customers see, reception QR check-ins, plus announcements.</p>
+    <div className="page-enter">
+      {/* Page Header */}
+      <div className="mb-6">
+        <h1 className="text-headline text-ink">Gym Profile</h1>
+        <p className="text-caption mt-0.5">Branding, reception QR check-ins &amp; member announcements</p>
+      </div>
 
       {/* Gym Details & Logo Upload */}
       <form onSubmit={handleSubmit} className="panel mb-8 grid gap-6 p-6 md:grid-cols-2">
@@ -243,7 +246,7 @@ export default function GymProfile() {
               type="color"
               value={profile.themeColor || '#e11d48'}
               onChange={(e) => setProfile({ ...profile, themeColor: e.target.value })}
-              className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-ink/15 bg-transparent p-0.5"
+              className="h-10 w-14 shrink-0 cursor-pointer rounded-md border border-ink/10 bg-transparent p-0.5"
             />
             <input
               className="field-input"
@@ -327,7 +330,7 @@ export default function GymProfile() {
       {/* Branded install link */}
       <div className="panel mb-8 p-6">
         <div className="mb-4 flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/10 text-iron">
             <svg className="icon !h-[18px] !w-[18px]"><use href="#i-shield" /></svg>
           </span>
           <div>
@@ -350,7 +353,7 @@ export default function GymProfile() {
               <img src={installData.qrDataUrl} alt="Install link QR code" className="h-40 w-40" />
             </div>
             <div className="flex-1 space-y-3 text-center sm:text-left">
-              <div className="flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+              <div className="flex items-center gap-2 rounded-sm border border-ink/10 bg-ink/[0.03] px-3 py-2">
                 <code className="flex-1 truncate text-xs text-ink">{installData.installUrl}</code>
                 <button type="button" onClick={copyInstallLink} className="shrink-0 text-xs font-medium text-iron hover:underline">
                   Copy
@@ -383,7 +386,7 @@ export default function GymProfile() {
       <div className="panel mb-8 p-6">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/10 text-iron">
               <svg className="icon !h-[18px] !w-[18px]"><use href="#i-shield" /></svg>
             </span>
             <div>
@@ -473,9 +476,9 @@ export default function GymProfile() {
 
       {/* Announcements */}
       <form onSubmit={handleAnnounce} className="panel p-6">
-        <div className="mb-1 flex items-center gap-2 text-sm font-medium text-steel">
-          <svg className="icon !h-4 !w-4"><use href="#i-bell" /></svg>
-          Send an announcement
+        <div className="mb-1 flex items-center gap-2">
+          <svg className="icon !h-4 !w-4 text-ember"><use href="#i-bell" /></svg>
+          <h2 className="text-sm font-semibold text-ink">Send an Announcement</h2>
         </div>
         <p className="mb-4 text-xs text-steel">Delivered as a notification to every customer at your gym.</p>
         <textarea

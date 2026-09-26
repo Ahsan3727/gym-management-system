@@ -99,7 +99,7 @@ export default function GymBranding({ admin, onClose, onUpdated, allAdmins = [] 
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {hasChanges && (
-            <span className="rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-500">
+            <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-500">
               ● Unsaved Changes
             </span>
           )}

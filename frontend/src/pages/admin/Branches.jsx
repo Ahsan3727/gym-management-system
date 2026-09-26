@@ -93,7 +93,7 @@ export default function Branches() {
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/15 text-iron">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/10 text-iron">
                     <svg className="icon !h-[18px] !w-[18px]"><use href="#i-building" /></svg>
                   </span>
                   <h3 className="text-base font-bold text-ink">{b.name}</h3>

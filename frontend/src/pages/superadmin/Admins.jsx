@@ -209,75 +209,174 @@ export default function Admins() {
   }
 
   return (
-    <div>
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="page-enter">
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Gym accounts</h1>
-          <p className="text-sm text-steel">Create, monitor and manage every gym on the platform.</p>
+          <h1 className="text-headline text-ink">Gym Accounts</h1>
+          <p className="text-caption mt-0.5">Create, monitor and manage every gym on the platform</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button type="button" onClick={openStaffQrModal} className="btn-secondary">
+        <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
+          <button type="button" onClick={openStaffQrModal} className="btn-secondary btn-md">
             <svg className="icon !h-4 !w-4"><use href="#i-briefcase" /></svg>
-            Staff App QR Code
+            Staff App QR
           </button>
-          <button type="button" onClick={() => setShowCreate(true)} className="btn-primary">
+          <button type="button" onClick={() => setShowCreate(true)} className="btn-primary btn-md">
             <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-            Add gym
+            Add Gym
           </button>
         </div>
       </div>
 
       {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
-      <ListCard>
-        {admins.map((admin) => (
-          <ListRow
-            key={admin._id}
-            icon="building"
-            iconBg={admin.isSuspended ? 'bg-danger/15 text-danger' : 'bg-chalk/15 text-chalk-dark'}
-            title={admin.gymName}
-            className="flex-col sm:flex-row !items-start sm:!items-center"
-            subtitle={
-              <>
-                {admin.user?.username} ·{' '}
-                <span className={admin.user?.isActive === false ? 'text-danger' : 'text-chalk-dark'}>
-                  {admin.user?.isActive === false ? 'Login disabled' : 'Login enabled'}
-                </span>{' '}
-                ·{' '}
-                <span className={admin.isSuspended ? 'text-danger font-medium' : 'text-chalk-dark font-medium'}>
-                  {admin.isSuspended ? 'Suspended' : 'Active'}
-                </span>
-              </>
-            }
-            trailing={
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:gap-x-3 sm:justify-end mt-2 sm:mt-0 w-full sm:w-auto">
-                <button
-                  onClick={() => setBrandingGym(admin)}
-                  className="rounded-lg bg-ink/5 px-2.5 py-1 text-xs font-semibold text-ink hover:bg-ink/10 transition-colors"
+      {/* Gym Account Cards */}
+      <div className="space-y-2">
+        {admins.map((admin) => {
+          const initials = (admin.gymName || '?').trim().charAt(0).toUpperCase();
+          const suspended = admin.isSuspended;
+          const loginDisabled = admin.user?.isActive === false;
+          return (
+            <div
+              key={admin._id}
+              className={`group relative rounded-[14px] border bg-panel transition-all duration-200 hover:shadow-soft hover:-translate-y-px ${
+                suspended ? 'border-danger/20 opacity-80' : 'border-ink/10'
+              }`}
+            >
+              <div className="flex items-start gap-3 p-4">
+                {/* Avatar */}
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] text-base font-bold shadow-xs"
+                  style={{
+                    background: suspended
+                      ? 'rgb(var(--c-danger) / 0.15)'
+                      : 'linear-gradient(135deg, rgb(var(--c-chalk)), rgb(var(--c-chalk-dark)))',
+                    color: suspended ? 'rgb(var(--c-danger))' : '#fff',
+                  }}
                 >
-                  🎨 Branding
-                </button>
-                <button onClick={() => openInstallLink(admin)} className="text-xs font-medium text-iron hover:underline">Install link</button>
-                <button onClick={() => copyInstallLink(admin)} className="text-xs font-medium text-steel hover:text-ink">Copy link</button>
-                <button onClick={() => openSummary(admin)} className="text-xs font-medium text-iron hover:underline">Summary</button>
-                <button onClick={() => setEditing({ ...admin })} className="text-xs font-medium text-steel hover:text-ink">Edit</button>
-                <button onClick={() => toggleSuspend(admin)} className="text-xs font-medium text-steel hover:text-ink">
-                  {admin.isSuspended ? 'Unsuspend' : 'Suspend'}
-                </button>
-                <button onClick={() => toggleLogin(admin)} className="text-xs font-medium text-steel hover:text-ink">
-                  {admin.user?.isActive === false ? 'Enable login' : 'Disable login'}
-                </button>
-                <button onClick={() => resetPassword(admin)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                  Reset password
-                </button>
+                  {initials}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-ink truncate">{admin.gymName}</span>
+                    {suspended
+                      ? <span className="badge-danger">Suspended</span>
+                      : <span className="badge-active">Active</span>
+                    }
+                    {loginDisabled && <span className="badge-inactive">Login off</span>}
+                  </div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-steel">
+                    <span className="font-mono">@{admin.user?.username || '—'}</span>
+                    {admin.slug && (
+                      <span className="font-mono text-steel-light">/g/{admin.slug}</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {/* Branding */}
+                  <button
+                    onClick={() => setBrandingGym(admin)}
+                    className="btn-sm border border-ink/10 bg-ink/5 text-ink hover:bg-ink/10 transition-colors"
+                    title="Gym Branding"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
+                    Branding
+                  </button>
+
+                  {/* Install Link */}
+                  <button
+                    onClick={() => openInstallLink(admin)}
+                    className="btn-sm border border-iron/20 bg-iron/10 text-iron hover:bg-iron/20 transition-colors"
+                    title="Install Link & QR"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-cloud" /></svg>
+                    Install
+                  </button>
+
+                  {/* Summary */}
+                  <button
+                    onClick={() => openSummary(admin)}
+                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    title="Gym Summary"
+                    aria-label="View summary"
+                  >
+                    <svg className="icon !h-3.5 !w-3.5"><use href="#i-trend" /></svg>
+                  </button>
+
+                  {/* ⋯ More: Edit, Suspend, Login, Reset PW */}
+                  <div className="relative">
+                    <button
+                      className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                      title="More actions"
+                      aria-label="More actions"
+                      onClick={(e) => {
+                        e.currentTarget.nextSibling.classList.toggle('hidden');
+                      }}
+                    >
+                      <svg className="icon !h-3.5 !w-3.5"><use href="#i-dots" /></svg>
+                    </button>
+                    <div className="hidden absolute right-0 top-9 z-20 w-44 rounded-[12px] border border-ink/10 bg-panel shadow-lg py-1">
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); setEditing({ ...admin }); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
+                        Edit Details
+                      </button>
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); copyInstallLink(admin); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-clipboard" /></svg>
+                        Copy Install Link
+                      </button>
+                      <div className="my-1 border-t border-ink/5" />
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); toggleSuspend(admin); }}
+                        className={`flex w-full items-center gap-2 px-3 py-2 text-xs transition-colors ${suspended ? 'text-chalk-dark hover:bg-chalk/5' : 'text-danger hover:bg-danger/5'}`}
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-shield" /></svg>
+                        {suspended ? 'Unsuspend Gym' : 'Suspend Gym'}
+                      </button>
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); toggleLogin(admin); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
+                        {loginDisabled ? 'Enable Login' : 'Disable Login'}
+                      </button>
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); resetPassword(admin); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/5 transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
+                        Reset Password
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            }
-          />
-        ))}
+            </div>
+          );
+        })}
+
         {admins.length === 0 && (
-          <div className="px-4 py-8 text-center text-sm text-steel">No gym accounts yet.</div>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-7 !w-7 text-steel"><use href="#i-building" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No gym accounts yet</h3>
+            <p className="text-caption max-w-xs">Add the first gym to start onboarding members across the platform.</p>
+            <button className="btn-primary btn-md mt-5" onClick={() => setShowCreate(true)}>
+              <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
+              Add First Gym
+            </button>
+          </div>
         )}
-      </ListCard>
+      </div>
 
 
       {showCreate && (
@@ -374,7 +473,7 @@ export default function Admins() {
           <p className="mb-4 text-xs text-steel">
             Share this QR code or link with members of {installFor.gymName}. Scanning it installs their own branded gym app (name, icon and theme color) directly to their home screen.
           </p>
-          <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+          <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/10 bg-ink/[0.03] px-3 py-2">
             <code className="flex-1 truncate text-xs text-ink">{installUrlFor(installFor)}</code>
             <button
               type="button"
@@ -418,7 +517,7 @@ export default function Admins() {
             <div className="py-8 text-center text-sm text-steel">Generating Staff App QR…</div>
           ) : (
             <>
-              <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/15 bg-ink/[0.03] px-3 py-2">
+              <div className="mb-4 flex items-center gap-2 rounded-sm border border-ink/10 bg-ink/[0.03] px-3 py-2">
                 <code className="flex-1 truncate text-xs text-ink">{staffQr.staffInstallUrl}</code>
                 <button
                   type="button"
@@ -450,7 +549,7 @@ export default function Admins() {
       {/* BUG #2 FIX: No longer shows a temp password — shows the server message instead */}
       {resetMessage && (
         <Modal title="Password Reset" onClose={() => setResetMessage('')}>
-          <div className="rounded-sm border border-ink/15 bg-ink/[0.03] px-4 py-4 text-sm text-ink">
+          <div className="rounded-sm border border-ink/10 bg-ink/[0.03] px-4 py-4 text-sm text-ink">
             {resetMessage}
           </div>
         </Modal>

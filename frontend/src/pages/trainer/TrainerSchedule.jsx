@@ -185,8 +185,8 @@ export default function TrainerSchedule() {
                     s.status === 'completed'
                       ? 'bg-chalk/20 text-chalk-dark'
                       : s.status === 'cancelled'
-                      ? 'bg-danger/15 text-danger'
-                      : 'bg-iron/15 text-iron'
+                      ? 'bg-danger/10 text-danger'
+                      : 'bg-iron/10 text-iron'
                   }`}
                 >
                   <svg className="icon !h-5 !w-5">
@@ -201,8 +201,8 @@ export default function TrainerSchedule() {
                         s.status === 'completed'
                           ? 'bg-chalk/20 text-chalk-dark'
                           : s.status === 'cancelled'
-                          ? 'bg-danger/15 text-danger'
-                          : 'bg-iron/15 text-iron'
+                          ? 'bg-danger/10 text-danger'
+                          : 'bg-iron/10 text-iron'
                       }`}
                     >
                       {s.status}

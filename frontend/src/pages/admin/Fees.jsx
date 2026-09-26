@@ -642,7 +642,7 @@ export default function Fees() {
                                 validUntil: member?.membershipExpiresAt,
                               })
                             }
-                            className="rounded-lg border border-ink/15 bg-panel px-2 py-1 text-xs font-medium text-ink hover:bg-ink/5 transition-colors"
+                            className="rounded-lg border border-ink/10 bg-panel px-2 py-1 text-xs font-medium text-ink hover:bg-ink/5 transition-colors"
                             title="Print thermal receipt slip"
                           >
                             🖨️ Slip

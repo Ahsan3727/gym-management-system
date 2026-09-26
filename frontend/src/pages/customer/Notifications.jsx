@@ -10,9 +10,9 @@ const TYPE_CONFIG = {
 };
 
 const ACCENT_CLASSES = {
-  ember: { chip: 'border-ember/25 bg-ember/10 text-ember-dark', iconBg: 'bg-ember/15 text-ember-dark', bar: 'border-l-ember' },
-  iron: { chip: 'border-iron/25 bg-iron/10 text-iron', iconBg: 'bg-iron/15 text-iron', bar: 'border-l-iron' },
-  chalk: { chip: 'border-chalk/25 bg-chalk/10 text-chalk-dark', iconBg: 'bg-chalk/15 text-chalk-dark', bar: 'border-l-chalk' },
+  ember: { chip: 'border-ember/25 bg-ember/10 text-ember-dark', iconBg: 'bg-ember/10 text-ember-dark', bar: 'border-l-ember' },
+  iron: { chip: 'border-iron/25 bg-iron/10 text-iron', iconBg: 'bg-iron/10 text-iron', bar: 'border-l-iron' },
+  chalk: { chip: 'border-chalk/25 bg-chalk/10 text-chalk-dark', iconBg: 'bg-chalk/10 text-chalk-dark', bar: 'border-l-chalk' },
 };
 
 export default function Notifications() {
@@ -85,7 +85,7 @@ export default function Notifications() {
           )}
           <button
             onClick={loadNotifications}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-steel transition-colors hover:border-ink/30 hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-ink/10 text-steel transition-colors hover:border-ink/30 hover:text-ink"
             title="Refresh"
             aria-label="Refresh notifications"
           >
