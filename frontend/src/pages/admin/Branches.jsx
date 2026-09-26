@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 
@@ -76,7 +76,7 @@ export default function Branches() {
     <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Multi-Branch Locations</h1>
+          <h1 className="text-headline text-ink">Multi-Branch Locations</h1>
           <p className="text-sm text-steel">Manage physical facilities, branch operating hours, and location managers.</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary">

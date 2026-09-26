@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios.js';
 import SegmentedControl from '../../components/SegmentedControl.jsx';
@@ -135,7 +135,7 @@ export default function TrainerClients() {
     <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Client Training Studio</h1>
+          <h1 className="text-headline text-ink">Client Training Studio</h1>
           <p className="text-sm text-steel">Prescribe customized workouts, assign nutrition plans, and track client metrics.</p>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -179,9 +179,9 @@ export default function AdminPlatformBilling() {
   const hasDues = summary?.totalOutstanding > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="page-enter space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Platform Subscription & Dues</h1>
+        <h1 className="text-headline text-ink">Platform Subscription & Dues</h1>
         <p className="mt-1 text-sm text-steel">
           View your Ironline SaaS software subscription invoices, payment instructions, and submit transaction receipts.
         </p>

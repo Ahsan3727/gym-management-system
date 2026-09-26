@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import ListCard from '../../components/ListCard.jsx';
 import ListRow from '../../components/ListRow.jsx';
@@ -57,7 +57,7 @@ export default function Workouts() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">Workouts</h1>
+      <h1 className="text-headline text-ink">Workouts</h1>
       <p className="mb-8 text-sm text-steel">Log sets, reps, weight and duration — or mark a rest day.</p>
 
       <form onSubmit={handleSubmit} className="panel mb-8 grid grid-cols-2 gap-4 p-6 md:grid-cols-4">

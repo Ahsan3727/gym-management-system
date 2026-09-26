@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
 import ListCard from '../../components/ListCard.jsx';
@@ -120,7 +120,7 @@ export default function TrainerSchedule() {
     <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Training Schedule & Sessions</h1>
+          <h1 className="text-headline text-ink">Training Schedule & Sessions</h1>
           <p className="text-sm text-steel">Book 1-on-1 personal coaching slots, manage client sessions, and log completions.</p>
         </div>
         <button

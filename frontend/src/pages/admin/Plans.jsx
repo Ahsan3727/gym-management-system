@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 
@@ -71,7 +71,7 @@ export default function Plans() {
     <div>
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Plans & pricing</h1>
+          <h1 className="text-headline text-ink">Plans & pricing</h1>
           <p className="text-sm text-steel">Membership tiers customers can be assigned to.</p>
         </div>
         <button onClick={openCreate} className="btn-primary">

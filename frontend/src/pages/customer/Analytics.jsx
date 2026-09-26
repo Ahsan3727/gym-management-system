@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React, { useEffect, useMemo, useState } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios.js';
 import SegmentedControl from '../../components/SegmentedControl.jsx';
@@ -58,11 +58,11 @@ export default function Analytics() {
   const workoutSeries = consistencyByDay(data.workouts, days);
 
   return (
-    <div>
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <div className="page-enter">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Analytics</h1>
-          <p className="text-sm text-steel">Weight, training and nutrition over the selected window.</p>
+          <h1 className="text-headline text-ink">Analytics</h1>
+          <p className="text-caption mt-0.5">Weight, training &amp; nutrition over the selected window</p>
         </div>
         <SegmentedControl
           options={[{ value: '7d', label: '7D' }, { value: '30d', label: '30D' }, { value: '90d', label: '90D' }]}
@@ -72,7 +72,7 @@ export default function Analytics() {
       </div>
 
       <div className="mb-8 panel p-6">
-        <div className="mb-4 text-sm font-medium text-steel">Weight over time</div>
+        <h2 className="text-title text-ink mb-1">Weight Trend</h2><p className="text-caption mb-4">Bodyweight over selected period</p>
         {weightSeries.length > 1 ? (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={weightSeries}>
@@ -84,12 +84,12 @@ export default function Analytics() {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="py-10 text-center text-sm text-steel">Log weight on a few different days to see a trend.</div>
+          <div className="flex flex-col items-center py-10 text-center"><svg className="icon !h-8 !w-8 text-steel mb-3"><use href="#i-trend" /></svg><p className="text-caption">Log weight on a few different days to see your trend</p></div>
         )}
       </div>
 
       <div className="mb-8 panel p-6">
-        <div className="mb-4 text-sm font-medium text-steel">Workout consistency</div>
+        <h2 className="text-title text-ink mb-1">Workout Consistency</h2><p className="text-caption mb-4">Daily training sessions logged</p>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={workoutSeries}>
             <CartesianGrid {...chart.gridProps} />
@@ -102,7 +102,7 @@ export default function Analytics() {
       </div>
 
       <div className="panel p-6">
-        <div className="mb-4 text-sm font-medium text-steel">Calorie trend</div>
+        <h2 className="text-title text-ink mb-1">Calorie Trend</h2><p className="text-caption mb-4">Daily caloric intake from meal logs</p>
         {calorieSeries.length > 1 ? (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={calorieSeries}>
@@ -114,7 +114,7 @@ export default function Analytics() {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="py-10 text-center text-sm text-steel">Log calories on a few meals to see a trend.</div>
+          <div className="flex flex-col items-center py-10 text-center"><svg className="icon !h-8 !w-8 text-steel mb-3"><use href="#i-trend" /></svg><p className="text-caption">Log meals with calorie counts to see a trend</p></div>
         )}
       </div>
     </div>
