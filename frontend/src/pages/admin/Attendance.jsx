@@ -85,19 +85,16 @@ export default function AdminAttendance() {
   if (loading) return <div className="text-sm text-steel">Loading reception attendance…</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="page-enter space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Member Attendance & Check-Ins</h1>
-          <p className="mt-1 text-sm text-steel">
+          <h1 className="text-headline text-ink">Attendance &amp; Check-ins</h1>
+          <p className="text-caption mt-0.5">
             Monitor daily gym floor traffic, QR verifications, and manual front-desk check-ins.
           </p>
         </div>
-        <button onClick={() => setShowManualModal(true)} className="btn-primary">
-          <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-          Manual Check-In
-        </button>
+        <button onClick={() => setShowManualModal(true)} className="btn-primary btn-md mt-3 sm:mt-0"><svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg> Manual Check-In</button>
       </div>
 
       {/* KPI Cards */}
@@ -125,7 +122,7 @@ export default function AdminAttendance() {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3">
           <input
             type="date"
@@ -139,7 +136,7 @@ export default function AdminAttendance() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button type="submit" className="btn-secondary text-xs">Filter</button>
+          <button type="submit" className="btn-secondary btn-sm">Filter</button>
         </form>
 
         <button
@@ -151,7 +148,7 @@ export default function AdminAttendance() {
       </div>
 
       {/* Attendance Log Table */}
-      <ListCard>
+      <div className="panel overflow-hidden">
         {attendance.map((record) => {
           const timeStr = new Date(record.checkedInAt).toLocaleTimeString([], {
             hour: '2-digit',
@@ -176,9 +173,7 @@ export default function AdminAttendance() {
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold text-ink">{record.customer?.name || 'Unknown Member'}</h3>
                     <span
-                      className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${
-                        record.method === 'qr' ? 'bg-iron/10 text-iron' : 'bg-chalk/10 text-chalk-dark'
-                      }`}
+                      className={record.method === "qr" ? "badge-info" : "badge-active"}
                     >
                       {record.method === 'qr' ? 'QR Scan' : 'Reception'}
                     </span>
@@ -201,11 +196,15 @@ export default function AdminAttendance() {
         })}
 
         {attendance.length === 0 && (
-          <div className="p-8 text-center text-sm text-steel">
-            No check-in records found for this date.
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-7 !w-7 text-steel"><use href="#i-check-circle" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No check-ins today</h3>
+            <p className="text-caption">No attendance records found for this date.</p>
           </div>
         )}
-      </ListCard>
+      </div>
 
       {/* Manual Check-In Modal */}
       {showManualModal && (
