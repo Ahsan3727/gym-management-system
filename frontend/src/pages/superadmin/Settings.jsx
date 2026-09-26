@@ -38,16 +38,16 @@ export default function Settings() {
   if (!settings) return <div className="text-sm text-steel">Loading settings…</div>;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="page-enter max-w-3xl space-y-6">
       <div>
-        <h1 className="mb-1 text-2xl font-semibold text-ink">Platform Settings</h1>
-        <p className="text-sm text-steel">Configure global platform settings, default gym subscription fees, and payment accounts.</p>
+        <h1 className="text-headline text-ink">Platform Settings</h1>
+        <p className="text-caption mt-0.5">Global billing defaults, payment accounts &amp; platform configuration</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Core Settings */}
         <div className="panel p-6 space-y-4">
-          <h2 className="text-base font-semibold text-ink border-b border-ink/10 pb-2">Platform Configuration</h2>
+          <h2 className="text-title text-ink pb-3 mb-1 border-b border-ink/10">Platform Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="field-label">Platform Currency</label>
@@ -73,7 +73,7 @@ export default function Settings() {
 
         {/* Subscription & Grace Period */}
         <div className="panel p-6 space-y-4">
-          <h2 className="text-base font-semibold text-ink border-b border-ink/10 pb-2">Gym SaaS Billing & Dues Policy</h2>
+          <h2 className="text-title text-ink pb-3 mb-1 border-b border-ink/10">Gym SaaS Billing & Dues Policy</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="field-label">Default Monthly Gym Fee ({settings.currency || 'PKR'})</label>
@@ -116,7 +116,7 @@ export default function Settings() {
         {/* SuperAdmin Receiving Accounts */}
         <div className="panel p-6 space-y-4">
           <div>
-            <h2 className="text-base font-semibold text-ink">Receiving Payment Accounts</h2>
+            <h2 className="text-title text-ink">Receiving Payment Accounts</h2>
             <p className="text-xs text-steel mt-0.5">These account details will appear automatically on gym owners' invoices and payment portals.</p>
           </div>
 

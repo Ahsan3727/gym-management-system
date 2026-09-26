@@ -23,10 +23,10 @@ export default function SuperAdminOverview() {
   const maxGymGrowth = Math.max(...(analytics?.monthlyGymGrowth || []).map((g) => g.count), 2);
 
   return (
-    <div className="space-y-8">
+    <div className="page-enter space-y-8">
       <div>
-        <h1 className="text-xl sm:text-2xl font-semibold text-ink">Platform Executive Overview</h1>
-        <p className="mt-1 text-sm text-steel">Aggregated operations, SaaS subscriptions, and gym revenue metrics.</p>
+        <h1 className="text-headline text-ink">Platform Overview</h1>
+        <p className="text-caption mt-0.5">Aggregated SaaS operations, subscriptions &amp; gym revenue metrics</p>
       </div>
 
       {/* Top KPI Cards */}
@@ -70,9 +70,7 @@ export default function SuperAdminOverview() {
               <h3 className="font-semibold text-ink">Platform Revenue Velocity</h3>
               <p className="text-xs text-steel">Aggregated payments across all tenant gyms</p>
             </div>
-            <span className="rounded-lg bg-chalk/10 px-2.5 py-1 text-xs font-semibold text-chalk-dark">
-              Last 6 Months
-            </span>
+            <span className="badge-info">Last 6 Months</span>
           </div>
 
           <div className="flex h-56 items-end gap-3 pt-6 pb-2 border-b border-ink/10">
@@ -107,9 +105,7 @@ export default function SuperAdminOverview() {
               <h3 className="font-semibold text-ink">New Gym Registrations</h3>
               <p className="text-xs text-steel">Tenant acquisition by month</p>
             </div>
-            <span className="rounded-lg bg-iron/10 px-2.5 py-1 text-xs font-semibold text-iron">
-              {analytics?.totalGyms || 0} Total Gyms
-            </span>
+            <span className="badge-active">{analytics?.totalGyms || 0} Total Gyms</span>
           </div>
 
           <div className="flex h-56 items-end gap-3 pt-6 pb-2 border-b border-ink/10">
@@ -170,9 +166,9 @@ export default function SuperAdminOverview() {
                   <td className="py-3 px-3 text-right font-bold text-iron">Rs. {g.revenue.toLocaleString()}</td>
                   <td className="py-3 px-3 text-center">
                     <span
-                      className={`inline-flex rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${
-                        g.isSuspended ? 'bg-danger/10 text-danger' : 'bg-chalk/10 text-chalk-dark'
-                      }`}
+                      className={
+                        g.isSuspended ? 'badge-danger' : 'badge-active'
+                      }
                     >
                       {g.isSuspended ? 'Suspended' : 'Active'}
                     </span>
@@ -194,7 +190,7 @@ export default function SuperAdminOverview() {
       {/* Staff App Quick Banner */}
       <div className="panel p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-ember text-on-primary shadow-soft">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-ember text-on-primary shadow-soft">
             <svg className="icon !h-6 !w-6"><use href="#i-briefcase" /></svg>
           </div>
           <div>

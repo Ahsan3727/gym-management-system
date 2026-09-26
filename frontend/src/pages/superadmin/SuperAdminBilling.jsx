@@ -368,12 +368,12 @@ export default function SuperAdminBilling() {
   if (loading && !stats) return <div className="text-sm text-steel">Loading platform billing…</div>;
 
   return (
-    <div className="space-y-8">
+    <div className="page-enter space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Gym Platform Billing</h1>
-          <p className="mt-1 text-sm text-steel">
+          <h1 className="text-headline text-ink">Gym Platform Billing</h1>
+          <p className="text-caption mt-0.5">
             Manage SaaS subscription dues, invoice gym owners manually, verify payment proofs, and issue receipts.
           </p>
         </div>
@@ -477,12 +477,12 @@ export default function SuperAdminBilling() {
             const isPaid = f.status === 'paid';
             const isOverdue = f.status === 'overdue';
             const statusClass = isPaid
-              ? 'bg-chalk/10 text-chalk-dark border-chalk/30'
+              ? 'badge-active'
               : isOverdue
-              ? 'bg-danger/10 text-danger border-danger/30'
+              ? 'badge-danger'
               : f.status === 'waived'
-              ? 'bg-steel/10 text-steel border-steel/20'
-              : 'bg-iron/10 text-iron border-iron/20';
+              ? 'badge-inactive'
+              : 'badge-warning';
             return (
               <div key={f._id} className="p-4 space-y-2">
                 <div className="flex items-start justify-between gap-2">
@@ -490,7 +490,7 @@ export default function SuperAdminBilling() {
                     <div className="text-sm font-semibold text-ink truncate">{f.admin?.gymName || 'Unknown Gym'}</div>
                     <div className="text-[11px] font-mono text-steel">{f.invoiceNumber} · {f.title}</div>
                   </div>
-                  <span className={`shrink-0 inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-semibold capitalize border ${statusClass}`}>
+                  <span className={`shrink-0 `}>
                     {f.status}
                   </span>
                 </div>
@@ -579,7 +579,7 @@ export default function SuperAdminBilling() {
                               : isOverdue
                               ? 'bg-danger/10 text-danger border border-danger/30'
                               : f.status === 'waived'
-                              ? 'bg-steel/10 text-steel'
+                              ? 'badge-inactive'
                               : 'bg-iron/10 text-iron border border-iron/20'
                           }`}
                         >

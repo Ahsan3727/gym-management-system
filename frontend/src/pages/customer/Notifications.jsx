@@ -67,14 +67,12 @@ export default function Notifications() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="page-enter space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Notifications</h1>
-          <p className="mt-1 text-sm text-steel">
-            Stay up to date with fee notices, workout streak reminders, and gym announcements.
-          </p>
+          <h1 className="text-headline text-ink">Notifications</h1>
+          <p className="text-caption mt-0.5">Fee notices, streak reminders &amp; gym announcements</p>
         </div>
 
         <div className="flex items-center gap-2">
