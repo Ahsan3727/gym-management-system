@@ -417,20 +417,18 @@ export default function Fees() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+    <div className="page-enter">
+      {/* Page Header */}
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Member Fees & Billing</h1>
-          <p className="text-sm text-steel">
-            Control member monthly subscription fees, batch invoice all members, issue receipt slips, and send WhatsApp receipts.
-          </p>
+          <h1 className="text-headline text-ink">Fees &amp; Billing</h1>
+          <p className="text-caption mt-0.5">Collect monthly fees, issue receipts &amp; send WhatsApp slips</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-3 sm:mt-0">
           <button
             onClick={() => handleExport('csv')}
             disabled={exporting}
-            className="btn-secondary text-xs"
+            className="btn-secondary btn-sm"
             title="Export CSV"
           >
             Export CSV
@@ -438,18 +436,18 @@ export default function Fees() {
           <button
             onClick={() => handleExport('pdf')}
             disabled={exporting}
-            className="btn-secondary text-xs"
+            className="btn-secondary btn-sm"
             title="Export PDF"
           >
             Export PDF
           </button>
-          <button onClick={openBulkModal} className="btn-secondary text-xs">
+          <button onClick={openBulkModal} className="btn-secondary btn-sm">
             <svg className="icon !h-4 !w-4"><use href="#i-refresh" /></svg>
-            Bulk Monthly Invoicing
+            Bulk Invoice
           </button>
-          <button onClick={() => openCreateModal()} className="btn-primary text-xs">
+          <button onClick={() => openCreateModal()} className="btn-primary btn-md">
             <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-            Add Member Fee
+            Add Fee
           </button>
         </div>
       </div>
@@ -487,15 +485,20 @@ export default function Fees() {
       </div>
 
       {/* Filter Bar */}
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <input
-          className="field-input max-w-xs"
-          placeholder="Search member or receipt #…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <svg className="icon !h-4 !w-4 absolute left-3 top-1/2 -translate-y-1/2 text-steel pointer-events-none">
+            <use href="#i-search" />
+          </svg>
+          <input
+            className="field-input pl-9"
+            placeholder="Search member or receipt #…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <select
-          className="field-input max-w-[11rem]"
+          className="field-input w-auto min-w-[10rem]"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -505,15 +508,15 @@ export default function Fees() {
           <option value="overdue">🔴 Overdue</option>
         </select>
         <input
-          className="field-input max-w-[11rem]"
-          placeholder="Filter month (e.g. Sep 2026)"
+          className="field-input w-auto min-w-[10rem]"
+          placeholder="Month (e.g. Sep 2026)"
           value={billingMonthFilter}
           onChange={(e) => setBillingMonthFilter(e.target.value)}
         />
         {(status || search || billingMonthFilter) && (
           <button
             onClick={() => { setStatus(''); setSearch(''); setBillingMonthFilter(''); }}
-            className="text-xs text-steel hover:text-ink underline"
+            className="btn-ghost btn-sm"
           >
             Clear Filters
           </button>
@@ -597,17 +600,11 @@ export default function Fees() {
                     {/* Status */}
                     <td className="px-4 py-4">
                       {isPaid ? (
-                        <span className="chip border-emerald-500/20 bg-emerald-500/10 text-emerald-600 font-semibold">
-                          Paid
-                        </span>
+                        <span className="badge-active">Paid</span>
                       ) : isOverdue ? (
-                        <span className="chip border-rose-500/25 bg-rose-500/15 text-rose-700 font-semibold">
-                          Overdue
-                        </span>
+                        <span className="badge-danger">Overdue</span>
                       ) : (
-                        <span className="chip border-amber-500/20 bg-amber-500/10 text-amber-700 font-semibold">
-                          Unpaid
-                        </span>
+                        <span className="badge-warning">Unpaid</span>
                       )}
                     </td>
 
@@ -618,7 +615,7 @@ export default function Fees() {
                         {!isPaid && (
                           <button
                             onClick={() => openPayModal(f)}
-                            className="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-emerald-700 transition-colors"
+                            className="btn-sm border border-chalk/40 bg-chalk/10 text-chalk-dark hover:bg-chalk/20 transition-colors"
                           >
                             Mark Paid
                           </button>

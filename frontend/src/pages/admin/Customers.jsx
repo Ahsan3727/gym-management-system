@@ -429,42 +429,47 @@ export default function Customers() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+    <div className="page-enter">
+      {/* Page Header */}
+      <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Members</h1>
-          <p className="text-sm text-steel">
-            Direct monthly subscription fee model. Register members, collect monthly fees, and track dues.
+          <h1 className="text-headline text-ink">Members</h1>
+          <p className="text-caption mt-0.5">
+            Register members, collect monthly fees &amp; track dues
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => { setShowImport(true); setImportResult(null); }} className="btn-secondary">
+        <div className="flex items-center gap-2 mt-3 sm:mt-0">
+          <button onClick={() => { setShowImport(true); setImportResult(null); }} className="btn-secondary btn-sm">
             <svg className="icon !h-4 !w-4"><use href="#i-clipboard" /></svg>
             Import CSV
           </button>
-          <button onClick={openCreateModal} className="btn-primary">
+          <button onClick={openCreateModal} className="btn-primary btn-md">
             <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-            Add member
+            Add Member
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <form onSubmit={handleSearchSubmit} className="mb-4 flex flex-wrap items-center gap-3">
-        <input
-          className="field-input max-w-xs"
-          placeholder="Search by name or phone…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select className="field-input max-w-[11rem]" value={status} onChange={(e) => setStatus(e.target.value)}>
+      <form onSubmit={handleSearchSubmit} className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <svg className="icon !h-4 !w-4 absolute left-3 top-1/2 -translate-y-1/2 text-steel pointer-events-none">
+            <use href="#i-search" />
+          </svg>
+          <input
+            className="field-input pl-9"
+            placeholder="Search by name or phone…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <select className="field-input w-auto min-w-[10rem]" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">All statuses</option>
           <option value="active">Active members</option>
           <option value="inactive">Inactive members</option>
           <option value="overdue">⚠️ Overdue fees</option>
         </select>
-        <button type="submit" className="btn-secondary">Search</button>
+        <button type="submit" className="btn-secondary btn-md">Search</button>
         {gymProfile?.defaultMemberMonthlyFee && (
           <span className="text-xs text-steel ml-auto hidden md:inline">
             Default rate: <strong className="text-ink">Rs. {Number(gymProfile.defaultMemberMonthlyFee).toLocaleString()}/mo</strong> · Due day: <strong className="text-ink">{gymProfile.defaultFeeDueDay || 10}th</strong>
@@ -530,20 +535,20 @@ export default function Customers() {
         )}
 
         {customers.map((c) => {
-          // Compute fee status badge
+          // Compute fee status badge using new badge system
           let feePill = null;
           if (c.feeStatus === 'paid') {
             const exp = c.membershipExpiresAt ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) : 'Active';
-            feePill = <span className="chip border-emerald-500/20 bg-emerald-500/10 text-emerald-600">🟢 Paid · exp {exp}</span>;
+            feePill = <span className="badge-active">Paid · {exp}</span>;
           } else if (c.feeStatus === 'due_soon') {
             const exp = c.membershipExpiresAt ? new Date(c.membershipExpiresAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) : 'Soon';
-            feePill = <span className="chip border-amber-500/25 bg-amber-500/15 text-amber-700 font-semibold">🟡 Due Soon · exp {exp}</span>;
+            feePill = <span className="badge-warning">Due Soon · {exp}</span>;
           } else if (c.feeStatus === 'overdue') {
-            feePill = <span className="chip border-rose-500/25 bg-rose-500/15 text-rose-700 font-semibold">🔴 Overdue</span>;
+            feePill = <span className="badge-danger">Overdue</span>;
           } else if (c.feeStatus === 'unpaid') {
-            feePill = <span className="chip border-amber-500/20 bg-amber-500/10 text-amber-600">🔴 Unpaid</span>;
+            feePill = <span className="badge-warning">Unpaid</span>;
           } else {
-            feePill = <span className="chip border-ink/10 bg-ink/5 text-steel">⚪ No Fee</span>;
+            feePill = <span className="badge-inactive">No Fee</span>;
           }
 
           return (
@@ -573,7 +578,7 @@ export default function Customers() {
                       <span>·</span>
                       <span className="font-medium text-ink">Rs. {Number(c.monthlyFee ?? 3000).toLocaleString()}/month</span>
                       <span>·</span>
-                      <span className={c.isActive ? 'text-chalk-dark font-medium' : 'text-steel'}>
+                      <span className={c.isActive ? 'badge-active' : 'badge-inactive'}>
                         {c.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>

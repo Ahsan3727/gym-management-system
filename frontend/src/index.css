@@ -113,27 +113,108 @@ html.light {
     stroke-linejoin: round;
   }
 
+  /* ── Button system ─────────────────────────────────────────────── */
+
+  /* Shared base — compose this with a size + color class */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold
+           select-none whitespace-nowrap
+           transition-all duration-150
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-ember focus-visible:ring-offset-2 focus-visible:ring-offset-bone
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  /* Size variants */
+  .btn-sm  { @apply btn h-8   px-3   text-xs  rounded-[10px]; }
+  .btn-md  { @apply btn h-10  px-4   text-sm  rounded-[12px]; }
+  .btn-lg  { @apply btn h-12  px-6   text-base rounded-[14px]; }
+
+  /* Icon-only square button */
+  .btn-icon {
+    @apply btn flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] p-0
+           text-steel hover:bg-ink/5 hover:text-ink;
+  }
+
+  /* Primary — gradient + ember glow */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-on-primary shadow-soft transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply btn btn-md text-on-primary active:scale-[0.96];
     background: linear-gradient(135deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)) 70%);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.20), 0 0 16px rgb(var(--c-ember) / 0.22);
   }
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.06);
+    filter: brightness(1.08);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.24), 0 0 24px rgb(var(--c-ember) / 0.35);
+    transform: translateY(-1px);
   }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0) scale(0.96);
+  }
+
+  /* Secondary — bordered panel */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink/15 bg-panel px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-ink/30 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply btn btn-md border border-ink/10 bg-panel text-ink
+           hover:border-ink/25 hover:bg-panel-2;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.10);
   }
+  .btn-secondary:hover:not(:disabled) {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.16);
+  }
+
+  /* Ghost — transparent, subtle hover */
+  .btn-ghost {
+    @apply btn btn-md bg-transparent text-steel
+           hover:bg-ink/5 hover:text-ink;
+  }
+
+  /* Danger — red border, transparent bg */
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-danger/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-danger-dark transition-colors hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply btn btn-md border border-danger/30 bg-transparent text-danger
+           hover:bg-danger/10 hover:border-danger/50;
   }
+  /* ── Form fields ───────────────────────────────────────────────── */
   .field-label {
-    @apply mb-1.5 block text-sm font-medium text-steel;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-steel;
   }
   .field-input {
-    @apply w-full rounded-[16px] border border-ink/15 bg-panel px-3.5 py-2.5 text-sm text-ink placeholder:text-steel-light transition-colors focus:border-ember focus:outline-none;
+    @apply w-full h-10 rounded-[12px] border border-ink/10 bg-panel-2
+           px-3.5 text-sm text-ink placeholder:text-steel-light
+           transition-all duration-150
+           hover:border-ink/20
+           focus:border-ember focus:bg-panel focus:outline-none focus:ring-2 focus:ring-ember/20;
   }
+  textarea.field-input { @apply h-auto py-2.5; }
+  select.field-input   { @apply cursor-pointer; }
+  .field-input--error  { @apply border-danger/50 focus:border-danger focus:ring-danger/20; }
+  .field-input--valid  { @apply border-chalk/50 focus:border-chalk focus:ring-chalk/20; }
+  .field-error         { @apply mt-1 flex items-center gap-1 text-xs text-danger; }
+  /* ── Panel / surface system ────────────────────────────────────── */
+
+  /* Base */
   .panel {
-    @apply rounded-[26px] border border-ink/10 bg-panel;
+    @apply rounded-[16px] border border-ink/10 bg-panel;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+  /* Elevated — modals, dropdowns */
+  .panel-elevated {
+    @apply rounded-[20px] border border-ink/10 bg-panel;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 0.28), 0 4px 8px rgb(0 0 0 / 0.14);
+  }
+  /* Clickable card — lifts on hover */
+  .panel-interactive {
+    @apply rounded-[16px] border border-ink/10 bg-panel cursor-pointer
+           transition-all duration-200
+           hover:border-ink/20 hover:-translate-y-0.5;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+  .panel-interactive:hover {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.20);
+  }
+  /* Brand tint — stat highlights */
+  .panel-brand {
+    @apply rounded-[16px] border bg-panel overflow-hidden;
+    border-color: rgb(var(--c-ember) / 0.22);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 0 18px rgb(var(--c-ember) / 0.08);
   }
   .stat-number {
     @apply font-display text-4xl font-extrabold leading-none tracking-[-0.02em];
@@ -143,30 +224,30 @@ html.light {
 
   /* StatCard surface + optional radial-glow "highlight" variant */
   .stat-card {
-    @apply relative overflow-hidden rounded-[26px] border border-ink/10 bg-panel px-5 py-4;
+    @apply relative overflow-hidden rounded-[16px] border border-ink/10 bg-panel px-5 py-4;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
+  }
+  .stat-card--hi {
+    border-color: rgb(var(--c-ember) / 0.22);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.12), 0 0 18px rgb(var(--c-ember) / 0.10);
   }
   .stat-card--hi::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(140px 90px at 88% -15%, rgb(var(--c-ember) / 0.35), transparent 70%);
+    background: radial-gradient(120px 80px at 88% -20%, rgb(var(--c-ember) / 0.28), transparent 65%);
     pointer-events: none;
   }
 
   /* Modal surface */
   .modal-panel {
-    @apply rounded-[26px] border border-ink/10 bg-panel shadow-soft;
-    animation: modal-in 0.18s ease-out;
+    @apply rounded-[20px] border border-ink/10 bg-panel;
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.45), 0 8px 16px rgb(0 0 0 / 0.20);
+    animation: modal-in 0.22s cubic-bezier(0.34, 1.3, 0.64, 1) both;
   }
   @keyframes modal-in {
-    from {
-      opacity: 0;
-      transform: translateY(8px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(14px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
   }
 
   /* Toast / snackbar (see components/Toast.jsx, useToast()) */
@@ -195,6 +276,26 @@ html.light {
   .chip {
     @apply inline-flex items-center gap-1.5 rounded-full border border-ink/10 bg-ink/5 px-3 py-1 text-xs font-semibold text-steel;
   }
+
+  /* ── Status badge system ────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .badge::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.65;
+    flex-shrink: 0;
+  }
+  .badge-active   { @apply badge bg-chalk/10  text-chalk-dark; }
+  .badge-inactive { @apply badge bg-steel/10  text-steel; }
+  .badge-warning  { @apply badge bg-warning/10 text-warning; }
+  .badge-danger   { @apply badge bg-danger/10  text-danger; }
+  .badge-info     { @apply badge bg-iron/10    text-iron; }
 
   /* Radial-glow tinted card (Login brand panel, hero stat cards, ...) */
   .card--tint {
@@ -243,6 +344,49 @@ html.light {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* ── Typography scale ──────────────────────────────────────────── */
+  .text-display  { @apply font-display text-4xl font-extrabold leading-tight   tracking-[-0.03em]; }
+  .text-headline { @apply font-display text-2xl font-bold    leading-snug    tracking-[-0.02em]; }
+  .text-title    { @apply text-lg font-semibold leading-snug  tracking-[-0.01em]; }
+  .text-body     { @apply text-sm font-normal   leading-relaxed; }
+  .text-caption  { @apply text-xs font-medium   leading-normal text-steel; }
+  .text-overline { @apply text-[11px] font-bold uppercase tracking-[0.08em] text-steel; }
+
+  /* ── Page entrance animation ───────────────────────────────────── */
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .page-enter {
+    animation: page-enter 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ── Skeleton shimmer ───────────────────────────────────────────── */
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+  }
+  .skeleton {
+    @apply rounded-[8px];
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-panel-2)) 25%,
+      rgb(var(--c-ink-soft)) 50%,
+      rgb(var(--c-panel-2)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* ── StatCard pop-in ────────────────────────────────────────────── */
+  @keyframes stat-pop {
+    from { opacity: 0; transform: scale(0.92) translateY(4px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0); }
+  }
+  .stat-pop {
+    animation: stat-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 
   /* Spinning loader inside submit button */

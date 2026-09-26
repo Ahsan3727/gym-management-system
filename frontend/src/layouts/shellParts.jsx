@@ -41,7 +41,7 @@ export function BrandHeader({
 }) {
   const { bgStyle, colorStyle } = useAccentStyles();
   return (
-    <div className="flex items-center gap-3 px-6 py-6 border-b border-ink/5">
+    <div className="flex items-center gap-3 px-5 py-5 border-b border-ink/8">
       {gymLogo ? (
         <img
           src={gymLogo}
@@ -83,10 +83,20 @@ export function NavItemLink({ item, onClick }) {
     <NavLink to={item.to} end={item.end} className="block" onClick={onClick}>
       {({ isActive }) => (
         <span
-          className="group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150"
+          className={`group relative flex items-center gap-3 rounded-[12px] px-3.5 py-2.5 text-sm transition-all duration-150 ${
+            isActive
+              ? 'font-semibold'
+              : 'font-medium text-steel hover:bg-ink/5 hover:text-ink'
+          }`}
           style={isActive ? { ...activeBgStyle, ...colorStyle } : {}}
-          data-inactive={!isActive || undefined}
         >
+          {/* Left accent bar — visible only on active item */}
+          {isActive && (
+            <span
+              className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full"
+              style={{ backgroundColor: 'rgb(var(--c-ember))' }}
+            />
+          )}
           <span
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
               isActive ? '' : 'bg-ink/5 group-hover:bg-ink/10'

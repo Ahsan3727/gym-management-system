@@ -66,7 +66,7 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
   return (
     <div className="min-h-screen bg-bone md:flex">
       {/* Mobile Top Header */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-ink/10 bg-panel px-4 py-3 md:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-ink/8 bg-panel/85 backdrop-blur-xl px-4 py-3 md:hidden shadow-xs">
         <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
           {gymLogo ? (
             <img src={gymLogo} alt={gymName} className="h-8 w-8 shrink-0 rounded-xl object-cover border border-ink/10 shadow-sm" />
@@ -111,13 +111,13 @@ export default function SidebarShell({ navItems, accent = 'ember', roleLabel, br
       </div>
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden w-72 shrink-0 border-r border-ink/10 bg-panel md:block">
+      <aside className="hidden w-64 shrink-0 border-r border-ink/8 bg-panel md:block">
         {sidebarContent}
       </aside>
 
       {/* Main Content Body */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-5xl overflow-x-hidden px-4 py-6 md:px-8 md:py-10">
+        <div className="mx-auto max-w-6xl overflow-x-hidden px-4 py-5 md:px-6 lg:px-8 md:py-8 page-enter">
           <Outlet />
         </div>
       </main>
