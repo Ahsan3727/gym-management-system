@@ -1,7 +1,6 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
-import ListCard from '../../components/ListCard.jsx';
 import Modal from '../../components/Modal.jsx';
 import SegmentedControl from '../../components/SegmentedControl.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -117,11 +116,11 @@ export default function TrainerSchedule() {
   if (loading) return <div className="text-sm text-steel">Loading session schedule…</div>;
 
   return (
-    <div>
+    <div className="page-enter">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-headline text-ink">Training Schedule & Sessions</h1>
-          <p className="text-sm text-steel">Book 1-on-1 personal coaching slots, manage client sessions, and log completions.</p>
+          <p className="text-caption mt-0.5">Book 1-on-1 personal coaching slots, manage client sessions, and log completions.</p>
         </div>
         <button
           onClick={() => setShowBookModal(true)}
@@ -170,18 +169,18 @@ export default function TrainerSchedule() {
       </div>
 
       {/* Sessions List */}
-      <ListCard>
+      <div className="panel divide-y divide-ink/10 overflow-hidden">
         {filteredSessions.map((s) => {
           const sessionDate = new Date(s.scheduledAt);
           const isUpcoming = sessionDate > new Date() && s.status === 'scheduled';
           return (
             <div
               key={s._id}
-              className="flex flex-col gap-3 border-b border-ink/5 p-4 transition-colors last:border-0 hover:bg-ink/[0.02] sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 p-4 transition-colors hover:bg-ink/[0.02] sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-start gap-3">
                 <div
-                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold text-xs ${
+                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs ${
                     s.status === 'completed'
                       ? 'bg-chalk/20 text-chalk-dark'
                       : s.status === 'cancelled'
@@ -190,20 +189,20 @@ export default function TrainerSchedule() {
                   }`}
                 >
                   <svg className="icon !h-5 !w-5">
-                    <use href={s.status === 'completed' ? '#i-check' : '#i-dumbbell'} />
+                    <use href={s.status === 'completed' ? '#i-check-circle' : '#i-dumbbell'} />
                   </svg>
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold text-ink">{s.title}</h3>
                     <span
-                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                      className={
                         s.status === 'completed'
-                          ? 'bg-chalk/20 text-chalk-dark'
+                          ? 'badge-active'
                           : s.status === 'cancelled'
-                          ? 'bg-danger/10 text-danger'
-                          : 'bg-iron/10 text-iron'
-                      }`}
+                          ? 'badge-danger'
+                          : 'badge-info'
+                      }
                     >
                       {s.status}
                     </span>
@@ -258,11 +257,17 @@ export default function TrainerSchedule() {
         })}
 
         {filteredSessions.length === 0 && (
-          <div className="p-8 text-center text-sm text-steel">
-            No {filter !== 'all' ? filter : ''} sessions found.
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-calendar" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No sessions scheduled</h3>
+            <p className="text-caption max-w-xs">
+              {filter !== 'all' ? `No ${filter} sessions found.` : 'Book a 1-on-1 coaching session with any of your assigned clients.'}
+            </p>
           </div>
         )}
-      </ListCard>
+      </div>
 
       {/* Book Session Modal */}
       {showBookModal && (

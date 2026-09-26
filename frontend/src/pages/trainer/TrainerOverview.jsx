@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function TrainerOverview() {

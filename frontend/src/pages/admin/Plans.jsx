@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 
@@ -68,15 +68,15 @@ export default function Plans() {
   }
 
   return (
-    <div>
-      <div className="mb-8 flex items-start justify-between">
+    <div className="page-enter">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-headline text-ink">Plans & pricing</h1>
-          <p className="text-sm text-steel">Membership tiers customers can be assigned to.</p>
+          <h1 className="text-headline text-ink">Plans & Pricing</h1>
+          <p className="text-caption mt-0.5">Membership tiers customers can be assigned to.</p>
         </div>
         <button onClick={openCreate} className="btn-primary">
           <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
-          Add plan
+          Add Plan
         </button>
       </div>
 
@@ -84,27 +84,39 @@ export default function Plans() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {plans.map((plan) => (
-          <div key={plan._id} className="panel p-5">
-            <div className="mb-1 flex items-start justify-between">
-              <div className="font-display text-lg font-semibold text-ink">{plan.planName}</div>
-              <span className={`chip ${plan.isActive ? 'border-chalk/25 bg-chalk/10 text-chalk-dark' : ''}`}>
-                {plan.isActive ? 'Active' : 'Inactive'}
-              </span>
+          <div key={plan._id} className="panel p-5 flex flex-col justify-between hover:shadow-soft transition-all">
+            <div>
+              <div className="mb-2 flex items-start justify-between">
+                <div className="font-display text-lg font-semibold text-ink">{plan.planName}</div>
+                <span className={plan.isActive ? 'badge-active' : 'badge-inactive'}>
+                  {plan.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div className="mb-4">
+                <span className="text-2xl font-bold text-ink">Rs. {Number(plan.price || 0).toLocaleString()}</span>
+                <span className="text-xs text-steel"> / {plan.durationMonths} month{plan.durationMonths > 1 ? 's' : ''}</span>
+              </div>
             </div>
-            <div className="mb-4 text-2xl font-semibold text-iron">
-              Rs. {Number(plan.price || 0).toLocaleString()}
-              <span className="text-sm font-normal text-steel"> / {plan.durationMonths}mo</span>
-            </div>
-            <div className="flex gap-3 text-xs font-medium">
-              <button onClick={() => openEdit(plan)} className="text-steel hover:text-ink">Edit</button>
-              <button onClick={() => toggleActive(plan)} className="text-steel hover:text-ink">
+            <div className="flex items-center gap-2 border-t border-ink/10 pt-3 text-xs font-medium">
+              <button onClick={() => openEdit(plan)} className="btn-secondary btn-sm flex-1">Edit</button>
+              <button onClick={() => toggleActive(plan)} className="btn-secondary btn-sm flex-1">
                 {plan.isActive ? 'Deactivate' : 'Activate'}
               </button>
-              <button onClick={() => handleDelete(plan)} className="text-steel hover:text-danger">Delete</button>
+              <button onClick={() => handleDelete(plan)} className="btn-icon !h-8 !w-8 text-steel hover:text-danger" title="Delete Plan">
+                <svg className="icon !h-4 !w-4"><use href="#i-trash" /></svg>
+              </button>
             </div>
           </div>
         ))}
-        {plans.length === 0 && <div className="text-sm text-steel">No plans yet — add your first one.</div>}
+        {plans.length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-tag" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No plans created yet</h3>
+            <p className="text-caption max-w-xs">Create your first membership tier (e.g. Monthly, Quarterly, VIP) to assign to members.</p>
+          </div>
+        )}
       </div>
 
       {showCreate && (

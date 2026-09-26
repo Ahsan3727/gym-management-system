@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
-import ListCard from '../../components/ListCard.jsx';
 import Modal from '../../components/Modal.jsx';
 import StatCard from '../../components/StatCard.jsx';
 import { useToast } from '../../context/ToastContext.jsx';

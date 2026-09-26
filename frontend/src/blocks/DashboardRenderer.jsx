@@ -88,5 +88,5 @@ export default function DashboardRenderer({ app = 'member' }) {
     i++;
   }
 
-  return <div className={`dashboard-container dashboard--${preset}`}>{elements}</div>;
+  return <div className={`dashboard-container dashboard--${preset} page-enter`}>{elements}</div>;
 }

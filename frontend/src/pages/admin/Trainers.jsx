@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 
 export default function Trainers() {
   const [trainers, setTrainers] = useState([]);
@@ -113,11 +111,11 @@ export default function Trainers() {
   if (loading) return <div className="text-sm text-steel">Loading trainers…</div>;
 
   return (
-    <div>
+    <div className="page-enter">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="mb-1 text-2xl font-semibold text-ink">Personal Trainers & Staff</h1>
-          <p className="text-sm text-steel">Manage coaching staff, specialty assignments, and member allocations.</p>
+          <h1 className="text-headline text-ink">Personal Trainers & Staff</h1>
+          <p className="text-caption mt-0.5">Manage coaching staff, specialty assignments, and member allocations.</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary">
           <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
@@ -127,32 +125,54 @@ export default function Trainers() {
 
       {error && <div className="mb-4 text-sm text-danger">{error}</div>}
 
-      <ListCard>
-        {trainers.map((t) => (
-          <ListRow
-            key={t._id}
-            icon="user"
-            iconBg="bg-iron/10 text-iron"
-            title={`Coach ${t.name}`}
-            subtitle={`${t.specialty || 'General'} · ${t.phone || 'No phone'} · ${t.assignedCustomers?.length || 0} client(s)`}
-            trailing={
-              <div className="flex items-center gap-3">
-                <button onClick={() => openAssignModal(t)} className="text-xs font-medium text-iron hover:underline">
-                  Assign clients
+      <div className="panel divide-y divide-ink/10 overflow-hidden">
+        {trainers.map((t) => {
+          const initials = (t.name || '?').trim().charAt(0).toUpperCase();
+          return (
+            <div key={t._id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-ink/[0.02] transition-colors">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-sm font-bold text-on-primary"
+                style={{ background: 'linear-gradient(135deg, rgb(var(--c-ember-light)), rgb(var(--c-ember)))' }}
+              >
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-ink">Coach {t.name}</span>
+                  <span className="badge-info">{t.specialty || 'General Fitness'}</span>
+                </div>
+                <div className="mt-0.5 text-xs text-steel">
+                  {t.phone || 'No phone'} &middot; {t.assignedCustomers?.length || 0} assigned client(s)
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => openAssignModal(t)}
+                  className="btn-secondary btn-sm"
+                >
+                  Assign Clients
                 </button>
-                <button onClick={() => handleDeleteTrainer(t._id)} className="text-xs font-medium text-steel hover:text-ember-dark">
-                  Remove
+                <button
+                  onClick={() => handleDeleteTrainer(t._id)}
+                  title="Remove Trainer"
+                  className="btn-icon !h-8 !w-8 text-steel hover:text-danger"
+                >
+                  <svg className="icon !h-4 !w-4"><use href="#i-trash" /></svg>
                 </button>
               </div>
-            }
-          />
-        ))}
+            </div>
+          );
+        })}
         {trainers.length === 0 && (
-          <div className="px-4 py-8 text-center text-sm text-steel">
-            No personal trainers added yet. Click "Add Trainer" to onboard coaches.
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-users" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No personal trainers added yet</h3>
+            <p className="text-caption max-w-xs">Click "Add Trainer" to onboard coaches and assign gym members.</p>
           </div>
         )}
-      </ListCard>
+      </div>
 
       {/* Add Trainer Modal */}
       {showAdd && (

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
-import ListCard from '../../components/ListCard.jsx';
 
 export default function SuperAdminOverview() {
   const [analytics, setAnalytics] = useState(null);

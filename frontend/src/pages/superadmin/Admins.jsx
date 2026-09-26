@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { escapeHtml } from '../../utils/escapeHtml.js';
 import GymBranding from './GymBranding.jsx';

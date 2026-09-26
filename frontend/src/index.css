@@ -363,6 +363,37 @@ html.light {
     animation: page-enter 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  /* ── Login animations ───────────────────────────────────────────── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .login-card {
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes loginSpin {
+    to { transform: rotate(360deg); }
+  }
+  .login-spinner {
+    display: inline-block;
+    border: 2.5px solid rgb(var(--c-ink) / 0.15);
+    border-top-color: rgb(var(--c-ember));
+    border-radius: 9999px;
+    animation: loginSpin 0.7s linear infinite;
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50%      { transform: scale(1.08); opacity: 0.28; }
+  }
+  .login-orb-1 {
+    animation: pulseSlow 8s ease-in-out infinite;
+  }
+  .login-orb-2 {
+    animation: pulseSlow 11s ease-in-out infinite reverse;
+  }
+
   /* ── Skeleton shimmer ───────────────────────────────────────────── */
   @keyframes shimmer {
     from { background-position: -200% 0; }

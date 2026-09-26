@@ -1,9 +1,7 @@
-﻿import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 import { useChartColors } from '../../utils/chartTheme.js';
 
 const emptyForm = {
@@ -165,9 +163,11 @@ export default function Weight() {
   }
 
   return (
-    <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">Weight & body</h1>
-      <p className="mb-8 text-sm text-steel">Track weight trend, BMI, measurements and progress photos.</p>
+    <div className="page-enter">
+      <div className="mb-6">
+        <h1 className="text-headline text-ink">Weight & Body Metrics</h1>
+        <p className="text-caption mt-0.5">Track weight trend, BMI, measurements and progress photos.</p>
+      </div>
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3">
         <StatCard icon="drop" hi label="Latest weight" value={latest ? `${latest.weightKg} kg` : '—'} />
@@ -199,6 +199,10 @@ export default function Weight() {
       )}
 
       <form onSubmit={handleSubmit} className="panel mb-8 grid grid-cols-2 gap-4 p-6 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4 border-b border-ink/10 pb-3 mb-1">
+          <h2 className="text-title text-ink">Log Weight & Measurements</h2>
+          <p className="text-caption">Record your body weight, tape measurements, and optional progress photo.</p>
+        </div>
         <div>
           <label className="field-label">Weight (kg)</label>
           <input
@@ -288,46 +292,67 @@ export default function Weight() {
         </div>
       </form>
 
-      <ListCard>
+      <div className="panel divide-y divide-ink/10 overflow-hidden">
         {logs.map((log) => {
           const m = log.measurements || {};
           const meta = [
-            m.chestCm != null ? `C ${m.chestCm}` : null,
-            m.waistCm != null ? `W ${m.waistCm}` : null,
-            m.hipsCm != null ? `H ${m.hipsCm}` : null,
-            m.armsCm != null ? `A ${m.armsCm}` : null,
+            m.chestCm != null ? `Chest: ${m.chestCm}cm` : null,
+            m.waistCm != null ? `Waist: ${m.waistCm}cm` : null,
+            m.hipsCm != null ? `Hips: ${m.hipsCm}cm` : null,
+            m.armsCm != null ? `Arms: ${m.armsCm}cm` : null,
           ].filter(Boolean);
           return (
-            <ListRow
-              key={log._id}
-              icon="drop"
-              title={`${log.weightKg} kg`}
-              subtitle={`${new Date(log.date).toLocaleDateString()}${meta.length ? ' · ' + meta.join(' / ') : ''}`}
-              trailing={
-                <div className="flex items-center gap-3">
-                  {log.progressPhotoUrl && (
-                    <a href={log.progressPhotoUrl} target="_blank" rel="noreferrer">
-                      <img
-                        src={log.progressPhotoUrl}
-                        alt="thumb"
-                        className="h-8 w-8 rounded-xl object-cover border border-ink/10"
-                      />
-                    </a>
-                  )}
-                  <button
-                    onClick={() => handleDelete(log._id)}
-                    aria-label="Delete entry"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-steel transition-colors hover:bg-ember/10 hover:text-ember-dark"
-                  >
-                    <svg className="icon !h-4 !w-4"><use href="#i-minus" /></svg>
-                  </button>
+            <div key={log._id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-ink/[0.02] transition-colors">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-iron/10 text-iron">
+                <svg className="icon !h-5 !w-5"><use href="#i-drop" /></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-bold text-ink">{log.weightKg} kg</span>
+                  <span className="text-xs text-steel">{new Date(log.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
-              }
-            />
+                {meta.length > 0 && (
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-steel">
+                    {meta.map((item, i) => (
+                      <span key={i} className="inline-flex items-center rounded-md bg-ink/5 px-1.5 py-0.5 text-[11px] text-ink/80">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                {log.progressPhotoUrl && (
+                  <a href={log.progressPhotoUrl} target="_blank" rel="noreferrer" title="View progress photo">
+                    <img
+                      src={log.progressPhotoUrl}
+                      alt="Progress"
+                      className="h-9 w-9 rounded-[10px] object-cover border border-ink/10 hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                )}
+                <button
+                  onClick={() => handleDelete(log._id)}
+                  aria-label="Delete entry"
+                  title="Delete weight entry"
+                  className="flex h-8 w-8 items-center justify-center rounded-[8px] text-steel hover:bg-danger/10 hover:text-danger transition-colors"
+                >
+                  <svg className="icon !h-4 !w-4"><use href="#i-trash" /></svg>
+                </button>
+              </div>
+            </div>
           );
         })}
-        {logs.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No weight entries yet.</div>}
-      </ListCard>
+        {logs.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-drop" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No weight entries yet</h3>
+            <p className="text-caption max-w-xs">Use the measurement form above to log your first weigh-in.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,9 +1,7 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios.js';
 import SegmentedControl from '../../components/SegmentedControl.jsx';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 
 export default function TrainerClients() {
@@ -132,11 +130,11 @@ export default function TrainerClients() {
   const currentClient = clientProgress?.customer || clients.find((c) => c._id === selectedClientId);
 
   return (
-    <div>
+    <div className="page-enter">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-headline text-ink">Client Training Studio</h1>
-          <p className="text-sm text-steel">Prescribe customized workouts, assign nutrition plans, and track client metrics.</p>
+          <p className="text-caption mt-0.5">Prescribe customized workouts, assign nutrition plans, and track client metrics.</p>
         </div>
 
         {clients.length > 0 && (
@@ -352,40 +350,46 @@ export default function TrainerClients() {
             <div className="grid gap-8 md:grid-cols-2">
               <div>
                 <div className="mb-2 px-1 text-xs font-semibold text-steel uppercase tracking-wider">Recent Workouts</div>
-                <ListCard>
+                <div className="panel divide-y divide-ink/10 overflow-hidden">
                   {clientProgress?.workouts?.slice(0, 10).map((w) => (
-                    <ListRow
-                      key={w._id}
-                      icon="dumbbell"
-                      title={w.exercise}
-                      subtitle={`${new Date(w.date).toLocaleDateString()}${
-                        w.sets && w.reps ? ` · ${w.sets} × ${w.reps}` : ''
-                      }${w.weight ? ` · ${w.weight}kg` : ''}${w.notes ? ` · ${w.notes}` : ''}`}
-                    />
+                    <div key={w._id} className="flex items-center gap-3 px-4 py-3 hover:bg-ink/[0.02] transition-colors">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-ink/5 text-ink">
+                        <svg className="icon !h-4 !w-4"><use href="#i-dumbbell" /></svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-ink">{w.exercise}</div>
+                        <div className="text-xs text-steel">
+                          {new Date(w.date).toLocaleDateString()}{w.sets && w.reps ? ` · ${w.sets} × ${w.reps}` : ''}{w.weight ? ` · ${w.weight}kg` : ''}{w.notes ? ` · ${w.notes}` : ''}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                   {(!clientProgress?.workouts || clientProgress.workouts.length === 0) && (
-                    <div className="px-4 py-6 text-center text-sm text-steel">No workouts recorded yet.</div>
+                    <div className="px-4 py-8 text-center text-sm text-steel">No workouts recorded yet.</div>
                   )}
-                </ListCard>
+                </div>
               </div>
 
               <div>
                 <div className="mb-2 px-1 text-xs font-semibold text-steel uppercase tracking-wider">Recent Nutrition Logs</div>
-                <ListCard>
+                <div className="panel divide-y divide-ink/10 overflow-hidden">
                   {clientProgress?.diet?.slice(0, 10).map((d) => (
-                    <ListRow
-                      key={d._id}
-                      icon="note"
-                      title={d.meal}
-                      subtitle={`${new Date(d.date).toLocaleDateString()}${d.calories ? ` · ${d.calories} kcal` : ''} · P${
-                        d.macros?.proteinG ?? '—'
-                      }/C${d.macros?.carbsG ?? '—'}/F${d.macros?.fatG ?? '—'}`}
-                    />
+                    <div key={d._id} className="flex items-center gap-3 px-4 py-3 hover:bg-ink/[0.02] transition-colors">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-iron/10 text-iron">
+                        <svg className="icon !h-4 !w-4"><use href="#i-note" /></svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-ink">{d.meal}</div>
+                        <div className="text-xs text-steel">
+                          {new Date(d.date).toLocaleDateString()}{d.calories ? ` · ${d.calories} kcal` : ''} · P{d.macros?.proteinG ?? '—'}/C{d.macros?.carbsG ?? '—'}/F{d.macros?.fatG ?? '—'}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                   {(!clientProgress?.diet || clientProgress.diet.length === 0) && (
-                    <div className="px-4 py-6 text-center text-sm text-steel">No diet entries logged yet.</div>
+                    <div className="px-4 py-8 text-center text-sm text-steel">No diet entries logged yet.</div>
                   )}
-                </ListCard>
+                </div>
               </div>
             </div>
           )}

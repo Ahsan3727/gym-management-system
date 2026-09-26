@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 
@@ -73,11 +73,11 @@ export default function Branches() {
   if (loading) return <div className="text-sm text-steel">Loading branches…</div>;
 
   return (
-    <div>
+    <div className="page-enter">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-headline text-ink">Multi-Branch Locations</h1>
-          <p className="text-sm text-steel">Manage physical facilities, branch operating hours, and location managers.</p>
+          <p className="text-caption mt-0.5">Manage physical facilities, branch operating hours, and location managers.</p>
         </div>
         <button onClick={() => setShowAdd(true)} className="btn-primary">
           <svg className="icon !h-4 !w-4"><use href="#i-plus" /></svg>
@@ -89,20 +89,20 @@ export default function Branches() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {branches.map((b) => (
-          <div key={b._id} className="panel p-6 relative flex flex-col justify-between">
+          <div key={b._id} className="panel p-6 relative flex flex-col justify-between hover:shadow-soft transition-all">
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-iron/10 text-iron">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-iron/10 text-iron">
                     <svg className="icon !h-[18px] !w-[18px]"><use href="#i-building" /></svg>
                   </span>
                   <h3 className="text-base font-bold text-ink">{b.name}</h3>
                 </div>
-                <span className="chip border-chalk/25 bg-chalk/10 text-chalk-dark">Active</span>
+                <span className="badge-active">Active</span>
               </div>
               <p className="mt-2 text-xs text-steel">{b.address || 'Address not specified'}</p>
 
-              <div className="mt-4 space-y-1.5 border-t border-ink/5 pt-4 text-xs">
+              <div className="mt-4 space-y-1.5 border-t border-ink/10 pt-4 text-xs">
                 <div className="flex justify-between">
                   <span className="text-steel">Manager:</span>
                   <span className="font-medium text-ink">{b.managerName || '—'}</span>
@@ -122,20 +122,25 @@ export default function Branches() {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end border-t border-ink/5 pt-3">
+            <div className="mt-6 flex justify-end border-t border-ink/10 pt-3">
               <button
                 onClick={() => handleDeleteBranch(b._id)}
-                className="text-xs font-medium text-steel hover:text-ember-dark"
+                className="btn-secondary btn-sm text-danger hover:border-danger/30"
               >
-                Remove branch
+                <svg className="icon !h-3.5 !w-3.5"><use href="#i-trash" /></svg>
+                Remove Branch
               </button>
             </div>
           </div>
         ))}
 
         {branches.length === 0 && (
-          <div className="col-span-full panel p-12 text-center text-sm text-steel">
-            No additional branches added yet. Click "Add Location" to manage multi-facility chains.
+          <div className="col-span-full flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-building" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No additional branches</h3>
+            <p className="text-caption max-w-xs">Click "Add Location" to register additional physical facilities and branch managers.</p>
           </div>
         )}
       </div>

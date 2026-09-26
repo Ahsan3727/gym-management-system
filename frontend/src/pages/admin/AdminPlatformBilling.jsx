@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
 import Modal from '../../components/Modal.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -182,7 +182,7 @@ export default function AdminPlatformBilling() {
     <div className="page-enter space-y-8">
       <div>
         <h1 className="text-headline text-ink">Platform Subscription & Dues</h1>
-        <p className="mt-1 text-sm text-steel">
+        <p className="text-caption mt-0.5">
           View your Ironline SaaS software subscription invoices, payment instructions, and submit transaction receipts.
         </p>
       </div>
@@ -205,15 +205,13 @@ export default function AdminPlatformBilling() {
           <div>
             <div className="flex items-center gap-2">
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase ${
-                  isSevere
-                    ? 'bg-ember/20 text-ember-dark'
-                    : isOverdue
-                    ? 'bg-ember/20 text-ember-dark'
+                className={
+                  isSevere || isOverdue
+                    ? 'badge-danger'
                     : hasDues
-                    ? 'bg-iron/20 text-iron'
-                    : 'bg-chalk/20 text-chalk-dark'
-                }`}
+                    ? 'badge-warning'
+                    : 'badge-active'
+                }
               >
                 {isSevere
                   ? 'Service Restriction Warning'
@@ -389,32 +387,32 @@ export default function AdminPlatformBilling() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
+                          className={
                             isPaid
-                              ? 'bg-chalk/10 text-chalk-dark border border-chalk/30'
+                              ? 'badge-active'
                               : isOverdue
-                              ? 'bg-ember/10 text-ember-dark border border-ember/30'
+                              ? 'badge-danger'
                               : f.status === 'waived'
-                              ? 'bg-steel/10 text-steel'
-                              : 'bg-iron/10 text-iron border border-iron/20'
-                          }`}
+                              ? 'badge-inactive'
+                              : 'badge-warning'
+                          }
                         >
                           {f.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-3 text-xs font-semibold">
+                        <div className="flex items-center justify-end gap-2 text-xs font-semibold">
                           {!isPaid && f.status !== 'waived' && (
                             <button
                               onClick={() => openProofModal(f)}
-                              className="rounded bg-iron px-3 py-1 text-on-primary hover:brightness-110 transition-all"
+                              className="btn-primary btn-sm"
                             >
                               {hasProof ? 'Update Proof' : 'Submit Proof'}
                             </button>
                           )}
                           <button
                             onClick={() => printInvoiceSlip(f)}
-                            className="text-steel hover:text-ink transition-colors"
+                            className="btn-secondary btn-sm"
                           >
                             Print Receipt
                           </button>

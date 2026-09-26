@@ -1,8 +1,6 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/axios.js';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 
 export default function Account() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -124,9 +122,11 @@ export default function Account() {
   }
 
   return (
-    <div>
-      <h1 className="mb-1 text-2xl font-semibold text-ink">Account & membership</h1>
-      <p className="mb-8 text-sm text-steel">Profile, notification preferences, passwords, and dues.</p>
+    <div className="page-enter">
+      <div className="mb-6">
+        <h1 className="text-headline text-ink">Account & Membership</h1>
+        <p className="text-caption mt-0.5">Profile, notification preferences, passwords, and dues.</p>
+      </div>
 
       {paymentNotice && (
         <div className="mb-6 rounded-2xl border border-chalk/30 bg-chalk/10 p-4 text-sm font-medium text-chalk-dark">
@@ -161,7 +161,8 @@ export default function Account() {
       <div className="mb-8 grid gap-8 md:grid-cols-2">
         {/* Profile & Notifications */}
         <form onSubmit={handleSaveProfile} className="panel p-6">
-          <div className="mb-4 text-sm font-medium text-steel">Profile & Preferences</div>
+          <h2 className="text-title text-ink mb-1">Profile & Preferences</h2>
+          <p className="text-caption mb-4">Update contact information and notification channels.</p>
           <div className="mb-4">
             <label className="field-label">Name</label>
             <input className="field-input opacity-70 cursor-not-allowed" value={profile.name} disabled />
@@ -213,7 +214,8 @@ export default function Account() {
 
         {/* Change Password */}
         <form onSubmit={handleChangePassword} className="panel p-6">
-          <div className="mb-4 text-sm font-medium text-steel">Change password</div>
+          <h2 className="text-title text-ink mb-1">Change Password</h2>
+          <p className="text-caption mb-4">Ensure your account uses a secure password.</p>
           <div className="mb-4">
             <label className="field-label">Current password</label>
             <input
@@ -244,37 +246,77 @@ export default function Account() {
       </div>
 
       {/* Fee History & Online Payment */}
-      <div className="mb-3 text-sm font-medium text-steel">Fee history & online payment</div>
-      <ListCard>
+      <div className="mb-4">
+        <h2 className="text-title text-ink">Fee History & Online Payment</h2>
+        <p className="text-caption mt-0.5">Track paid invoices and clear any outstanding membership dues.</p>
+      </div>
+
+      <div className="panel divide-y divide-ink/10 overflow-hidden">
         {fees.map((fee) => (
-          <ListRow
-            key={fee._id}
-            icon="card"
-            iconBg={fee.status === 'paid' ? 'bg-chalk/10 text-chalk-dark' : fee.status === 'overdue' ? 'bg-danger/10 text-danger' : 'bg-ink/5'}
-            title={`Rs. ${fmtAmount(fee.amount)} · due ${new Date(fee.dueDate).toLocaleDateString()}`}
-            subtitle={
-              fee.status === 'paid'
-                ? `${fee.receiptNumber ? `Receipt ${fee.receiptNumber}` : 'Paid'}${fee.paidOn ? ` · ${new Date(fee.paidOn).toLocaleDateString()}` : ''}`
-                : <span className={`font-medium capitalize ${statusAccent[fee.status]}`}>{fee.status}</span>
-            }
-            trailing={
-              fee.status !== 'paid' ? (
+          <div key={fee._id} className="flex flex-col gap-3 p-4 transition-colors hover:bg-ink/[0.02] sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-xs font-bold ${
+                  fee.status === 'paid'
+                    ? 'bg-chalk/20 text-chalk-dark'
+                    : fee.status === 'overdue'
+                    ? 'bg-danger/10 text-danger'
+                    : 'bg-iron/10 text-iron'
+                }`}
+              >
+                <svg className="icon !h-5 !w-5">
+                  <use href={fee.status === 'paid' ? '#i-check-circle' : '#i-card'} />
+                </svg>
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-ink">Rs. {fmtAmount(fee.amount)}</span>
+                  <span
+                    className={
+                      fee.status === 'paid'
+                        ? 'badge-active'
+                        : fee.status === 'overdue'
+                        ? 'badge-danger'
+                        : 'badge-warning'
+                    }
+                  >
+                    {fee.status}
+                  </span>
+                </div>
+                <div className="mt-0.5 text-xs text-steel">
+                  Due {new Date(fee.dueDate).toLocaleDateString()}
+                  {fee.paidOn ? ` · Paid on ${new Date(fee.paidOn).toLocaleDateString()}` : ''}
+                  {fee.receiptNumber ? ` · Receipt #${fee.receiptNumber}` : ''}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-center">
+              {fee.status !== 'paid' ? (
                 <button
                   type="button"
                   onClick={() => handlePayFee(fee)}
                   disabled={payingFeeId === fee._id}
-                  className="btn-primary py-1.5 px-3 text-xs"
+                  className="btn-primary btn-sm"
                 >
-                  {payingFeeId === fee._id ? 'Opening…' : 'Pay now'}
+                  {payingFeeId === fee._id ? 'Opening Gateway…' : 'Pay Now'}
                 </button>
               ) : (
-                <span className="text-xs font-medium text-chalk-dark">Paid</span>
-              )
-            }
-          />
+                <span className="badge-active">Paid in full</span>
+              )}
+            </div>
+          </div>
         ))}
-        {fees.length === 0 && <div className="px-4 py-8 text-center text-sm text-steel">No fee records yet.</div>}
-      </ListCard>
+        {fees.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-card" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No fee records found</h3>
+            <p className="text-caption max-w-xs">You have no billed membership dues or fee history on file.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

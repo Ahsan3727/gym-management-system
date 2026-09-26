@@ -1,7 +1,5 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../../api/axios.js';
-import ListCard from '../../components/ListCard.jsx';
-import ListRow from '../../components/ListRow.jsx';
 
 const emptyForm = { exercise: '', sets: '', reps: '', weight: '', durationMinutes: '', isRestDay: false, notes: '' };
 
@@ -56,11 +54,18 @@ export default function Workouts() {
   }
 
   return (
-    <div>
-      <h1 className="text-headline text-ink">Workouts</h1>
-      <p className="mb-8 text-sm text-steel">Log sets, reps, weight and duration — or mark a rest day.</p>
+    <div className="page-enter">
+      <div className="mb-6">
+        <h1 className="text-headline text-ink">Workouts</h1>
+        <p className="text-caption mt-0.5">Log sets, reps, weight and duration — or mark a rest day.</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="panel mb-8 grid grid-cols-2 gap-4 p-6 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-4 border-b border-ink/10 pb-3 mb-1">
+          <h2 className="text-title text-ink">Log Workout Entry</h2>
+          <p className="text-caption">Record your daily training or schedule recovery.</p>
+        </div>
+
         <div className="col-span-2 md:col-span-2">
           <label className="field-label">Exercise</label>
           <input
@@ -69,6 +74,7 @@ export default function Workouts() {
             onChange={(e) => setForm({ ...form, exercise: e.target.value })}
             placeholder="e.g. Back squat"
             disabled={form.isRestDay}
+            required={!form.isRestDay}
           />
         </div>
         <div>
@@ -89,19 +95,20 @@ export default function Workouts() {
         </div>
         <div className="col-span-2 md:col-span-3">
           <label className="field-label">Notes</label>
-          <input className="field-input" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          <input className="field-input" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="e.g. Felt strong on last set" />
         </div>
-        <div className="flex items-end gap-2">
-          <label className="flex items-center gap-2 text-sm text-ink/80">
+        <div className="flex items-end gap-2 pb-1">
+          <label className="flex items-center gap-2 text-sm text-ink cursor-pointer select-none">
             <input
               type="checkbox"
+              className="rounded border-ink/20"
               checked={form.isRestDay}
               onChange={(e) => setForm({ ...form, isRestDay: e.target.checked })}
             />
-            Rest day
+            <span>Rest day</span>
           </label>
         </div>
-        <div className="col-span-2 md:col-span-4">
+        <div className="col-span-2 md:col-span-4 pt-2">
           {error && <div className="mb-3 text-sm text-danger">{error}</div>}
           <button type="submit" disabled={saving} className="btn-primary">
             {saving ? 'Saving…' : 'Log entry'}
@@ -109,33 +116,59 @@ export default function Workouts() {
         </div>
       </form>
 
-      <ListCard>
+      <div className="panel divide-y divide-ink/10 overflow-hidden">
         {loading ? (
-          <div className="px-4 py-8 text-center text-sm text-steel">Loading workouts…</div>
+          <div className="px-4 py-12 text-center text-sm text-steel">Loading workouts…</div>
         ) : logs.length === 0 ? (
-          <div className="px-4 py-8 text-center text-sm text-steel">No workouts logged yet.</div>
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] border border-ink/10 bg-panel-2">
+              <svg className="icon !h-6 !w-6 text-steel"><use href="#i-dumbbell" /></svg>
+            </div>
+            <h3 className="text-title text-ink mb-1">No workouts logged yet</h3>
+            <p className="text-caption max-w-xs">Use the form above to record your first workout session or recovery day.</p>
+          </div>
         ) : (
           logs.map((log) => (
-          <ListRow
-            key={log._id}
-            icon={log.isRestDay ? 'moon' : 'dumbbell'}
-            title={log.isRestDay ? 'Rest day' : log.exercise}
-            subtitle={`${new Date(log.date).toLocaleDateString()}${
-              log.sets && log.reps ? ` · ${log.sets} × ${log.reps}` : ''
-            }${log.weight ? ` · ${log.weight} kg` : ''}${log.durationMinutes ? ` · ${log.durationMinutes} min` : ''}`}
-            trailing={
+            <div key={log._id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-ink/[0.02] transition-colors">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] text-xs font-bold ${
+                  log.isRestDay ? 'bg-iron/10 text-iron' : 'bg-ember/10 text-ember-dark'
+                }`}
+              >
+                <svg className="icon !h-5 !w-5">
+                  <use href={log.isRestDay ? '#i-moon' : '#i-dumbbell'} />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-ink">
+                    {log.isRestDay ? 'Rest day' : log.exercise}
+                  </span>
+                  {log.isRestDay ? (
+                    <span className="badge-info">Recovery</span>
+                  ) : (
+                    log.weight && <span className="badge-active">{log.weight} kg</span>
+                  )}
+                </div>
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-steel">
+                  <span>{new Date(log.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                  {log.sets && log.reps && <span>&middot; {log.sets} &times; {log.reps} reps</span>}
+                  {log.durationMinutes && <span>&middot; {log.durationMinutes} min</span>}
+                  {log.notes && <span className="italic text-ink/70">&middot; "{log.notes}"</span>}
+                </div>
+              </div>
               <button
                 onClick={() => handleDelete(log._id)}
                 aria-label="Delete entry"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-steel transition-colors hover:bg-ember/10 hover:text-ember-dark"
+                title="Delete workout"
+                className="flex h-8 w-8 items-center justify-center rounded-[8px] text-steel hover:bg-danger/10 hover:text-danger transition-colors shrink-0"
               >
-                <svg className="icon !h-4 !w-4"><use href="#i-minus" /></svg>
+                <svg className="icon !h-4 !w-4"><use href="#i-trash" /></svg>
               </button>
-            }
-          />
+            </div>
           ))
         )}
-      </ListCard>
+      </div>
     </div>
   );
 }
