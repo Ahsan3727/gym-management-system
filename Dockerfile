@@ -9,7 +9,7 @@ ENV NODE_ENV=production \
 
 # Backend production dependencies (cached layer)
 COPY backend/package*.json ./backend/
-RUN cd backend && npm ci --omit=dev
+RUN cd backend && npm install --omit=dev
 
 # Backend source + prebuilt frontend (served by Express from ../frontend/dist)
 COPY backend/ ./backend/
