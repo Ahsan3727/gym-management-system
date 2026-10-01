@@ -110,10 +110,6 @@ app.use('/api/superadmin', superAdminLimiter);
 const publicLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false });
 app.use('/api/public', publicLimiter);
 
-// Friendly response for anyone (or any uptime monitor) hitting the bare
-// domain directly — the real app only ever calls routes under /api/...
-app.get('/', (req, res) => res.json({ status: 'ok', message: 'Ironline API is running. See /api/health.' }));
-
 app.get('/api/health', async (req, res) => {
   const mongoose = require('mongoose');
   const dbState = mongoose.connection.readyState;
@@ -129,6 +125,17 @@ app.use('/api/superadmin', superAdminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api', gymBillingRoutes);
+
+// Serve the built React app (frontend/dist) from this same server.
+// API requests (/api/...) and non-GET requests skip the fallback, so API 404s still return JSON.
+const distDir = require('path').join(__dirname, '..', 'frontend', 'dist');
+if (require('fs').existsSync(distDir)) {
+  app.use(express.static(distDir));
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
+    res.sendFile(require('path').join(distDir, 'index.html'));
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);
