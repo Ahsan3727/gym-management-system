@@ -130,9 +130,9 @@ html.light {
   .btn-md  { @apply btn h-10  px-4   text-sm  rounded-[12px]; }
   .btn-lg  { @apply btn h-12  px-6   text-base rounded-[14px]; }
 
-  /* Icon-only square button */
+  /* Icon-only square button — 44px minimum touch target (Apple HIG) */
   .btn-icon {
-    @apply btn flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] p-0
+    @apply btn flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] p-0
            text-steel hover:bg-ink/5 hover:text-ink;
   }
 
@@ -492,10 +492,21 @@ html.light {
   }
 }
 
+
 /* ── Utilities ──────────────────────────────────────────────────────────── */
-/* scrollbar-none: used by TopBarShell horizontal sub-nav on mobile         */
 .scrollbar-none {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ── Mobile bottom-sheet slide-up animation ─────────────────────────────── */
+@keyframes slideUpModal {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Safe-area padding utility (for iPhones with home bar) ─────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

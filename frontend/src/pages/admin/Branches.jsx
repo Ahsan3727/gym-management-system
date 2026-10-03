@@ -168,7 +168,7 @@ export default function Branches() {
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
               />
             </div>
-            <div className="mb-3 grid grid-cols-2 gap-3">
+            <div className="mb-3 grid sm:grid-cols-2 gap-3">
               <div>
                 <label className="field-label">Phone</label>
                 <input
@@ -188,7 +188,7 @@ export default function Branches() {
                 />
               </div>
             </div>
-            <div className="mb-4 grid grid-cols-2 gap-3">
+            <div className="mb-4 grid sm:grid-cols-2 gap-3">
               <div>
                 <label className="field-label">Operating Hours</label>
                 <input

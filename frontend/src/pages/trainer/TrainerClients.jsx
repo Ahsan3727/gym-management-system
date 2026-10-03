@@ -203,10 +203,10 @@ export default function TrainerClients() {
             <SegmentedControl
               accent="iron"
               options={[
-                { value: 'workout', label: 'Prescribe Workout' },
-                { value: 'diet', label: 'Prescribe Nutrition' },
-                { value: 'history', label: 'Client History' },
-                { value: 'notes', label: 'Coach Notes' },
+                { value: 'workout', label: 'Prescribe Workout', short: 'Workout' },
+                { value: 'diet', label: 'Prescribe Nutrition', short: 'Diet' },
+                { value: 'history', label: 'Client History', short: 'History' },
+                { value: 'notes', label: 'Coach Notes', short: 'Notes' },
               ]}
               value={activeTab}
               onChange={setActiveTab}

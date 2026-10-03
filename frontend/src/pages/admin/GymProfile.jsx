@@ -321,7 +321,7 @@ export default function GymProfile() {
         <div className="md:col-span-2">
           {message && <div className="mb-3 text-sm text-chalk-dark">{message}</div>}
           {error && <div className="mb-3 text-sm text-danger">{error}</div>}
-          <button type="submit" disabled={saving} className="btn-primary">
+          <button type="submit" disabled={saving} className="btn-primary w-full sm:w-auto">
             {saving ? 'Saving…' : 'Save changes'}
           </button>
         </div>

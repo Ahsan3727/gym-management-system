@@ -124,7 +124,7 @@ export default function Login() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-bone p-4">
+    <div className="relative flex min-h-screen items-start sm:items-center justify-center overflow-y-auto bg-bone px-4 py-8">
 
       {/* Animated background orbs */}
       <div
@@ -148,7 +148,7 @@ export default function Login() {
       {/* Card */}
       <form
         onSubmit={handleSubmit}
-        className="login-card panel relative z-10 w-full max-w-sm px-7 py-9 shadow-soft"
+        className="login-card panel relative z-10 w-full max-w-sm px-6 py-8 sm:px-7 sm:py-9 shadow-soft"
       >
         {/* Header */}
         <div className="mb-8 flex flex-col items-center text-center">

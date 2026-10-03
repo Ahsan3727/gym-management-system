@@ -274,20 +274,20 @@ export default function Admins() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 shrink-0">
-                  {/* Branding */}
+                  {/* Branding — hidden on mobile, in ⋯ menu */}
                   <button
                     onClick={() => setBrandingGym(admin)}
-                    className="btn-sm border border-ink/10 bg-ink/5 text-ink hover:bg-ink/10 transition-colors"
+                    className="hidden md:inline-flex btn-sm border border-ink/10 bg-ink/5 text-ink hover:bg-ink/10 transition-colors"
                     title="Gym Branding"
                   >
                     <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
                     Branding
                   </button>
 
-                  {/* Install Link */}
+                  {/* Install Link — hidden on mobile, in ⋯ menu */}
                   <button
                     onClick={() => openInstallLink(admin)}
-                    className="btn-sm border border-iron/20 bg-iron/10 text-iron hover:bg-iron/20 transition-colors"
+                    className="hidden md:inline-flex btn-sm border border-iron/20 bg-iron/10 text-iron hover:bg-iron/20 transition-colors"
                     title="Install Link & QR"
                   >
                     <svg className="icon !h-3.5 !w-3.5"><use href="#i-cloud" /></svg>
@@ -297,17 +297,17 @@ export default function Admins() {
                   {/* Summary */}
                   <button
                     onClick={() => openSummary(admin)}
-                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    className="btn-icon !h-9 !w-9 !rounded-[10px]"
                     title="Gym Summary"
                     aria-label="View summary"
                   >
                     <svg className="icon !h-3.5 !w-3.5"><use href="#i-trend" /></svg>
                   </button>
 
-                  {/* ⋯ More: Edit, Suspend, Login, Reset PW */}
+                  {/* ⋯ More: Branding(mob)+Install(mob)+Edit+Suspend+Login+Reset PW */}
                   <div className="relative">
                     <button
-                      className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                      className="btn-icon !h-9 !w-9 !rounded-[10px]"
                       title="More actions"
                       aria-label="More actions"
                       onClick={(e) => {
@@ -316,39 +316,55 @@ export default function Admins() {
                     >
                       <svg className="icon !h-3.5 !w-3.5"><use href="#i-dots" /></svg>
                     </button>
-                    <div className="hidden absolute right-0 top-9 z-20 w-44 rounded-[12px] border border-ink/10 bg-panel shadow-lg py-1">
+                    <div className="hidden absolute right-0 top-10 z-20 w-48 rounded-[12px] border border-ink/10 bg-panel shadow-xl py-1">
+                      {/* Mobile-only: Branding + Install in menu */}
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); setBrandingGym(admin); }}
+                        className="flex md:hidden w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
+                        Gym Branding
+                      </button>
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); openInstallLink(admin); }}
+                        className="flex md:hidden w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-cloud" /></svg>
+                        Install Link
+                      </button>
+                      <div className="md:hidden my-0.5 border-t border-ink/5" />
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); setEditing({ ...admin }); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
                         Edit Details
                       </button>
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); copyInstallLink(admin); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-clipboard" /></svg>
                         Copy Install Link
                       </button>
-                      <div className="my-1 border-t border-ink/5" />
+                      <div className="my-0.5 border-t border-ink/5" />
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); toggleSuspend(admin); }}
-                        className={`flex w-full items-center gap-2 px-3 py-2 text-xs transition-colors ${suspended ? 'text-chalk-dark hover:bg-chalk/5' : 'text-danger hover:bg-danger/5'}`}
+                        className={`flex w-full items-center gap-2 px-3 py-2.5 text-xs transition-colors ${suspended ? 'text-chalk-dark hover:bg-chalk/5' : 'text-danger hover:bg-danger/5'}`}
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-shield" /></svg>
                         {suspended ? 'Unsuspend Gym' : 'Suspend Gym'}
                       </button>
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); toggleLogin(admin); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
                         {loginDisabled ? 'Enable Login' : 'Disable Login'}
                       </button>
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); resetPassword(admin); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/5 transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-danger hover:bg-danger/5 transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
                         Reset Password
@@ -447,7 +463,7 @@ export default function Admins() {
           ) : !summary ? (
             <div className="py-8 text-center text-sm text-steel">Loading…</div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="panel px-4 py-3">
                 <div className="text-xs uppercase tracking-wide text-steel">Customers</div>
                 <div className="stat-number mt-1 text-lg">{summary.customerCount}</div>
@@ -457,7 +473,7 @@ export default function Admins() {
                 {/* BUG #14 FIX: Format amount properly */}
                 <div className="stat-number mt-1 text-lg">Rs. {(summary.revenueCollected || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
-              <div className="panel px-4 py-3 col-span-2">
+              <div className="panel px-4 py-3 sm:col-span-2">
                 <div className="text-xs uppercase tracking-wide text-steel">Overdue fees</div>
                 <div className={`stat-number mt-1 text-lg ${summary.overdueFees ? 'text-danger' : ''}`}>{summary.overdueFees}</div>
               </div>

@@ -20,22 +20,24 @@ export default function SegmentedControl({ options, value, onChange, accent = 'e
   const activeBgStyle = { backgroundColor: 'rgb(var(--c-ember))' };
 
   return (
-    <div className={`inline-flex rounded-full border border-ink/10 bg-panel p-1 ${className}`}>
+    <div className={`flex flex-wrap gap-1 rounded-full border border-ink/10 bg-panel p-1 ${className}`}>
       {options.map((opt) => {
         const optValue = typeof opt === 'string' ? opt : opt.value;
         const optLabel = typeof opt === 'string' ? opt : opt.label;
+        const optShort = typeof opt === 'string' ? opt : (opt.short || opt.label);
         const active = optValue === value;
         return (
           <button
             key={optValue}
             type="button"
             onClick={() => onChange(optValue)}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-150 ${
+            className={`rounded-full px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all duration-150 whitespace-nowrap ${
               active ? 'text-on-primary shadow-soft' : 'text-steel hover:text-ink'
             }`}
             style={active ? activeBgStyle : {}}
           >
-            {optLabel}
+            <span className="hidden sm:inline">{optLabel}</span>
+            <span className="sm:hidden">{optShort}</span>
           </button>
         );
       })}

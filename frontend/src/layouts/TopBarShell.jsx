@@ -108,35 +108,103 @@ export default function TopBarShell({ navItems, accent = 'ember', roleLabel }) {
           </div>
         </div>
 
-        {/* Mobile Horizontal Scrolling Sub-Nav */}
-        <div className="md:hidden border-t border-ink/5 overflow-x-auto px-2 py-1.5 flex gap-1 scrollbar-none">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  isActive ? 'font-bold' : 'text-steel hover:bg-ink/5 hover:text-ink'
-                }`
-              }
-              style={({ isActive }) => isActive ? { ...activeBgStyle, ...colorStyle } : {}}
-            >
-              <svg className="icon !h-3.5 !w-3.5">
-                <use href={`#i-${item.icon || 'dots'}`} />
-              </svg>
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
+        {/* No horizontal sub-nav on mobile — bottom tab bar is below */}
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Content Area — pb-20 clears the bottom tab bar on mobile */}
       <main className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <div
+          className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8 md:pb-8"
+          style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <Outlet />
         </div>
       </main>
+
+      {/* Mobile bottom tab bar — hidden on md+ where the top nav handles navigation */}
+      <nav
+        className="fixed bottom-0 inset-x-0 z-30 flex items-center justify-around border-t border-ink/10 bg-panel/95 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        {navItems.slice(0, 5).map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-medium transition-colors min-h-[56px] ${
+                isActive ? 'font-bold' : 'text-steel'
+              }`
+            }
+            style={({ isActive }) => isActive ? colorStyle : {}}
+          >
+            {({ isActive }) => (
+              <>
+                <div
+                  className={`flex h-7 w-10 items-center justify-center rounded-xl mb-0.5 transition-colors`}
+                  style={isActive ? activeBgStyle : {}}
+                >
+                  <svg className="icon !h-[18px] !w-[18px]">
+                    <use href={`#i-${item.icon || 'dots'}`} />
+                  </svg>
+                </div>
+                <span className="truncate max-w-[56px] leading-tight">{item.label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+        {navItems.length > 5 && (
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-medium text-steel min-h-[56px]"
+          >
+            <div className="flex h-7 w-10 items-center justify-center rounded-xl mb-0.5 hover:bg-ink/5">
+              <svg className="icon !h-[18px] !w-[18px]"><use href="#i-dots" /></svg>
+            </div>
+            <span>More</span>
+          </button>
+        )}
+      </nav>
+
+      {/* More drawer for overflow nav items */}
+      {menuOpen && navItems.length > 5 && (
+        <>
+          <div className="fixed inset-0 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-ink/10 bg-panel p-5 shadow-2xl md:hidden"
+            style={{ paddingBottom: 'calc(1.25rem + env(safe-area-inset-bottom, 0px))' }}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-sm font-bold text-ink">More</div>
+              <button onClick={() => setMenuOpen(false)} className="p-1 text-steel hover:text-ink">✕</button>
+            </div>
+            <div className="space-y-1">
+              {navItems.slice(5).map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-colors ${
+                      isActive ? '' : 'text-steel hover:bg-ink/5 hover:text-ink'
+                    }`
+                  }
+                  style={({ isActive }) => isActive ? { ...activeBgStyle, ...colorStyle } : {}}
+                >
+                  <svg className="icon !h-5 !w-5"><use href={`#i-${item.icon || 'dots'}`} /></svg>
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+            <div className="mt-4 border-t border-ink/10 pt-4 flex items-center justify-between">
+              <div className="text-xs text-steel">{user?.username} · {roleLabel}</div>
+              <button onClick={() => { setMenuOpen(false); logout(); }} className="btn-secondary text-xs py-1.5 px-3">Log Out</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

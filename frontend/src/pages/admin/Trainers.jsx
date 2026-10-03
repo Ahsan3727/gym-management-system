@@ -189,7 +189,7 @@ export default function Trainers() {
                   required
                 />
               </div>
-              <div className="mb-3 grid grid-cols-2 gap-3">
+              <div className="mb-3 grid sm:grid-cols-2 gap-3">
                 <div>
                   <label className="field-label">Username</label>
                   <input
@@ -214,7 +214,7 @@ export default function Trainers() {
                   />
                 </div>
               </div>
-              <div className="mb-3 grid grid-cols-2 gap-3">
+              <div className="mb-3 grid sm:grid-cols-2 gap-3">
                 <div>
                   <label className="field-label">Phone</label>
                   <input
@@ -297,20 +297,33 @@ export default function Trainers() {
           onClose={() => setEditingTrainer(null)}
         >
           <form onSubmit={handleSaveAssignments}>
-            <p className="text-xs text-steel mb-4">
+            <p className="text-xs text-steel mb-3">
               Select the gym members who will be coached by this trainer. Trainers can only view workouts and assign plans to their assigned clients.
             </p>
-            <div className="max-h-60 overflow-y-auto space-y-2 border border-ink/10 rounded-lg p-3 mb-4">
+            <input
+              className="field-input mb-3 text-sm"
+              placeholder="Search members…"
+              onChange={(e) => {
+                const q = e.target.value.toLowerCase();
+                // filter is visual — use data-search on labels
+                document.querySelectorAll('[data-client-label]').forEach((el) => {
+                  el.style.display = el.dataset.clientLabel.toLowerCase().includes(q) ? '' : 'none';
+                });
+              }}
+            />
+            <div className="space-y-1 border border-ink/10 rounded-lg p-2 mb-4">
               {customers.map((c) => (
                 <label
                   key={c._id}
-                  className="flex items-center justify-between p-2 rounded hover:bg-ink/[0.03] cursor-pointer text-xs"
+                  data-client-label={c.name}
+                  className="flex items-center justify-between p-3 rounded-lg hover:bg-ink/[0.04] cursor-pointer text-xs"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={selectedClientIds.includes(c._id)}
                       onChange={() => toggleClientSelection(c._id)}
+                      className="h-4 w-4 rounded"
                     />
                     <span className="font-medium text-ink">{c.name}</span>
                   </div>

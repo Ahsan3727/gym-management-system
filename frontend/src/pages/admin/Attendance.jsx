@@ -122,20 +122,20 @@ export default function AdminAttendance() {
 
       {/* Filters Bar */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-        <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-3">
+        <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row sm:items-center gap-2">
           <input
             type="date"
-            className="field-input py-1.5 text-xs font-mono"
+            className="field-input py-1.5 text-xs font-mono w-full sm:w-auto"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
           />
           <input
-            className="field-input py-1.5 text-xs"
+            className="field-input py-1.5 text-xs w-full sm:flex-1"
             placeholder="Search member name or phone…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button type="submit" className="btn-secondary btn-sm">Filter</button>
+          <button type="submit" className="btn-secondary btn-sm w-full sm:w-auto">Filter</button>
         </form>
 
         <button

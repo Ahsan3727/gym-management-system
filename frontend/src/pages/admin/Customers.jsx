@@ -449,8 +449,8 @@ export default function Customers() {
       </div>
 
       {/* Filters */}
-      <form onSubmit={handleSearchSubmit} className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="relative flex-1 min-w-[180px] max-w-xs">
+      <form onSubmit={handleSearchSubmit} className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="relative w-full sm:flex-1 sm:max-w-xs">
           <svg className="icon !h-4 !w-4 absolute left-3 top-1/2 -translate-y-1/2 text-steel pointer-events-none">
             <use href="#i-search" />
           </svg>
@@ -616,9 +616,9 @@ export default function Customers() {
                   </div>
                 </div>
 
-                {/* Action buttons — desktop: always visible, mobile: shown on tap */}
-                <div className="flex items-center gap-1 shrink-0 flex-wrap justify-end">
-                  {/* Collect Fee — primary action */}
+                {/* Actions: Fee + dots always; Progress + Edit visible on md+ */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {/* Fee — always visible (primary action) */}
                   <button
                     onClick={() => openQuickFee(c)}
                     className="btn-sm border border-iron/20 bg-iron/10 text-iron hover:bg-iron/20 hover:border-iron/30 transition-colors"
@@ -628,30 +628,30 @@ export default function Customers() {
                     Fee
                   </button>
 
-                  {/* Progress */}
+                  {/* Progress — hidden on mobile */}
                   <button
                     onClick={() => openProgress(c)}
-                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    className="btn-icon !h-9 !w-9 !rounded-[10px] hidden md:flex"
                     title="View Progress"
                     aria-label="View progress"
                   >
                     <svg className="icon !h-3.5 !w-3.5"><use href="#i-trend" /></svg>
                   </button>
 
-                  {/* Edit */}
+                  {/* Edit — hidden on mobile */}
                   <button
                     onClick={() => setEditing({ ...c })}
-                    className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                    className="btn-icon !h-9 !w-9 !rounded-[10px] hidden md:flex"
                     title="Edit Member"
                     aria-label="Edit member"
                   >
                     <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
                   </button>
 
-                  {/* More actions dropdown toggle — Reset PW + Remove */}
-                  <div className="relative group/more">
+                  {/* ⋯ More — always visible, contains all actions on mobile */}
+                  <div className="relative">
                     <button
-                      className="btn-icon !h-8 !w-8 !rounded-[8px]"
+                      className="btn-icon !h-9 !w-9 !rounded-[10px]"
                       title="More actions"
                       aria-label="More actions"
                       onClick={(e) => {
@@ -661,17 +661,33 @@ export default function Customers() {
                     >
                       <svg className="icon !h-3.5 !w-3.5"><use href="#i-dots" /></svg>
                     </button>
-                    <div className="hidden absolute right-0 top-9 z-20 w-40 rounded-[12px] border border-ink/10 bg-panel shadow-lg py-1">
+                    <div className="hidden absolute right-0 top-10 z-20 w-44 rounded-[12px] border border-ink/10 bg-panel shadow-xl py-1">
+                      {/* Progress + Edit — show in dropdown on mobile */}
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); openProgress(c); }}
+                        className="flex md:hidden w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-trend" /></svg>
+                        View Progress
+                      </button>
+                      <button
+                        onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); setEditing({ ...c }); }}
+                        className="flex md:hidden w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                      >
+                        <svg className="icon !h-3.5 !w-3.5"><use href="#i-pencil" /></svg>
+                        Edit Member
+                      </button>
+                      <div className="md:hidden my-0.5 border-t border-ink/5" />
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); openReset(c); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-steel hover:bg-ink/5 hover:text-ink transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-lock" /></svg>
                         Reset Password
                       </button>
                       <button
                         onClick={(e) => { e.currentTarget.closest('.relative').querySelector('div').classList.add('hidden'); handleDelete(c); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-xs text-danger hover:bg-danger/5 transition-colors"
+                        className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-danger hover:bg-danger/5 transition-colors"
                       >
                         <svg className="icon !h-3.5 !w-3.5"><use href="#i-trash" /></svg>
                         Remove Member

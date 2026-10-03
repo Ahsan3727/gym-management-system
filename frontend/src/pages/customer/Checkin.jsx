@@ -453,26 +453,52 @@ export default function CustomerCheckin() {
         </div>
       </div>
 
-      {/* In-App Camera Scanner Modal */}
+      {/* In-App Camera Scanner — full-screen on mobile, modal on sm+ */}
       {showScanner && (
-        <Modal title="Scan Reception QR Code" onClose={() => setShowScanner(false)} width="max-w-md">
-          <div className="text-center">
-            <p className="text-xs text-steel mb-3">
-              Point your camera at the QR code displayed on the reception desk.
+        <>
+          {/* Mobile: full-screen overlay */}
+          <div className="fixed inset-0 z-50 flex flex-col bg-black sm:hidden">
+            <div className="flex items-center justify-between px-4 pt-safe py-3">
+              <span className="text-sm font-semibold text-white">Scan Reception QR</span>
+              <button
+                type="button"
+                onClick={() => setShowScanner(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white"
+                aria-label="Close scanner"
+              >
+                <svg className="icon !h-4 !w-4"><use href="#i-close" /></svg>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div id="qr-reader-view" className="h-full w-full" />
+            </div>
+            <p className="px-4 py-3 text-center text-xs text-white/60">
+              Point your camera at the QR code on the reception desk.
             </p>
-            <div
-              id="qr-reader-view"
-              className="overflow-hidden rounded-2xl border border-ink/10 bg-black max-w-full mx-auto"
-            />
-            <button
-              type="button"
-              onClick={() => setShowScanner(false)}
-              className="btn-secondary w-full text-xs mt-4"
-            >
-              Cancel
-            </button>
           </div>
-        </Modal>
+
+          {/* Desktop sm+: keep original Modal */}
+          <div className="hidden sm:block">
+            <Modal title="Scan Reception QR Code" onClose={() => setShowScanner(false)} width="max-w-md">
+              <div className="text-center">
+                <p className="text-xs text-steel mb-3">
+                  Point your camera at the QR code displayed on the reception desk.
+                </p>
+                <div
+                  id="qr-reader-view"
+                  className="overflow-hidden rounded-2xl border border-ink/10 bg-black max-w-full mx-auto"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowScanner(false)}
+                  className="btn-secondary w-full text-xs mt-4"
+                >
+                  Cancel
+                </button>
+              </div>
+            </Modal>
+          </div>
+        </>
       )}
     </div>
   );

@@ -186,7 +186,7 @@ export default function Settings() {
         )}
         {error && <div className="text-sm text-danger">{error}</div>}
 
-        <button type="submit" disabled={saving} className="btn-primary">
+        <button type="submit" disabled={saving} className="btn-primary w-full sm:w-auto">
           {saving ? 'Saving...' : 'Save Platform Settings'}
         </button>
       </form>
