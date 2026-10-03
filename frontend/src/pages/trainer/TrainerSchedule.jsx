@@ -300,7 +300,7 @@ export default function TrainerSchedule() {
               />
             </div>
 
-            <div className="mb-4 grid grid-cols-2 gap-3">
+            <div className="mb-4 grid sm:grid-cols-2 gap-3">
               <div>
                 <label className="field-label">Date & Time</label>
                 <input

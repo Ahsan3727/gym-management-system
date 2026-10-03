@@ -215,7 +215,7 @@ export default function TrainerClients() {
 
           {/* Tab 1: Prescribe Workout Form */}
           {activeTab === 'workout' && (
-            <form onSubmit={handlePrescribeWorkout} className="panel p-6 mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <form onSubmit={handlePrescribeWorkout} className="panel p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-4">
               <div className="col-span-2">
                 <label className="field-label">Exercise Name</label>
                 <input
@@ -286,7 +286,7 @@ export default function TrainerClients() {
 
           {/* Tab 2: Prescribe Nutrition Form */}
           {activeTab === 'diet' && (
-            <form onSubmit={handlePrescribeDiet} className="panel p-6 mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <form onSubmit={handlePrescribeDiet} className="panel p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-4">
               <div className="col-span-2">
                 <label className="field-label">Meal / Diet Recommendation</label>
                 <input

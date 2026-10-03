@@ -1262,7 +1262,7 @@ export default function Customers() {
             <div className="py-8 text-center text-sm text-steel">Loading member progress…</div>
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-4">
                 <div className="panel px-4 py-3">
                   <div className="text-xs uppercase tracking-wide text-steel">Current Streak</div>
                   <div className="stat-number mt-1 text-xl font-bold text-iron">{progress.streak?.currentStreak ?? 0} days</div>

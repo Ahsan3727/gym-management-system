@@ -669,7 +669,7 @@ export default function SuperAdminBilling() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="field-label">Fee Type</label>
                 <select
@@ -705,7 +705,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="field-label">Amount (PKR)</label>
                 <input
@@ -797,7 +797,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="field-label">Default Amount (PKR)</label>
                 <input
@@ -879,7 +879,7 @@ export default function SuperAdminBilling() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="field-label">Transaction Reference #</label>
                 <input
@@ -940,7 +940,7 @@ export default function SuperAdminBilling() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
                 <label className="field-label">Amount (PKR)</label>
                 <input
