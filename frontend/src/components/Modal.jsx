@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
- * Mobile-first modal:
- * - On phones: slides up from the bottom as a bottom sheet (rounded-t-[28px],
- *   safe-area padding, 92dvh max-height). The keyboard opens upward so the modal
- *   content scrolls internally and the submit button stays reachable.
- * - On sm+ (640px+): vertically centered overlay (the classic modal pattern).
+ * Mobile-first modal — rendered via React Portal directly into document.body.
+ *
+ * WHY PORTAL: `position: fixed` is broken whenever a parent element has a CSS
+ * `transform`, `filter`, `perspective`, or `will-change: transform` applied.
+ * Cards in this app use `hover:-translate-y-px` (a transform), which makes any
+ * nested `fixed` element anchor to the card instead of the viewport — causing
+ * the modal to appear off-screen when the page is scrolled.
+ * Portal bypasses the entire DOM tree and attaches directly to <body>.
+ *
+ * - On phones  : slides up from the bottom as a bottom sheet.
+ * - On sm+ (640px+): vertically centered overlay.
  * - Escape key + backdrop click both close the modal.
  * - Body scroll is locked while open.
  */
@@ -21,13 +28,13 @@ export default function Modal({ title, onClose, children, width = 'max-w-md' }) 
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:px-4"
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm sm:px-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose?.(); }}
     >
       <div
-        className={`modal-panel w-full ${width} rounded-t-[28px] sm:rounded-[20px] flex flex-col animate-[slideUpModal_0.25s_ease-out] sm:animate-[fadeIn_0.15s_ease-out]`}
+        className={`modal-panel w-full ${width} rounded-t-[28px] sm:rounded-[20px] flex flex-col animate-[slideUpModal_0.25s_ease-out] sm:animate-[modal-in_0.22s_cubic-bezier(0.34,1.3,0.64,1)_both]`}
         style={{ maxHeight: '92dvh' }}
       >
         {/* Drag handle — visible on mobile only */}
@@ -55,6 +62,7 @@ export default function Modal({ title, onClose, children, width = 'max-w-md' }) 
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
