@@ -1,0 +1,22 @@
+{
+  "short_name": "Ironline",
+  "name": "Ironline Gym Management Platform",
+  "description": "Multi-tenant fitness, workout tracking, attendance streaks, and gym operations.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0b0c10",
+  "theme_color": "#ff4e1f",
+  "display": "standalone",
+  "orientation": "portrait"
+}

@@ -1,0 +1,23 @@
+# Never bake secrets into the image
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Dependencies (installed inside the image)
+**/node_modules
+
+# VCS / CI / tests
+.git
+.github
+frontend/e2e
+frontend/playwright-report
+**/test-results
+
+# Vercel-only files (not needed in the container)
+api
+vercel.json
+
+# Misc
+*.md
+.DS_Store
