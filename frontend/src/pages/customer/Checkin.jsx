@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axios.js';
 import StatCard from '../../components/StatCard.jsx';
@@ -456,8 +457,8 @@ export default function CustomerCheckin() {
       {/* In-App Camera Scanner — full-screen on mobile, modal on sm+ */}
       {showScanner && (
         <>
-          {/* Mobile: full-screen overlay */}
-          <div className="fixed inset-0 z-50 flex flex-col bg-black sm:hidden">
+          {createPortal(
+            <div className="fixed inset-0 z-[9999] flex flex-col bg-black sm:hidden">
             <div className="flex items-center justify-between px-4 pt-safe py-3">
               <span className="text-sm font-semibold text-white">Scan Reception QR</span>
               <button
@@ -475,7 +476,8 @@ export default function CustomerCheckin() {
             <p className="px-4 py-3 text-center text-xs text-white/60">
               Point your camera at the QR code on the reception desk.
             </p>
-          </div>
+            </div>
+          , document.body)}
 
           {/* Desktop sm+: keep original Modal */}
           <div className="hidden sm:block">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import api from '../../api/axios.js';
 
 /**
@@ -34,9 +35,9 @@ export default function SavePackageModal({ memberDraft, adminDraft, onClose, onS
     }
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="modal-panel w-full max-w-sm px-6 py-7 space-y-5">
@@ -130,6 +131,7 @@ export default function SavePackageModal({ memberDraft, adminDraft, onClose, onS
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
