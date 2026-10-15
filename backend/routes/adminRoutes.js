@@ -1204,6 +1204,7 @@ router.get(
       monthlyRevenueRaw,
       monthlyMembersRaw,
       planAggRaw,
+      plans,
     ] = await Promise.all([
       Customer.countDocuments({ admin: req.adminId, isActive: true }),
       Customer.countDocuments({ admin: req.adminId, isActive: false }),
@@ -1256,6 +1257,8 @@ router.get(
         { $match: { admin: req.adminId } },
         { $group: { _id: '$plan', count: { $sum: 1 } } },
       ]),
+      // Pulled into Promise.all so it overlaps with the aggregations above
+      MembershipPlan.find({ admin: req.adminId }).lean(),
     ]);
 
     const totalRevenue = paidFees[0]?.total || 0;
@@ -1287,7 +1290,6 @@ router.get(
       });
     }
 
-    const plans = await MembershipPlan.find({ admin: req.adminId }).lean();
     const planMap = new Map(plans.map((p) => [p._id.toString(), p.planName]));
     const planDistribution = planAggRaw.map((item) => ({
       name: item._id ? planMap.get(item._id.toString()) || 'Unknown Plan' : 'No Plan',

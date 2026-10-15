@@ -196,6 +196,8 @@ router.post(
  * GET /api/auth/me
  * Returns the current user plus role-specific profile info, so the
  * frontend can render the right dashboard immediately after login/refresh.
+ * PERF: The role-profile query runs in parallel with protect()'s User.findById
+ * via Promise.all — saving one full Atlas round-trip on every page load.
  */
 router.get(
   '/me',
@@ -215,8 +217,11 @@ router.get(
       });
     }
     if (req.user.role === 'customer') {
-      const customerDoc = await Customer.findOne({ user: req.user._id }).populate('plan').lean();
-      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin).lean() : null;
+      // Both queries are independent — run them in parallel
+      const [customerDoc, adminDoc] = await Promise.all([
+        Customer.findOne({ user: req.user._id }).populate('plan').lean(),
+        req.user.admin ? Admin.findById(req.user.admin).lean() : null,
+      ]);
       return res.json({
         ...base,
         profile: customerDoc,
@@ -227,8 +232,11 @@ router.get(
       });
     }
     if (req.user.role === 'trainer') {
-      const trainerDoc = await Trainer.findOne({ user: req.user._id }).populate('assignedCustomers', 'name phone').lean();
-      const adminDoc = req.user.admin ? await Admin.findById(req.user.admin).lean() : null;
+      // Both queries are independent — run them in parallel
+      const [trainerDoc, adminDoc] = await Promise.all([
+        Trainer.findOne({ user: req.user._id }).populate('assignedCustomers', 'name phone').lean(),
+        req.user.admin ? Admin.findById(req.user.admin).lean() : null,
+      ]);
       return res.json({
         ...base,
         profile: trainerDoc,
