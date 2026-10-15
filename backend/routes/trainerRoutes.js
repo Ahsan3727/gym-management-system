@@ -47,18 +47,26 @@ router.get(
       isActive: true,
     }).populate('plan', 'planName durationMonths');
 
-    // Enrich each customer with their streak
-    const enriched = await Promise.all(
-      customers.map(async (c) => {
-        const streak = await Streak.findOne({ customer: c._id });
-        const lastWorkout = await WorkoutLog.findOne({ customer: c._id }).sort({ date: -1 });
-        return {
-          ...c.toObject(),
-          streak: streak ? streak.currentStreak : 0,
-          lastWorkoutDate: lastWorkout ? lastWorkout.date : null,
-        };
-      })
-    );
+    const customerIds = customers.map((c) => c._id);
+
+    // PERF FIX: batch both lookups — 2 queries total instead of 2×N (N+1)
+    const [streaks, lastWorkouts] = await Promise.all([
+      Streak.find({ customer: { $in: customerIds } }).lean(),
+      WorkoutLog.aggregate([
+        { $match: { customer: { $in: customerIds } } },
+        { $sort: { date: -1 } },
+        { $group: { _id: '$customer', date: { $first: '$date' } } },
+      ]),
+    ]);
+
+    const streakMap = Object.fromEntries(streaks.map((s) => [s.customer.toString(), s.currentStreak]));
+    const workoutMap = Object.fromEntries(lastWorkouts.map((w) => [w._id.toString(), w.date]));
+
+    const enriched = customers.map((c) => ({
+      ...c.toObject(),
+      streak: streakMap[c._id.toString()] ?? 0,
+      lastWorkoutDate: workoutMap[c._id.toString()] ?? null,
+    }));
 
     res.json(enriched);
   })

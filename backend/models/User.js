@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema(
 // Compound unique index: username is unique PER GYM.
 // Allows two different gyms to each have a customer or trainer named "ahsan" without collision.
 userSchema.index({ admin: 1, username: 1 }, { unique: true });
+// Sparse: excludes trainers/admins with no email from the index
+userSchema.index({ email: 1 }, { sparse: true });
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {
   return bcrypt.compare(candidate, this.passwordHash);

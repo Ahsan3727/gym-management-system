@@ -52,7 +52,7 @@ router.put(
 router.get(
   '/fees',
   asyncHandler(async (req, res) => {
-    const fees = await Fee.find({ customer: req.customerId }).sort({ dueDate: -1 });
+    const fees = await Fee.find({ customer: req.customerId }).sort({ dueDate: -1 }).lean();
     res.json(fees);
   })
 );
@@ -97,7 +97,7 @@ router.get(
 router.get(
   '/notifications',
   asyncHandler(async (req, res) => {
-    const notifications = await Notification.find({ user: req.user._id }).sort({ sentAt: -1 }).limit(50);
+    const notifications = await Notification.find({ user: req.user._id }).sort({ sentAt: -1 }).limit(50).lean();
     res.json(notifications);
   })
 );
@@ -131,7 +131,7 @@ router.patch(
 router.get(
   '/workouts',
   asyncHandler(async (req, res) => {
-    const logs = await WorkoutLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    const logs = await WorkoutLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200).lean();
     res.json(logs);
   })
 );
@@ -193,7 +193,7 @@ router.delete(
 router.get(
   '/diet',
   asyncHandler(async (req, res) => {
-    const logs = await DietLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    const logs = await DietLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200).lean();
     res.json(logs);
   })
 );
@@ -239,7 +239,7 @@ router.delete(
 router.get(
   '/weight',
   asyncHandler(async (req, res) => {
-    const logs = await WeightLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200);
+    const logs = await WeightLog.find({ customer: req.customerId }).sort({ date: -1 }).limit(200).lean();
     res.json(logs);
   })
 );
@@ -453,7 +453,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const sessions = await Session.find({ customer: req.customerId, admin: req.adminId })
       .populate('trainer', 'name phone specialty')
-      .sort({ scheduledAt: 1 });
+      .sort({ scheduledAt: 1 })
+      .lean();
     res.json(sessions);
   })
 );

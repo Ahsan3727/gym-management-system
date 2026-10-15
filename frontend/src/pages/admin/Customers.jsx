@@ -103,6 +103,8 @@ export default function Customers() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   // Create
   const [showCreate, setShowCreate] = useState(false);
@@ -154,14 +156,15 @@ export default function Customers() {
   const [importResult, setImportResult] = useState(null);
 
   async function load() {
-    const params = {};
+    const params = { page, limit: 20 };
     if (status) params.status = status;
     if (search) params.search = search;
     const [customersRes, profileRes] = await Promise.all([
       api.get('/admin/customers', { params }),
       api.get('/admin/profile').catch(() => ({ data: null })),
     ]);
-    setCustomers(customersRes.data);
+    setCustomers(customersRes.data.data);
+    setPagination(customersRes.data.pagination);
     if (profileRes.data) {
       setGymProfile(profileRes.data);
       if (profileRes.data.defaultMemberMonthlyFee && createForm.monthlyFee === 3000) {
@@ -177,11 +180,15 @@ export default function Customers() {
   useEffect(() => {
     load().catch(() => setError('Could not load customers.'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  }, [status, page]);
 
   function handleSearchSubmit(e) {
     e.preventDefault();
-    load().catch(() => setError('Could not load customers.'));
+    if (page !== 1) {
+      setPage(1); // triggers useEffect → load
+    } else {
+      load().catch(() => setError('Could not load customers.'));
+    }
   }
 
   // ── Open Create Modal with Fresh Defaults ──────────────────────────────────
@@ -461,7 +468,11 @@ export default function Customers() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select className="field-input w-auto min-w-[10rem]" value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select
+          className="field-input w-auto min-w-[10rem]"
+          value={status}
+          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+        >
           <option value="">All statuses</option>
           <option value="active">Active members</option>
           <option value="inactive">Inactive members</option>
@@ -526,7 +537,9 @@ export default function Customers() {
             title="Select all"
           />
           <label htmlFor="select-all-customers" className="text-xs font-medium text-steel cursor-pointer">
-            {selected.size > 0 ? `${selected.size} of ${customers.length} selected` : `${customers.length} member${customers.length !== 1 ? 's' : ''}`}
+            {selected.size > 0
+              ? `${selected.size} of ${pagination?.total ?? customers.length} selected`
+              : `${pagination?.total ?? customers.length} member${(pagination?.total ?? customers.length) !== 1 ? 's' : ''}`}
           </label>
         </div>
       )}
@@ -719,6 +732,31 @@ export default function Customers() {
         )}
       </div>
 
+      {/* Pagination controls */}
+      {pagination && pagination.pages > 1 && (
+        <div className="mt-5 flex items-center justify-between text-sm">
+          <span className="text-steel text-xs">
+            Page <strong className="text-ink">{pagination.page}</strong> of <strong className="text-ink">{pagination.pages}</strong>
+            <span className="hidden sm:inline"> · {pagination.total} members total</span>
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={pagination.page <= 1}
+              className="btn-secondary btn-sm disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+              disabled={pagination.page >= pagination.pages}
+              className="btn-secondary btn-sm disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Create Modal ───────────────────────────────────────────────────── */}
       {showCreate && (

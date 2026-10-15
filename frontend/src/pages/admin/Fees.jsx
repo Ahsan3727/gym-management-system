@@ -111,6 +111,8 @@ export default function Fees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   // Manual Add Fee Modal
   const [showCreate, setShowCreate] = useState(false);
@@ -160,20 +162,22 @@ export default function Fees() {
 
   async function load() {
     try {
-      const params = {};
+      const params = { page, limit: 20 };
       if (status) params.status = status;
       if (search) params.search = search;
       if (billingMonthFilter) params.billingMonth = billingMonthFilter;
 
       const [feesRes, customersRes, statsRes, profileRes] = await Promise.all([
         api.get('/admin/fees', { params }),
-        api.get('/admin/customers'),
+        // limit=200 so all members are available in the "Add Fee" dropdown
+        api.get('/admin/customers', { params: { limit: 200 } }),
         api.get('/admin/fees/stats').catch(() => ({ data: null })),
         api.get('/admin/profile').catch(() => ({ data: null })),
       ]);
 
-      setFees(feesRes.data);
-      setCustomers(customersRes.data);
+      setFees(feesRes.data.data);
+      setPagination(feesRes.data.pagination);
+      setCustomers(customersRes.data.data);
       if (statsRes.data) setStats(statsRes.data);
       if (profileRes.data) setGymProfile(profileRes.data);
     } catch (err) {
@@ -186,7 +190,7 @@ export default function Fees() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, search, billingMonthFilter]);
+  }, [status, search, billingMonthFilter, page]);
 
   // ── Open Create Fee Modal ──────────────────────────────────────────────────
   function openCreateModal(preselectedCustomerId = '') {
@@ -477,7 +481,7 @@ export default function Fees() {
         />
         <StatCard
           title="Total Active Members"
-          value={customers.filter((c) => c.isActive).length}
+          value={stats?.activeMemberCount ?? customers.filter((c) => c.isActive).length}
           sub={`Rate: Rs. ${Number(gymProfile?.defaultMemberMonthlyFee || 3000).toLocaleString()}/mo`}
           icon="user"
           iconColor="text-sky-600 bg-sky-500/10"
@@ -515,7 +519,7 @@ export default function Fees() {
         />
         {(status || search || billingMonthFilter) && (
           <button
-            onClick={() => { setStatus(''); setSearch(''); setBillingMonthFilter(''); }}
+            onClick={() => { setStatus(''); setSearch(''); setBillingMonthFilter(''); setPage(1); }}
             className="btn-ghost btn-sm"
           >
             Clear Filters
@@ -719,7 +723,34 @@ export default function Fees() {
         </div>
       </div>
 
+      {/* Pagination controls */}
+      {pagination && pagination.pages > 1 && (
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <span className="text-steel text-xs">
+            Page <strong className="text-ink">{pagination.page}</strong> of <strong className="text-ink">{pagination.pages}</strong>
+            <span className="hidden sm:inline"> · {pagination.total} records total</span>
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={pagination.page <= 1}
+              className="btn-secondary btn-sm disabled:opacity-40"
+            >
+              ← Previous
+            </button>
+            <button
+              onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+              disabled={pagination.page >= pagination.pages}
+              className="btn-secondary btn-sm disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Add Member Fee Modal ────────────────────────────────────────────── */}
+
       {showCreate && (
         <Modal title="Add Member Fee" onClose={() => setShowCreate(false)} width="max-w-lg">
           <form onSubmit={handleCreate} className="space-y-4">

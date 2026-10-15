@@ -292,7 +292,7 @@ router.post(
 router.get(
   '/plans',
   asyncHandler(async (req, res) => {
-    const plans = await MembershipPlan.find({ admin: req.adminId }).sort({ price: 1 });
+    const plans = await MembershipPlan.find({ admin: req.adminId }).sort({ price: 1 }).lean();
     res.json(plans);
   })
 );
@@ -303,7 +303,7 @@ router.get(
 router.get(
   '/plans/active',
   asyncHandler(async (req, res) => {
-    const plans = await MembershipPlan.find({ admin: req.adminId, isActive: true }).sort({ price: 1 });
+    const plans = await MembershipPlan.find({ admin: req.adminId, isActive: true }).sort({ price: 1 }).lean();
     res.json(plans);
   })
 );
@@ -348,23 +348,62 @@ router.delete(
 
 /* -------------------------------- Customers -------------------------------- */
 
-// GET /api/admin/customers?status=active|inactive|overdue&search=jane
+// GET /api/admin/customers?status=active|inactive|overdue&search=jane&page=1&limit=20
 router.get(
   '/customers',
   asyncHandler(async (req, res) => {
     const { status, search } = req.query;
+    const page  = Math.max(1, parseInt(req.query.page  || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
+    const skip  = (page - 1) * limit;
+
+    // For 'overdue' we must pre-build the qualifying ID set because the
+    // overdue check depends on populated fee data (can't filter in Mongo directly).
+    let overdueIds = null;
+    if (status === 'overdue') {
+      const now = new Date();
+      const [overdueFeeCusts, expiredCusts] = await Promise.all([
+        Fee.find({
+          admin: req.adminId,
+          $or: [
+            { status: 'overdue' },
+            { status: 'unpaid', dueDate: { $lt: now } },
+          ],
+        }).select('customer').lean(),
+        Customer.find({
+          admin: req.adminId,
+          membershipExpiresAt: { $lt: now },
+          isActive: true,
+        }).select('_id').lean(),
+      ]);
+      const idSet = new Set([
+        ...overdueFeeCusts.map((f) => f.customer.toString()),
+        ...expiredCusts.map((c) => c._id.toString()),
+      ]);
+      overdueIds = [...idSet];
+      if (overdueIds.length === 0) {
+        return res.json({ data: [], pagination: { page, limit, total: 0, pages: 0 } });
+      }
+    }
+
     const query = { admin: req.adminId };
     if (status === 'active') query.isActive = true;
     if (status === 'inactive') query.isActive = false;
+    if (status === 'overdue') query._id = { $in: overdueIds };
     if (search) query.name = { $regex: search, $options: 'i' };
 
-    let customers = await Customer.find(query)
-      .populate('user', 'username email isActive created_at')
-      .populate('plan')
-      .sort({ created_at: -1 })
-      .lean();
+    const [total, customers] = await Promise.all([
+      Customer.countDocuments(query),
+      Customer.find(query)
+        .populate('user', 'username email isActive created_at')
+        .populate('plan')
+        .sort({ created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+    ]);
 
-    // Attach latest fee and computed feeStatus in a single DB query
+    // Attach latest fee and feeStatus — scoped to this page only
     const customerIds = customers.map((c) => c._id);
     const fees = await Fee.find({ admin: req.adminId, customer: { $in: customerIds } })
       .sort({ dueDate: -1, created_at: -1 })
@@ -373,13 +412,11 @@ router.get(
     const latestFeeMap = {};
     for (const f of fees) {
       const cid = f.customer.toString();
-      if (!latestFeeMap[cid]) {
-        latestFeeMap[cid] = f;
-      }
+      if (!latestFeeMap[cid]) latestFeeMap[cid] = f;
     }
 
     const now = new Date();
-    customers = customers.map((c) => {
+    const data = customers.map((c) => {
       const cid = c._id.toString();
       const latestFee = latestFeeMap[cid] || null;
       let feeStatus = 'none';
@@ -398,28 +435,19 @@ router.get(
         } else if (latestFee.status === 'overdue') {
           feeStatus = 'overdue';
         } else if (latestFee.status === 'unpaid') {
-          if (new Date(latestFee.dueDate) < now) {
-            feeStatus = 'overdue';
-          } else {
-            feeStatus = 'unpaid';
-          }
+          feeStatus = new Date(latestFee.dueDate) < now ? 'overdue' : 'unpaid';
         } else {
           feeStatus = latestFee.status;
         }
       }
 
-      return {
-        ...c,
-        latestFee,
-        feeStatus,
-      };
+      return { ...c, latestFee, feeStatus };
     });
 
-    if (status === 'overdue') {
-      customers = customers.filter((c) => c.feeStatus === 'overdue');
-    }
-
-    res.json(customers);
+    res.json({
+      data,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   })
 );
 
@@ -624,9 +652,7 @@ router.post(
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(',').map((c) => c.trim().replace(/^["']|["']$/g, ''));
           const rowObj = {};
-          headers.forEach((h, idx) => {
-            rowObj[h] = cols[idx] || '';
-          });
+          headers.forEach((h, idx) => { rowObj[h] = cols[idx] || ''; });
           rows.push(rowObj);
         }
       }
@@ -639,48 +665,74 @@ router.post(
     const createdList = [];
     const skippedList = [];
 
-    for (const row of rows) {
-      const name = (row.name || row.fullname || '').trim();
-      const username = (row.username || row.user || '').trim().toLowerCase();
-      const phone = (row.phone || row.mobile || '').trim();
-      const rawPassword = (row.password || '').trim();
+    // PERF FIX: batch the import — 1 duplicate check + parallel hashing + 3 insertMany
+    // instead of 5 serial DB calls per row.
 
+    // 1. Parse & validate shape
+    const parsed = [];
+    for (const row of rows) {
+      const name     = (row.name || row.fullname || '').trim();
+      const username = (row.username || row.user || '').trim().toLowerCase();
+      const phone    = (row.phone || row.mobile || '').trim();
+      const rawPassword = (row.password || '').trim();
       if (!name || !username) {
         skippedList.push({ name: name || 'Unknown', username, reason: 'Missing name or username' });
         continue;
       }
+      parsed.push({ name, username, phone, rawPassword });
+    }
 
-      const existing = await User.findOne({ username, admin: req.adminId });
-      if (existing) {
-        skippedList.push({ name, username, reason: 'Username already taken' });
+    // 2. One query to find all already-taken usernames
+    const allUsernames = parsed.map((r) => r.username);
+    const existingUsers = allUsernames.length
+      ? await User.find({ username: { $in: allUsernames }, admin: req.adminId }).select('username').lean()
+      : [];
+    const takenSet = new Set(existingUsers.map((u) => u.username));
+
+    // 3. Separate valid rows; generate passwords
+    const toCreate = [];
+    for (const row of parsed) {
+      if (takenSet.has(row.username)) {
+        skippedList.push({ name: row.name, username: row.username, reason: 'Username already taken' });
         continue;
       }
+      const isAuto = !row.rawPassword || row.rawPassword.length < 8;
+      const effectivePassword = isAuto ? crypto.randomBytes(5).toString('base64url') : row.rawPassword;
+      toCreate.push({ ...row, effectivePassword, isAuto });
+    }
 
-      const isAuto = !rawPassword || rawPassword.length < 8;
-      const effectivePassword = isAuto ? crypto.randomBytes(5).toString('base64url') : rawPassword;
-      const passwordHash = await User.hashPassword(effectivePassword);
-
-      const user = await User.create({
-        username,
-        passwordHash,
-        role: 'customer',
-        admin: req.adminId,
+    if (toCreate.length === 0) {
+      return res.json({
+        message: `Import completed: 0 member(s) created, ${skippedList.length} skipped.`,
+        createdCount: 0,
+        skippedCount: skippedList.length,
+        created: [],
+        skipped: skippedList,
       });
+    }
 
-      const customer = await Customer.create({
-        user: user._id,
-        admin: req.adminId,
-        name,
-        phone,
-      });
+    // 4. Hash all passwords concurrently
+    await Promise.all(toCreate.map(async (r) => {
+      r.passwordHash = await User.hashPassword(r.effectivePassword);
+    }));
 
-      await Streak.create({ customer: customer._id });
+    // 5. Bulk insert Users → Customers → Streaks (3 queries total)
+    const insertedUsers = await User.insertMany(
+      toCreate.map((r) => ({ username: r.username, passwordHash: r.passwordHash, role: 'customer', admin: req.adminId }))
+    );
 
+    const insertedCustomers = await Customer.insertMany(
+      insertedUsers.map((u, i) => ({ user: u._id, admin: req.adminId, name: toCreate[i].name, phone: toCreate[i].phone }))
+    );
+
+    await Streak.insertMany(insertedCustomers.map((c) => ({ customer: c._id })));
+
+    for (let i = 0; i < insertedCustomers.length; i++) {
       createdList.push({
-        _id: customer._id,
-        name,
-        username,
-        password: isAuto ? effectivePassword : 'Provided in CSV',
+        _id: insertedCustomers[i]._id,
+        name: toCreate[i].name,
+        username: toCreate[i].username,
+        password: toCreate[i].isAuto ? toCreate[i].effectivePassword : 'Provided in CSV',
       });
     }
 
@@ -747,28 +799,39 @@ router.put(
 
 /* ---------------------------------- Fees ----------------------------------- */
 
-// GET /api/admin/fees?status=unpaid&customerId=...&billingMonth=...
+// GET /api/admin/fees?status=unpaid&customerId=...&billingMonth=...&page=1&limit=20
 router.get(
   '/fees',
   asyncHandler(async (req, res) => {
     const { status, customerId, billingMonth, search } = req.query;
+    const page  = Math.max(1, parseInt(req.query.page  || '1', 10));
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit || '20', 10)));
+    const skip  = (page - 1) * limit;
+
     const query = { admin: req.adminId };
     if (status && status !== 'all') query.status = status;
     if (customerId) query.customer = customerId;
     if (billingMonth) query.billingMonth = billingMonth;
 
-    let fees = await Fee.find(query)
-      .populate({
-        path: 'customer',
-        select: 'name phone monthlyFee membershipExpiresAt',
-        populate: { path: 'user', select: 'username email' },
-      })
-      .sort({ dueDate: -1, created_at: -1 })
-      .lean();
+    const [total, fees] = await Promise.all([
+      Fee.countDocuments(query),
+      Fee.find(query)
+        .populate({
+          path: 'customer',
+          select: 'name phone monthlyFee membershipExpiresAt',
+          populate: { path: 'user', select: 'username email' },
+        })
+        .sort({ dueDate: -1, created_at: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+    ]);
 
+    // In-memory search on the current page (search targets populated customer.name)
+    let data = fees;
     if (search) {
       const q = search.toLowerCase();
-      fees = fees.filter(
+      data = fees.filter(
         (f) =>
           f.customer?.name?.toLowerCase().includes(q) ||
           f.customer?.phone?.includes(q) ||
@@ -778,7 +841,10 @@ router.get(
       );
     }
 
-    res.json(fees);
+    res.json({
+      data,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   })
 );
 
@@ -789,37 +855,59 @@ router.get(
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const [allFees, activeMemberCount] = await Promise.all([
-      Fee.find({ admin: req.adminId }).lean(),
+    // PERF FIX: replace Fee.find() + in-memory JS loop with a single
+    // $group aggregation — MongoDB computes all sums server-side.
+    // Previously this fetched every fee document across the network.
+    const [statsRows, activeMemberCount] = await Promise.all([
+      Fee.aggregate([
+        { $match: { admin: req.adminId } },
+        {
+          $group: {
+            _id: null,
+            totalPaidThisMonth: {
+              $sum: {
+                $cond: [
+                  { $and: [{ $eq: ['$status', 'paid'] }, { $gte: ['$paidOn', startOfMonth] }] },
+                  '$amount',
+                  0,
+                ],
+              },
+            },
+            totalUnpaidAmount: {
+              $sum: {
+                $cond: [{ $in: ['$status', ['unpaid', 'overdue']] }, '$amount', 0],
+              },
+            },
+            overdueCount: {
+              $sum: {
+                $cond: [
+                  {
+                    $or: [
+                      { $eq: ['$status', 'overdue'] },
+                      { $and: [{ $eq: ['$status', 'unpaid'] }, { $lt: ['$dueDate', now] }] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
+            },
+            paidCount: { $sum: { $cond: [{ $eq: ['$status', 'paid'] }, 1, 0] } },
+            totalFeesCount: { $sum: 1 },
+          },
+        },
+      ]),
       Customer.countDocuments({ admin: req.adminId, isActive: true }),
     ]);
 
-    let totalPaidThisMonth = 0;
-    let totalUnpaidAmount = 0;
-    let overdueCount = 0;
-    let paidCount = 0;
-
-    for (const f of allFees) {
-      if (f.status === 'paid') {
-        paidCount++;
-        if (f.paidOn && new Date(f.paidOn) >= startOfMonth) {
-          totalPaidThisMonth += f.amount;
-        }
-      } else if (f.status === 'unpaid' || f.status === 'overdue') {
-        totalUnpaidAmount += f.amount;
-        if (f.status === 'overdue' || new Date(f.dueDate) < now) {
-          overdueCount++;
-        }
-      }
-    }
-
+    const s = statsRows[0] || {};
     res.json({
-      totalPaidThisMonth,
-      totalUnpaidAmount,
-      overdueCount,
-      paidCount,
+      totalPaidThisMonth: s.totalPaidThisMonth || 0,
+      totalUnpaidAmount:  s.totalUnpaidAmount  || 0,
+      overdueCount:       s.overdueCount       || 0,
+      paidCount:          s.paidCount          || 0,
       activeMemberCount,
-      totalFeesCount: allFees.length,
+      totalFeesCount:     s.totalFeesCount     || 0,
     });
   })
 );
@@ -887,24 +975,25 @@ router.post(
   asyncHandler(async (req, res) => {
     const { billingMonth, dueDate, title, defaultAmount } = req.body;
 
-    const activeCustomers = await Customer.find({ admin: req.adminId, isActive: true });
-    let createdCount = 0;
-    let skippedCount = 0;
-
-    for (const cust of activeCustomers) {
-      // Check if already invoiced for this month & feeType='subscription'
-      const existing = await Fee.findOne({
+    // PERF FIX: 2 parallel queries instead of N×3 queries in a loop.
+    // Fetch all active customers AND all existing fees for this month at once,
+    // then insertMany the new fees in a single round-trip.
+    const [activeCustomers, existingFees] = await Promise.all([
+      Customer.find({ admin: req.adminId, isActive: true }).lean(),
+      Fee.find({
         admin: req.adminId,
-        customer: cust._id,
         billingMonth,
         feeType: 'subscription',
-      });
+      }).select('customer').lean(),
+    ]);
 
-      if (existing) {
-        skippedCount++;
-        continue;
-      }
+    const alreadyBilled = new Set(existingFees.map((f) => f.customer.toString()));
+    const dueAt    = new Date(dueDate);
+    const feeTitle = title || `Monthly Subscription — ${billingMonth}`;
 
+    const toInsert = [];
+    for (const cust of activeCustomers) {
+      if (alreadyBilled.has(cust._id.toString())) continue;
       const feeAmount =
         cust.monthlyFee != null
           ? cust.monthlyFee
@@ -912,21 +1001,22 @@ router.post(
           ? defaultAmount
           : req.adminDoc.defaultMemberMonthlyFee || 3000;
 
-      const invoiceNo = await Fee.generateReceiptNumber(req.adminId);
-      await Fee.create({
+      toInsert.push({
         customer: cust._id,
         admin: req.adminId,
-        invoiceNumber: invoiceNo,
-        title: title || `Monthly Subscription — ${billingMonth}`,
+        title: feeTitle,
         feeType: 'subscription',
         billingMonth,
         amount: feeAmount,
-        dueDate: new Date(dueDate),
+        dueDate: dueAt,
         status: 'unpaid',
       });
-
-      createdCount++;
     }
+
+    if (toInsert.length) await Fee.insertMany(toInsert, { ordered: false });
+
+    const createdCount = toInsert.length;
+    const skippedCount = activeCustomers.length - createdCount;
 
     res.json({
       message: `Bulk monthly invoicing complete: ${createdCount} created, ${skippedCount} skipped (already invoiced).`,
@@ -1228,7 +1318,7 @@ router.post(
     const { message, sendEmail: doSendEmail } = req.body;
     if (!message) return res.status(400).json({ message: 'message is required.' });
 
-    const customers = await Customer.find({ admin: req.adminId }).select('user name').populate('user', 'email');
+    const customers = await Customer.find({ admin: req.adminId }).select('user name').populate('user', 'email').lean();
     const docs = customers.map((c) => ({ user: c.user?._id, type: 'admin_alert', message }));
     if (docs.length) await Notification.insertMany(docs.filter((d) => d.user));
 
@@ -1261,7 +1351,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const trainers = await Trainer.find({ admin: req.adminId })
       .populate('user', 'username email isActive')
-      .populate('assignedCustomers', 'name phone');
+      .populate('assignedCustomers', 'name phone')
+      .lean();
     res.json(trainers);
   })
 );

@@ -38,6 +38,8 @@ const feeSchema = new mongoose.Schema(
 feeSchema.index({ admin: 1, status: 1, dueDate: 1 });
 feeSchema.index({ admin: 1, status: 1, paidOn: 1 });
 feeSchema.index({ admin: 1, customer: 1, created_at: -1 });
+// Covers bulk-billing duplicate check and per-member monthly fee queries
+feeSchema.index({ admin: 1, customer: 1, billingMonth: 1, feeType: 1 });
 
 // Generate sequential receipt/invoice number per gym: REC-YYYYMM-XXXX
 feeSchema.statics.generateReceiptNumber = async function (adminId) {
