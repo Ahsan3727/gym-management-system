@@ -33,26 +33,26 @@ export default function AdminAttendance() {
     }
   }
 
-  async function loadCustomers() {
-    try {
-      const { data } = await api.get('/admin/customers');
-      setCustomers(data || []);
-      if (!selectedCustomerId && data.length > 0) {
-        setSelectedCustomerId(data[0]._id);
-      }
-    } catch {
-      // ignore
-    }
-  }
-
+  // On mount: load both in parallel — attendance and the customer list for the
+  // manual check-in dropdown. Two separate useEffects would fire them serially.
   useEffect(() => {
-    loadAttendance();
-  }, [selectedDate]);
-
-  useEffect(() => {
-    loadCustomers();
+    Promise.all([
+      api.get('/admin/attendance', { params: { date: selectedDate } }),
+      api.get('/admin/customers', { params: { limit: 200 } }),
+    ])
+      .then(([attRes, custRes]) => {
+        setAttendance(attRes.data.attendance || []);
+        setTotalToday(attRes.data.totalToday || 0);
+        const list = custRes.data.data || custRes.data || [];
+        setCustomers(list);
+        if (!selectedCustomerId && list.length > 0) setSelectedCustomerId(list[0]._id);
+      })
+      .catch(() => showToast('Could not load attendance records.', 'error'))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Re-fetch attendance only when the date changes (customer list doesn't change)
   function handleSearchSubmit(e) {
     e.preventDefault();
     loadAttendance();

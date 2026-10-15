@@ -31,10 +31,10 @@ export default function Trainers() {
     try {
       const [trainersRes, customersRes] = await Promise.all([
         api.get('/admin/trainers'),
-        api.get('/admin/customers'),
+        api.get('/admin/customers', { params: { limit: 200 } }),
       ]);
       setTrainers(trainersRes.data);
-      setCustomers(customersRes.data);
+      setCustomers(customersRes.data.data || customersRes.data);
     } catch {
       setError('Could not load trainers.');
     } finally {
